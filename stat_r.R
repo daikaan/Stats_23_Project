@@ -1,4 +1,4 @@
-bank_data <- read.csv('C:/Users/Bertug/Desktop/BankChurners.csv')
+bank_data <- read.csv('~/GitHub/Stats_23_Project/BankChurners.csv')
 
 head(bank_data)
 dim(bank_data) #10127 rows and 23 columns
