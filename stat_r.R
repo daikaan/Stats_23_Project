@@ -1,5 +1,8 @@
 bank_data <- read.csv('~/GitHub/Stats_23_Project/BankChurners.csv')
 
+# client_num should be added to qualitative as well as primary key
+# dependent_count to qualitative? 
+
 head(bank_data)
 dim(bank_data) #10127 rows and 23 columns
 
