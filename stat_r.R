@@ -55,7 +55,16 @@ ggplot(data = quantitative, aes(x= as.numeric(age_group), color='red')) +
   labs(title= 'Avg uti by age group hist', x = 'age_group', y='Count')
 
 #Months inactive
+library(yarrr) #to make colors transparent
+hist(bank_data$Months_Inactive_12_mon, col = yarrr::transparent('red',trans.val = 0.9))
+hist(bank_data$Contacts_Count_12_mon, col = yarrr::transparent('blue', trans.val = 0.8), add = TRUE)
 
+hist(bank_data$Total_Trans_Ct)
 
-
-hist(bank_data$Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, main = "Churn", xlab = "Churn Seg", ylab = "Count", col = "cornflowerblue")
+#investigate correlation
+#we can add one column after we decide conditions as churn number
+#and we can investigate the correlation this column with other columns
+library(corrplot)
+corr_quant <- subset(quantitative, select = -c(CLIENTNUM, Dependent_count, age_group, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
+corralted = cor(corr_quant)
+corrplot(corralted, method = 'color', order = 'alphabet')
