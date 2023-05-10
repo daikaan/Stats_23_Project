@@ -68,3 +68,10 @@ library(corrplot)
 corr_quant <- subset(quantitative, select = -c(CLIENTNUM, Dependent_count, age_group, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
 corralted = cor(corr_quant)
 corrplot(corralted, method = 'color', order = 'alphabet')
+
+
+hist(bank_data$Avg_Utilization_Ratio)
+hist(log1p(bank_data$Avg_Utilization_Ratio))
+
+hist(bank_data$Avg_Open_To_Buy)
+hist(log1p(bank_data$Avg_Open_To_Buy))
