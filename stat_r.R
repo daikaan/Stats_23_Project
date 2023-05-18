@@ -73,10 +73,56 @@ corr_quant <- subset(quantitative, select = -c(CLIENTNUM, Dependent_count, age_g
 corralted = cor(corr_quant)
 corrplot(corralted, method = 'color', order = 'alphabet')
 
+#create copy of qualitative data and make it quantitative
+qual_to_quant <- qualitative
 
+#change categories to the numeric values
+qual_to_quant$Attrition_Flag <- ifelse(qual_to_quant$Attrition_Flag == 'Existing Customer', 1, 0)
+
+qual_to_quant$Gender <- ifelse(qual_to_quant$Gender == 'M', 1, 0)
+
+unique(bank_data$Education_Level)
+qual_to_quant$Education_Level[qual_to_quant$Education_Level == 'Unknown'] <- 0
+qual_to_quant$Education_Level[qual_to_quant$Education_Level == 'Uneducated'] <- 1
+qual_to_quant$Education_Level[qual_to_quant$Education_Level == 'High School'] <- 2
+qual_to_quant$Education_Level[qual_to_quant$Education_Level == 'College'] <- 3
+qual_to_quant$Education_Level[qual_to_quant$Education_Level == 'Graduate'] <- 4
+qual_to_quant$Education_Level[qual_to_quant$Education_Level == 'Post-Graduate'] <- 5
+qual_to_quant$Education_Level[qual_to_quant$Education_Level == 'Doctorate'] <- 6
+qual_to_quant$Education_Level = as.numeric(as.character(qual_to_quant$Education_Level))
+
+unique(bank_data$Marital_Status)
+qual_to_quant$Marital_Status[qual_to_quant$Marital_Status == 'Unknown'] <- 0
+qual_to_quant$Marital_Status[qual_to_quant$Marital_Status == 'Single'] <- 1
+qual_to_quant$Marital_Status[qual_to_quant$Marital_Status == 'Married'] <- 2
+qual_to_quant$Marital_Status[qual_to_quant$Marital_Status == 'Divorced'] <- 3
+qual_to_quant$Marital_Status = as.numeric(as.character(qual_to_quant$Marital_Status))
+
+unique(bank_data$Income_Category)
+qual_to_quant$Income_Category[qual_to_quant$Income_Category == 'Unknown'] <- 0
+qual_to_quant$Income_Category[qual_to_quant$Income_Category == 'Less than $40K'] <- 1
+qual_to_quant$Income_Category[qual_to_quant$Income_Category == '$40K - $60K'] <- 2
+qual_to_quant$Income_Category[qual_to_quant$Income_Category == '$60K - $80K'] <- 3
+qual_to_quant$Income_Category[qual_to_quant$Income_Category == '$80K - $120K'] <- 4
+qual_to_quant$Income_Category[qual_to_quant$Income_Category == '$120K +'] <- 5
+qual_to_quant$Income_Category = as.numeric(as.character(qual_to_quant$Income_Category))
+
+unique(bank_data$Card_Category)
+qual_to_quant$Card_Category[qual_to_quant$Card_Category == 'Silver'] <- 0
+qual_to_quant$Card_Category[qual_to_quant$Card_Category == 'Gold'] <- 1
+qual_to_quant$Card_Category[qual_to_quant$Card_Category == 'Platinum'] <- 2
+qual_to_quant$Card_Category[qual_to_quant$Card_Category == 'Blue'] <- 3
+qual_to_quant$Card_Category = as.numeric(as.character(qual_to_quant$Card_Category))
+
+corr_qual_to_quant = cor(qual_to_quant)
+corrplot(corr_qual_to_quant, method = 'number')
+
+#histograms
 hist(bank_data$Avg_Utilization_Ratio)
 hist(log1p(bank_data$Avg_Utilization_Ratio))
 
 hist(bank_data$Avg_Open_To_Buy)
 hist(log1p(bank_data$Avg_Open_To_Buy))
 hist(bank_data$Avg_Open_To_Buy)
+
+mod.out <- glm()
