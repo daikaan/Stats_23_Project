@@ -117,6 +117,40 @@ qual_to_quant$Card_Category = as.numeric(as.character(qual_to_quant$Card_Categor
 corr_qual_to_quant = cor(qual_to_quant)
 corrplot(corr_qual_to_quant, method = 'number')
 
+#we need to calculate chi square for the categorical values 
+#to see are they dependent or not
+#assume conf interval 95%
+table(quantitative$attrition_flag_binary, quantitative$age_group)
+chisq.test(quantitative$attrition_flag_binary, quantitative$age_group, correct=FALSE)
+
+table(quantitative$attrition_flag_binary, quantitative$Dependent_count)
+chisq.test(quantitative$attrition_flag_binary, quantitative$Dependent_count, correct=FALSE)
+
+table(quantitative$attrition_flag_binary, quantitative$Total_Relationship_Count)
+chisq.test(quantitative$attrition_flag_binary, quantitative$Total_Relationship_Count, correct=FALSE)
+
+table(quantitative$attrition_flag_binary, quantitative$Contacts_Count_12_mon)
+chisq.test(quantitative$attrition_flag_binary, quantitative$Contacts_Count_12_mon, correct=FALSE)
+
+table(qual_to_quant$Attrition_Flag, qual_to_quant$Gender)
+chisq.test(qual_to_quant$Attrition_Flag, qual_to_quant$Gender, correct=FALSE)
+
+table(qual_to_quant$Attrition_Flag, qual_to_quant$Education_Level)
+chisq.test(qual_to_quant$Attrition_Flag, qual_to_quant$Education_Level, correct=FALSE)
+
+table(qual_to_quant$Attrition_Flag, qual_to_quant$Marital_Status)
+chisq.test(qual_to_quant$Attrition_Flag, qual_to_quant$Marital_Status, correct=FALSE)
+
+table(qual_to_quant$Attrition_Flag, qual_to_quant$Income_Category)
+chisq.test(qual_to_quant$Attrition_Flag, qual_to_quant$Income_Category, correct=FALSE)
+
+#simulate.p.value
+table(qual_to_quant$Attrition_Flag, qual_to_quant$Card_Category)
+chisq.test(qual_to_quant$Attrition_Flag, qual_to_quant$Card_Category, correct=FALSE, simulate.p.value=TRUE)
+
+table(quantitative$attrition_flag_binary, quantitative$Months_Inactive_12_mon)
+chisq.test(quantitative$attrition_flag_binary, quantitative$Months_Inactive_12_mon, correct=FALSE, simulate.p.value=TRUE)
+
 #histograms
 hist(bank_data$Avg_Utilization_Ratio)
 hist(log1p(bank_data$Avg_Utilization_Ratio))
