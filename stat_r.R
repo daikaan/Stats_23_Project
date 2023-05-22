@@ -117,6 +117,16 @@ qual_to_quant$Card_Category = as.numeric(as.character(qual_to_quant$Card_Categor
 corr_qual_to_quant = cor(qual_to_quant)
 corrplot(corr_qual_to_quant, method = 'number')
 
+#function to normalize value
+normalizer_fnc <- function(x) {
+  (x - min(x)) / (max(x) - min(x))
+}
+
+quan_normalized <- as.data.frame(lapply(quantitative[2:18], normalizer_fnc))
+qual_to_quant_normalized <- as.data.frame(lapply(qual_to_quant[2:6], normalizer_fnc))
+
+
+
 #we need to calculate chi square for the categorical values 
 #to see are they dependent or not
 #assume conf interval 95%
@@ -158,5 +168,3 @@ hist(log1p(bank_data$Avg_Utilization_Ratio))
 hist(bank_data$Avg_Open_To_Buy)
 hist(log1p(bank_data$Avg_Open_To_Buy))
 hist(bank_data$Avg_Open_To_Buy)
-
-mod.out <- glm()
