@@ -161,6 +161,37 @@ chisq.test(qual_to_quant$Attrition_Flag, qual_to_quant$Card_Category, correct=FA
 table(quantitative$attrition_flag_binary, quantitative$Months_Inactive_12_mon)
 chisq.test(quantitative$attrition_flag_binary, quantitative$Months_Inactive_12_mon, correct=FALSE, simulate.p.value=TRUE)
 
+table(quantitative$attrition_flag_binary, quantitative$Months_on_book)
+chisq.test(quantitative$attrition_flag_binary, quantitative$Months_on_book, correct=FALSE, simulate.p.value=TRUE)
+
+table(quantitative$attrition_flag_binary, quantitative$Credit_Limit)
+chisq.test(quantitative$attrition_flag_binary, quantitative$Credit_Limit, correct=FALSE, simulate.p.value=TRUE)
+
+table(quantitative$attrition_flag_binary, quantitative$Total_Revolving_Bal)
+chisq.test(quantitative$attrition_flag_binary, quantitative$Total_Revolving_Bal, correct=FALSE, simulate.p.value=TRUE)
+
+table(quantitative$attrition_flag_binary, quantitative$Avg_Open_To_Buy)
+chisq.test(quantitative$attrition_flag_binary, quantitative$Avg_Open_To_Buy, correct=FALSE, simulate.p.value=TRUE)
+
+table(quantitative$attrition_flag_binary, quantitative$Total_Amt_Chng_Q4_Q1)
+chisq.test(quantitative$attrition_flag_binary, quantitative$Total_Amt_Chng_Q4_Q1, correct=FALSE, simulate.p.value=TRUE)
+
+table(quantitative$attrition_flag_binary, quantitative$Total_Trans_Amt)
+chisq.test(quantitative$attrition_flag_binary, quantitative$Total_Trans_Amt, correct=FALSE, simulate.p.value=TRUE)
+
+table(quantitative$attrition_flag_binary, quantitative$Total_Trans_Ct)
+chisq.test(quantitative$attrition_flag_binary, quantitative$Total_Trans_Ct, correct=FALSE, simulate.p.value=TRUE)
+
+table(quantitative$attrition_flag_binary, quantitative$Total_Ct_Chng_Q4_Q1)
+chisq.test(quantitative$attrition_flag_binary, quantitative$Total_Ct_Chng_Q4_Q1, correct=FALSE, simulate.p.value=TRUE)
+
+table(quantitative$attrition_flag_binary, quantitative$Avg_Utilization_Ratio)
+chisq.test(quantitative$attrition_flag_binary, quantitative$Avg_Utilization_Ratio, correct=FALSE, simulate.p.value=TRUE)
+
+table(quantitative$attrition_flag_binary, quantitative$Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1)
+chisq.test(quantitative$attrition_flag_binary, quantitative$Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, correct=FALSE, simulate.p.value=TRUE)
+
+
 #histograms
 hist(bank_data$Avg_Utilization_Ratio)
 hist(log1p(bank_data$Avg_Utilization_Ratio))
