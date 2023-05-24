@@ -50,13 +50,20 @@ Grouped.age.hist <- hist(as.numeric(quantitative$age_group), xlab="age_group", y
 
 #Avg utilization ratios by age groups
 avguti.agegrp <- quantitative %>% group_by(age_group) %>% summarise(avg_uti = mean(Avg_Utilization_Ratio))
-plot(avguti.agegrp)
+plot(avguti.agegrp, type = "o")
 
 #combined figure
 ggplot(data = quantitative, aes(x= as.numeric(age_group), color='red')) +
   geom_histogram(bins = 4, fill="white", show.legend = FALSE, size=1.1) +
   geom_line(data = avguti.agegrp, aes(x=age_group, y=avg_uti), color= 'blue', size=1.1) +
-  labs(title= 'Avg uti by age group hist', x = 'age_group', y='Count')
+  labs(title= 'Avg uti by age group hist', x = 'age_group', y='Count') +   scale_y_continuous(
+    
+    # Features of the first axis
+    name = "First Axis",
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~./10000, name="Second Axis")
+  )
 
 #Months inactive
 library(yarrr) #to make colors transparent
