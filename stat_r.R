@@ -78,7 +78,9 @@ hist(bank_data$Total_Trans_Ct)
 library(corrplot)
 corr_quant <- subset(quantitative, select = -c(CLIENTNUM, Dependent_count, age_group, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
 corralted = cor(corr_quant)
-corrplot(corralted, method = 'color', order = 'alphabet')
+corrplot(corralted, method = 'color')
+
+#
 
 #create copy of qualitative data and make it quantitative
 qual_to_quant <- qualitative
