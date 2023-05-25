@@ -5,6 +5,7 @@ bank_data <- read.csv('~/GitHub/Stats_23_Project/BankChurners.csv')
 
 head(bank_data)
 dim(bank_data) #10127 rows and 23 columns
+summary(bank_data)
 
 col = c('CLIENTNUM', 'Attrition_Flag', 'Customer_Age',	'Gender',	'Dependent_count', 'Education_Level',	'Marital_Status',	'Income_Category', 'Card_Category',	'Months_on_book',	'Total_Relationship_Count', 'Months_Inactive_12_mon',	'Contacts_Count_12_mon', 'Credit_Limit', 'Total_Revolving_Bal',	'Avg_Open_To_Buy', 'Total_Amt_Chng_Q4_Q1', 'Total_Trans_Amt', 'Total_Trans_Ct', 'Total_Ct_Chng_Q4_Q1',	'Avg_Utilization_Ratio',	'Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1',	'Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2')
 
@@ -29,6 +30,17 @@ colSums(is.na(bank_data)) #no null value
 # Descriptive Graphs
 
 #Customer age
+
+#boxplot
+cust.age.boxplot <- boxplot(quantitative$Customer_Age, ylab = "age")
+cust.age.boxplot
+
+#using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, 
+#it is seen that customers over the age of 70 are outliers
+boxplot.stats(quantitative$Customer_Age)$out
+
+
+#histogram
 Cust.age.hist <- hist(quantitative$Customer_Age, xlab="age", ylab="freq",
                       main="Customer age distribution", col="orange")
 Cust.age.hist
@@ -47,6 +59,13 @@ quantitative$attrition_flag_binary <- ifelse(bank_data$Attrition_Flag=='Existing
 #grouped age histogram
 Grouped.age.hist <- hist(as.numeric(quantitative$age_group), xlab="age_group", ylab="freq", breaks=4,
                       main="Customer age group distribution", col="green")
+
+# grouped age piechart
+library(RColorBrewer)
+myPalette <- brewer.pal(5, "Set2") 
+cust.age.piechart <- pie(count(quantitative, age_group)$n, border="white", col=myPalette)
+cust.age.piechart
+
 
 #Avg utilization ratios by age groups
 avguti.agegrp <- quantitative %>% group_by(age_group) %>% summarise(avg_uti = mean(Avg_Utilization_Ratio))
