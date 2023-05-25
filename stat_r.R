@@ -72,64 +72,6 @@ hist(bank_data$Contacts_Count_12_mon, col = yarrr::transparent('blue', trans.val
 
 hist(bank_data$Total_Trans_Ct)
 
-#investigate correlation
-#we can add one column after we decide conditions as churn number
-#and we can investigate the correlation this column with other columns
-library(corrplot)
-corr_quant <- subset(quantitative, select = -c(CLIENTNUM, Dependent_count, age_group, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
-corralted = cor(corr_quant)
-corrplot(corralted, method = 'color')
-
-#took log and calculate corr again
-log_quant <- log1p(quantitative)
-corr_log_quant <- subset(log_quant, select = -c(CLIENTNUM, Dependent_count, age_group, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
-log_corralted = cor(corr_log_quant)
-corrplot(log_corralted, method = 'color')
-
-#create copy of qualitative data and make it quantitative
-qual_to_quant <- qualitative
-
-#change categories to the numeric values
-qual_to_quant$Attrition_Flag <- ifelse(qual_to_quant$Attrition_Flag == 'Existing Customer', 1, 0)
-
-qual_to_quant$Gender <- ifelse(qual_to_quant$Gender == 'M', 1, 0)
-
-unique(bank_data$Education_Level)
-qual_to_quant$Education_Level[qual_to_quant$Education_Level == 'Unknown'] <- 0
-qual_to_quant$Education_Level[qual_to_quant$Education_Level == 'Uneducated'] <- 1
-qual_to_quant$Education_Level[qual_to_quant$Education_Level == 'High School'] <- 2
-qual_to_quant$Education_Level[qual_to_quant$Education_Level == 'College'] <- 3
-qual_to_quant$Education_Level[qual_to_quant$Education_Level == 'Graduate'] <- 4
-qual_to_quant$Education_Level[qual_to_quant$Education_Level == 'Post-Graduate'] <- 5
-qual_to_quant$Education_Level[qual_to_quant$Education_Level == 'Doctorate'] <- 6
-qual_to_quant$Education_Level = as.numeric(as.character(qual_to_quant$Education_Level))
-
-unique(bank_data$Marital_Status)
-qual_to_quant$Marital_Status[qual_to_quant$Marital_Status == 'Unknown'] <- 0
-qual_to_quant$Marital_Status[qual_to_quant$Marital_Status == 'Single'] <- 1
-qual_to_quant$Marital_Status[qual_to_quant$Marital_Status == 'Married'] <- 2
-qual_to_quant$Marital_Status[qual_to_quant$Marital_Status == 'Divorced'] <- 3
-qual_to_quant$Marital_Status = as.numeric(as.character(qual_to_quant$Marital_Status))
-
-unique(bank_data$Income_Category)
-qual_to_quant$Income_Category[qual_to_quant$Income_Category == 'Unknown'] <- 0
-qual_to_quant$Income_Category[qual_to_quant$Income_Category == 'Less than $40K'] <- 1
-qual_to_quant$Income_Category[qual_to_quant$Income_Category == '$40K - $60K'] <- 2
-qual_to_quant$Income_Category[qual_to_quant$Income_Category == '$60K - $80K'] <- 3
-qual_to_quant$Income_Category[qual_to_quant$Income_Category == '$80K - $120K'] <- 4
-qual_to_quant$Income_Category[qual_to_quant$Income_Category == '$120K +'] <- 5
-qual_to_quant$Income_Category = as.numeric(as.character(qual_to_quant$Income_Category))
-
-unique(bank_data$Card_Category)
-qual_to_quant$Card_Category[qual_to_quant$Card_Category == 'Silver'] <- 0
-qual_to_quant$Card_Category[qual_to_quant$Card_Category == 'Gold'] <- 1
-qual_to_quant$Card_Category[qual_to_quant$Card_Category == 'Platinum'] <- 2
-qual_to_quant$Card_Category[qual_to_quant$Card_Category == 'Blue'] <- 3
-qual_to_quant$Card_Category = as.numeric(as.character(qual_to_quant$Card_Category))
-
-corr_qual_to_quant = cor(qual_to_quant)
-corrplot(corr_qual_to_quant, method = 'number')
-
 #########
 library("dplyr")
 library("corrplot")
@@ -137,7 +79,9 @@ library("caTools")
 library("ggpubr")
 library("ROSE")
 library("correlation")
-
+library(moments) #to calculate skewness
+library(olsrr) #to use ols_step_backward_p
+library(MASS)
 
 bank_data_origin <- read.csv('~/GitHub/Stats_23_Project/BankChurners.csv')
 bank_data <- data.frame(bank_data_origin)
@@ -216,65 +160,94 @@ order_Card_Category <- list("Blue" = 1,
                             "Platinum" = 4)
 new_bank_data$Card_Category <- unlist(order_Card_Category[as.character(new_bank_data$Card_Category)])
 
-
 #calculate skewness in quant to find which are normally dist
-skewness(quantitative$Customer_Age)
-skewness(quantitative$Dependent_count)
-skewness(quantitative$Months_on_book)
-skewness(quantitative$Total_Relationship_Count)
-skewness(quantitative$Months_Inactive_12_mon)
-skewness(quantitative$Contacts_Count_12_mon)
-skewness(quantitative$Total_Revolving_Bal)
-skewness(quantitative$Total_Trans_Ct)
-skewness(quantitative$Avg_Utilization_Ratio)
+skewness(new_bank_data$Customer_Age)
+skewness(new_bank_data$Dependent_count)
+skewness(new_bank_data$Months_on_book)
+skewness(new_bank_data$Total_Relationship_Count)
+skewness(new_bank_data$Months_Inactive_12_mon)
+skewness(new_bank_data$Contacts_Count_12_mon)
+skewness(new_bank_data$Total_Revolving_Bal)
+skewness(new_bank_data$Total_Trans_Ct)
+skewness(new_bank_data$Avg_Utilization_Ratio)
+skewness(new_bank_data$Is_Female)
+skewness(new_bank_data$Education_Level)
+skewness(new_bank_data$Marital_Status)
+skewness(new_bank_data$Income_Category)
+
 
 #we should take log to normalize and calculate skewness again for these
-skewness(quantitative$Total_Ct_Chng_Q4_Q1)
-skewness(quantitative$Total_Trans_Amt)
-skewness(quantitative$Total_Amt_Chng_Q4_Q1)
-skewness(quantitative$Avg_Open_To_Buy)
-skewness(quantitative$Credit_Limit)
+skewness(new_bank_data$Total_Ct_Chng_Q4_Q1)
+skewness(new_bank_data$Total_Trans_Amt)
+skewness(new_bank_data$Total_Amt_Chng_Q4_Q1)
+skewness(new_bank_data$Avg_Open_To_Buy)
+skewness(new_bank_data$Credit_Limit)
+skewness(new_bank_data$Card_Category)
+
 
 #they are normally dist now
-skewness(log1p(quantitative$Total_Ct_Chng_Q4_Q1))
-skewness(log1p(quantitative$Total_Trans_Amt))
-skewness(log1p(quantitative$Total_Amt_Chng_Q4_Q1))
-skewness(log1p(quantitative$Avg_Open_To_Buy))
-skewness(log1p(quantitative$Credit_Limit))
-
-quantitative$Total_Ct_Chng_Q4_Q1 <- log1p(quantitative$Total_Ct_Chng_Q4_Q1)
-colnames(quantitative)[14] <- "log_Total_Ct_Chng_Q4_Q1"
-
-quantitative$Total_Trans_Amt <- log1p(quantitative$Total_Trans_Amt)
-colnames(quantitative)[12] <- "log_Total_Trans_Amt"
-
-quantitative$Total_Amt_Chng_Q4_Q1 <- log1p(quantitative$Total_Amt_Chng_Q4_Q1)
-colnames(quantitative)[11] <- "log_Total_Amt_Chng_Q4_Q1"
-
-quantitative$Avg_Open_To_Buy <- log1p(quantitative$Avg_Open_To_Buy)
-colnames(quantitative)[10] <- "log_Avg_Open_To_Buy"
-
-quantitative$Credit_Limit <- log1p(quantitative$Credit_Limit)
-colnames(quantitative)[8] <- "log_Credit_Limit"
+skewness(log1p(new_bank_data$Total_Ct_Chng_Q4_Q1))
+skewness(log1p(new_bank_data$Total_Trans_Amt))
+skewness(log1p(new_bank_data$Total_Amt_Chng_Q4_Q1))
+skewness(log1p(new_bank_data$Avg_Open_To_Buy))
+skewness(log1p(new_bank_data$Credit_Limit))
 
 
+helmert <- function(n) {
+  m <- t((diag(seq(n-1, 0)) - upper.tri(matrix(1, n, n)))[-n,])
+  t(apply(m, 1, rev))
+}
+encode_helmert <- function(df, var) {
+  x <- df[[var]]
+  x <- unique(x)
+  n <- length(x)
+  d <- as.data.frame(helmert(n))
+  d[[var]] <- rev(x)
+  names(d) <- c(paste0(var, 1:(n-1)), var)
+  d
+}
 
-#calculate skewness in qual_to_quant to find which are normally dist
-skewness(qual_to_quant$Gender)
-skewness(qual_to_quant$Education_Level)
-skewness(qual_to_quant$Marital_Status)
-skewness(qual_to_quant$Income_Category)
+copy_new_bank_data$Card_Category1 <- ifelse(copy_new_bank_data$Card_Category == '1', 1, 0)
+copy_new_bank_data$Card_Category2 <- ifelse(copy_new_bank_data$Card_Category == '2', 1, 0)
+copy_new_bank_data$Card_Category3 <- ifelse(copy_new_bank_data$Card_Category == '3', 1, 0)
+copy_new_bank_data$Card_Category4 <- ifelse(copy_new_bank_data$Card_Category == '4', 1, 0)
 
-skewness(exp(qual_to_quant$Card_Category))
-hist(qual_to_quant$Card_Category)
+skewness(copy_new_bank_data$Card_Category)
+
+hist(log1p(copy_new_bank_data$Card_Category))
+
+encode_helmert(new_bank_data, 'Card_Category')
+
+a <- boxcox(lm(copy_new_bank_data$Card_Category ~ 1), lambda = seq(-200,3))
+hist(a)
+skewness((copy_new_bank_data$Card_Category^-11))
+hist(copy_new_bank_data$Card_Category^-19)
+
+copy_new_bank_data <- new_bank_data
+
+copy_new_bank_data$Total_Ct_Chng_Q4_Q1 <- log1p(copy_new_bank_data$Total_Ct_Chng_Q4_Q1)
+colnames(copy_new_bank_data)[20] <- "log_Total_Ct_Chng_Q4_Q1"
+
+copy_new_bank_data$Total_Trans_Amt <- log1p(copy_new_bank_data$Total_Trans_Amt)
+colnames(copy_new_bank_data)[18] <- "log_Total_Trans_Amt"
+
+copy_new_bank_data$Total_Amt_Chng_Q4_Q1 <- log1p(copy_new_bank_data$Total_Amt_Chng_Q4_Q1)
+colnames(copy_new_bank_data)[17] <- "log_Total_Amt_Chng_Q4_Q1"
+
+copy_new_bank_data$Avg_Open_To_Buy <- log1p(copy_new_bank_data$Avg_Open_To_Buy)
+colnames(copy_new_bank_data)[16] <- "log_Avg_Open_To_Buy"
+
+copy_new_bank_data$Credit_Limit <- log1p(copy_new_bank_data$Credit_Limit)
+colnames(copy_new_bank_data)[14] <- "log_Credit_Limit"
+
 
 # Train-test Split
 
 set.seed(0987)
 
-sample <- sample.split(new_bank_data$Attrition_Flag,SplitRatio = 0.75)
-train <- subset(new_bank_data[2:21],sample == TRUE)
-test <- subset(new_bank_data[2:21],sample == FALSE)
+sample <- sample.split(copy_new_bank_data$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(copy_new_bank_data[2:21],sample == TRUE)
+test <- subset(copy_new_bank_data[2:21],sample == FALSE)
 
 #Proportion of Attrited and Existing Customer
 prop.table(table(train$Attrition_Flag))
@@ -282,7 +255,7 @@ prop.table(table(test$Attrition_Flag))
 
 
 #Original proportion of Attrited and Existing Customer
-prop.table(table(new_bank_data$Attrition_Flag))
+prop.table(table(copy_new_bank_data$Attrition_Flag))
 
 #It's an unbalanced dataset.
 #It might be better to consider a resampling of the dataset
@@ -343,102 +316,31 @@ model <- lm(Attrition_Flag ~ ., data = train_mix)
 summary(model)$adj.r.squared
 summary(model)$coeff
 
-library(olsrr)
 model_back1 <- ols_step_backward_p(model, prem = 0.05, progress = TRUE, details = TRUE)
 
 model_back1$adjr
 
 model_back1$rmse
 
+model_back1$model$coefficients
+
+plot(model_back1)
+
+
+model_back <- ols_step_backward_p(model, prem = 0.1, progress = TRUE, details = FALSE)
+
+model_back$adjr
+
+model_back1$rmse
+
+library(forecast)
+pred <- predict(model_back$model, test, se.fit = TRUE)
+rmse <- accuracy(pred$fit, test$Attrition_Flag)[2]
+rmse
+
+resid <- test$Attrition_Flag - pred$fit
+plot(resid)
+abline(h = 0, col = "red")
 
 
 
-
-
-
-
-
-
-#we dont need to normalize function because we are calculating the skewness of all columns
-#function to normalize value
-normalizer_fnc <- function(x) {
-  (x - min(x)) / (max(x) - min(x))
-}
-
-quan_normalized <- as.data.frame(lapply(quantitative[2:18], normalizer_fnc))
-qual_to_quant_normalized <- as.data.frame(lapply(qual_to_quant[2:6], normalizer_fnc))
-
-
-#we should calculate this in one table
-#we need to calculate chi square for the categorical values 
-#to see are they dependent or not
-#assume conf interval 95%
-table(quantitative$attrition_flag_binary, quantitative$age_group)
-chisq.test(quantitative$attrition_flag_binary, quantitative$age_group, correct=FALSE)
-
-table(quantitative$attrition_flag_binary, quantitative$Dependent_count)
-chisq.test(quantitative$attrition_flag_binary, quantitative$Dependent_count, correct=FALSE)
-
-table(quantitative$attrition_flag_binary, quantitative$Total_Relationship_Count)
-chisq.test(quantitative$attrition_flag_binary, quantitative$Total_Relationship_Count, correct=FALSE)
-
-table(quantitative$attrition_flag_binary, quantitative$Contacts_Count_12_mon)
-chisq.test(quantitative$attrition_flag_binary, quantitative$Contacts_Count_12_mon, correct=FALSE)
-
-table(qual_to_quant$Attrition_Flag, qual_to_quant$Gender)
-chisq.test(qual_to_quant$Attrition_Flag, qual_to_quant$Gender, correct=FALSE)
-
-table(qual_to_quant$Attrition_Flag, qual_to_quant$Education_Level)
-chisq.test(qual_to_quant$Attrition_Flag, qual_to_quant$Education_Level, correct=FALSE)
-
-table(qual_to_quant$Attrition_Flag, qual_to_quant$Marital_Status)
-chisq.test(qual_to_quant$Attrition_Flag, qual_to_quant$Marital_Status, correct=FALSE)
-
-table(qual_to_quant$Attrition_Flag, qual_to_quant$Income_Category)
-chisq.test(qual_to_quant$Attrition_Flag, qual_to_quant$Income_Category, correct=FALSE)
-
-#simulate.p.value
-table(qual_to_quant$Attrition_Flag, qual_to_quant$Card_Category)
-chisq.test(qual_to_quant$Attrition_Flag, qual_to_quant$Card_Category, correct=FALSE, simulate.p.value=TRUE)
-
-table(quantitative$attrition_flag_binary, quantitative$Months_Inactive_12_mon)
-chisq.test(quantitative$attrition_flag_binary, quantitative$Months_Inactive_12_mon, correct=FALSE, simulate.p.value=TRUE)
-
-table(quantitative$attrition_flag_binary, quantitative$Months_on_book)
-chisq.test(quantitative$attrition_flag_binary, quantitative$Months_on_book, correct=FALSE, simulate.p.value=TRUE)
-
-table(quantitative$attrition_flag_binary, quantitative$Credit_Limit)
-chisq.test(quantitative$attrition_flag_binary, quantitative$Credit_Limit, correct=FALSE, simulate.p.value=TRUE)
-
-table(quantitative$attrition_flag_binary, quantitative$Total_Revolving_Bal)
-chisq.test(quantitative$attrition_flag_binary, quantitative$Total_Revolving_Bal, correct=FALSE, simulate.p.value=TRUE)
-
-table(quantitative$attrition_flag_binary, quantitative$Avg_Open_To_Buy)
-chisq.test(quantitative$attrition_flag_binary, quantitative$Avg_Open_To_Buy, correct=FALSE, simulate.p.value=TRUE)
-
-table(quantitative$attrition_flag_binary, quantitative$Total_Amt_Chng_Q4_Q1)
-chisq.test(quantitative$attrition_flag_binary, quantitative$Total_Amt_Chng_Q4_Q1, correct=FALSE, simulate.p.value=TRUE)
-
-table(quantitative$attrition_flag_binary, quantitative$Total_Trans_Amt)
-chisq.test(quantitative$attrition_flag_binary, quantitative$Total_Trans_Amt, correct=FALSE, simulate.p.value=TRUE)
-
-table(quantitative$attrition_flag_binary, quantitative$Total_Trans_Ct)
-chisq.test(quantitative$attrition_flag_binary, quantitative$Total_Trans_Ct, correct=FALSE, simulate.p.value=TRUE)
-
-table(quantitative$attrition_flag_binary, quantitative$Total_Ct_Chng_Q4_Q1)
-chisq.test(quantitative$attrition_flag_binary, quantitative$Total_Ct_Chng_Q4_Q1, correct=FALSE, simulate.p.value=TRUE)
-
-table(quantitative$attrition_flag_binary, quantitative$Avg_Utilization_Ratio)
-chisq.test(quantitative$attrition_flag_binary, quantitative$Avg_Utilization_Ratio, correct=FALSE, simulate.p.value=TRUE)
-
-table(quantitative$attrition_flag_binary, quantitative$Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1)
-chisq.test(quantitative$attrition_flag_binary, quantitative$Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, correct=FALSE, simulate.p.value=TRUE)
-
-
-#histograms
-hist(bank_data$Avg_Utilization_Ratio)
-hist(log1p(bank_data$Avg_Utilization_Ratio))
-
-hist(bank_data$Avg_Open_To_Buy)
-hist(log1p(bank_data$Avg_Open_To_Buy))
-hist(bank_data$Avg_Open_To_Buy)
