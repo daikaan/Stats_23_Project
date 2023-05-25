@@ -80,7 +80,11 @@ corr_quant <- subset(quantitative, select = -c(CLIENTNUM, Dependent_count, age_g
 corralted = cor(corr_quant)
 corrplot(corralted, method = 'color')
 
-#
+#took log and calculate corr again
+log_quant <- log1p(quantitative)
+corr_log_quant <- subset(log_quant, select = -c(CLIENTNUM, Dependent_count, age_group, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
+log_corralted = cor(corr_log_quant)
+corrplot(log_corralted, method = 'color')
 
 #create copy of qualitative data and make it quantitative
 qual_to_quant <- qualitative
@@ -126,6 +130,236 @@ qual_to_quant$Card_Category = as.numeric(as.character(qual_to_quant$Card_Categor
 corr_qual_to_quant = cor(qual_to_quant)
 corrplot(corr_qual_to_quant, method = 'number')
 
+#########
+library("dplyr")
+library("corrplot")
+library("caTools")
+library("ggpubr")
+library("ROSE")
+library("correlation")
+
+
+bank_data_origin <- read.csv('~/GitHub/Stats_23_Project/BankChurners.csv')
+bank_data <- data.frame(bank_data_origin)
+
+#Dimension of dataset
+dim(bank_data)
+
+#Names of the columns
+col <- colnames(bank_data)
+
+#names of quantitative columns
+col_quant <- colnames(select_if(bank_data,is.numeric))
+
+#names of qualitative columns
+col_qualit <- colnames(select_if(bank_data,is.character))
+
+#Shows structure of dataset
+str(bank_data)
+
+
+#View the categorical variables
+
+table(bank_data$Attrition_Flag)
+
+table(bank_data$Gender)
+
+table(bank_data$Education_Level)
+
+table(bank_data$Marital_Status)
+
+table(bank_data$Income_Category)
+
+table(bank_data$Card_Category)
+
+
+#Correlation matrix
+cor_mat <- cor(bank_data[col_quant[2:15]])
+corrplot(cor_mat,method = "number",type = "upper", tl.pos = "td",tl.cex=0.5, tl.col = "black" ,diag = FALSE)
+
+
+#We convert categorical variables into numerical
+new_bank_data <- data.frame(bank_data)
+
+new_bank_data$Attrition_Flag <- as.numeric(new_bank_data$Attrition_Flag == "Attrited Customer")
+
+new_bank_data$Gender <- as.numeric(new_bank_data$Gender == "F")
+new_bank_data <- new_bank_data %>% rename("Is_Female" = "Gender")
+
+order_education_level <- list("Unknown" = 0,
+                              "Uneducated" = 1,
+                              "High School" = 2,
+                              "College" = 3,
+                              "Graduate" = 4,
+                              "Post-Graduate" = 5,
+                              "Doctorate" = 6)
+new_bank_data$Education_Level <- unlist(order_education_level[as.character(new_bank_data$Education_Level)])
+
+order_Marital_Status <- list("Unknown" = 0,
+                             "Single" = 1,
+                             "Married" = 2,
+                             "Divorced" = 3)
+new_bank_data$Marital_Status <- unlist(order_Marital_Status[as.character(new_bank_data$Marital_Status)])
+
+order_Income_Category <- list("Unknown" = 0,
+                              "Less than $40K" = 1,
+                              "$40K - $60K" = 2,
+                              "$60K - $80K" = 3,
+                              "$80K - $120K" = 4,
+                              "$120K +" = 5)
+new_bank_data$Income_Category <- unlist(order_Income_Category[as.character(new_bank_data$Income_Category)])
+
+
+order_Card_Category <- list("Blue" = 1,
+                            "Silver" = 2,
+                            "Gold" = 3,
+                            "Platinum" = 4)
+new_bank_data$Card_Category <- unlist(order_Card_Category[as.character(new_bank_data$Card_Category)])
+
+
+#calculate skewness in quant to find which are normally dist
+skewness(quantitative$Customer_Age)
+skewness(quantitative$Dependent_count)
+skewness(quantitative$Months_on_book)
+skewness(quantitative$Total_Relationship_Count)
+skewness(quantitative$Months_Inactive_12_mon)
+skewness(quantitative$Contacts_Count_12_mon)
+skewness(quantitative$Total_Revolving_Bal)
+skewness(quantitative$Total_Trans_Ct)
+skewness(quantitative$Avg_Utilization_Ratio)
+
+#we should take log to normalize and calculate skewness again for these
+skewness(quantitative$Total_Ct_Chng_Q4_Q1)
+skewness(quantitative$Total_Trans_Amt)
+skewness(quantitative$Total_Amt_Chng_Q4_Q1)
+skewness(quantitative$Avg_Open_To_Buy)
+skewness(quantitative$Credit_Limit)
+
+#they are normally dist now
+skewness(log1p(quantitative$Total_Ct_Chng_Q4_Q1))
+skewness(log1p(quantitative$Total_Trans_Amt))
+skewness(log1p(quantitative$Total_Amt_Chng_Q4_Q1))
+skewness(log1p(quantitative$Avg_Open_To_Buy))
+skewness(log1p(quantitative$Credit_Limit))
+
+quantitative$Total_Ct_Chng_Q4_Q1 <- log1p(quantitative$Total_Ct_Chng_Q4_Q1)
+colnames(quantitative)[14] <- "log_Total_Ct_Chng_Q4_Q1"
+
+quantitative$Total_Trans_Amt <- log1p(quantitative$Total_Trans_Amt)
+colnames(quantitative)[12] <- "log_Total_Trans_Amt"
+
+quantitative$Total_Amt_Chng_Q4_Q1 <- log1p(quantitative$Total_Amt_Chng_Q4_Q1)
+colnames(quantitative)[11] <- "log_Total_Amt_Chng_Q4_Q1"
+
+quantitative$Avg_Open_To_Buy <- log1p(quantitative$Avg_Open_To_Buy)
+colnames(quantitative)[10] <- "log_Avg_Open_To_Buy"
+
+quantitative$Credit_Limit <- log1p(quantitative$Credit_Limit)
+colnames(quantitative)[8] <- "log_Credit_Limit"
+
+
+
+#calculate skewness in qual_to_quant to find which are normally dist
+skewness(qual_to_quant$Gender)
+skewness(qual_to_quant$Education_Level)
+skewness(qual_to_quant$Marital_Status)
+skewness(qual_to_quant$Income_Category)
+
+skewness(exp(qual_to_quant$Card_Category))
+hist(qual_to_quant$Card_Category)
+
+# Train-test Split
+
+set.seed(0987)
+
+sample <- sample.split(new_bank_data$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(new_bank_data[2:21],sample == TRUE)
+test <- subset(new_bank_data[2:21],sample == FALSE)
+
+#Proportion of Attrited and Existing Customer
+prop.table(table(train$Attrition_Flag))
+prop.table(table(test$Attrition_Flag))
+
+
+#Original proportion of Attrited and Existing Customer
+prop.table(table(new_bank_data$Attrition_Flag))
+
+#It's an unbalanced dataset.
+#It might be better to consider a resampling of the dataset
+
+# Under-sampling
+train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+
+# Over-sampling
+train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+
+#Mixed Sampling with 40% of Attrited Customer
+
+train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N =7595)$data
+
+
+
+#Thresholds for classification:
+threshold1 <- 0.4
+threshold2 <- 0.5
+threshold3 <- 0.6
+
+
+
+
+
+
+
+
+
+#This part is to check how the rows containg at least one "unknown" are distributed (Probably useless)
+
+#Change Unknown value to NA
+bank_data_copy <- data.frame(bank_data)
+bank_data_copy[bank_data_copy=='Unknown'] <- NA
+
+#Build a dataset without missing values
+bank_data_rev <- na.omit(bank_data_copy)
+
+# Number of rows containing at least one "Unknown"
+dim(bank_data_copy)[1] - dim(bank_data_rev)[1]
+
+#Split the initial data based on attrition flag
+bank_data_split <- split(bank_data,bank_data$Attrition_Flag)
+
+dim(bank_data_split$`Attrited Customer`)
+dim(bank_data_split$`Existing Customer`)
+
+#We check how the rows containing "Unknown" are distributed in relation to the split dataset
+
+bank_data_split$`Attrited Customer`[bank_data_split$`Attrited Customer`=='Unknown'] <- NA
+(dim(bank_data_split$`Attrited Customer`)[1]-dim(na.omit(bank_data_split$`Attrited Customer`))[1])/dim(bank_data_split$`Attrited Customer`)[1]
+
+bank_data_split$`Existing Customer`[bank_data_split$`Existing Customer`=='Unknown'] <- NA
+(dim(bank_data_split$`Existing Customer`)[1]-dim(na.omit(bank_data_split$`Existing Customer`))[1])/dim(bank_data_split$`Existing Customer`)[1]
+
+
+model <- lm(Attrition_Flag ~ ., data = train_mix)
+summary(model)$adj.r.squared
+summary(model)$coeff
+
+library(olsrr)
+model_back1 <- ols_step_backward_p(model, prem = 0.05, progress = TRUE, details = TRUE)
+
+model_back1$adjr
+
+model_back1$rmse
+
+
+
+
+
+
+
+
+
+
+#we dont need to normalize function because we are calculating the skewness of all columns
 #function to normalize value
 normalizer_fnc <- function(x) {
   (x - min(x)) / (max(x) - min(x))
@@ -135,7 +369,7 @@ quan_normalized <- as.data.frame(lapply(quantitative[2:18], normalizer_fnc))
 qual_to_quant_normalized <- as.data.frame(lapply(qual_to_quant[2:6], normalizer_fnc))
 
 
-
+#we should calculate this in one table
 #we need to calculate chi square for the categorical values 
 #to see are they dependent or not
 #assume conf interval 95%
