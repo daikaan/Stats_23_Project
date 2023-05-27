@@ -119,6 +119,8 @@ relationship.count.boxplot
 #outlier extraction using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule
 boxplot.stats(quantitative$Total_Relationship_Count)$out
 
+boxplot(subset(quantitative, select=- c(CLIENTNUM, Credit_Limit, Total_Trans_Ct, Total_Revolving_Bal, Contacts_Count_12_mon, Avg_Open_To_Buy, Total_Amt_Chng_Q4_Q1, Total_Trans_Amt)))
+
 #Avg utilization ratios by age groups
 avguti.agegrp <- quantitative %>% group_by(age_group) %>% summarise(avg_uti = mean(Avg_Utilization_Ratio))
 plot(avguti.agegrp, type = "o")
