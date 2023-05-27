@@ -104,11 +104,20 @@ boxplot.stats(quantitative$Months_on_book)$out
 # Credit Limit
 
 #boxplot
-credit.limit.boxplot <- boxplot(quantitative$Credit_Limit, ylab = "months")
-credit.limit.boxplot
+credit.limit.boxplot <- boxplot(quantitative$Credit_Limit, ylab = "Dollars")
+Dcredit.limit.boxplot
 
 #outlier extraction using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule
 boxplot.stats(quantitative$Credit_Limit)$out
+
+# Total Relationship Count
+
+#boxplot
+relationship.count.boxplot <- boxplot(quantitative$Total_Relationship_Count, ylab = "# of products")
+relationship.count.boxplot
+
+#outlier extraction using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule
+boxplot.stats(quantitative$Total_Relationship_Count)$out
 
 #Avg utilization ratios by age groups
 avguti.agegrp <- quantitative %>% group_by(age_group) %>% summarise(avg_uti = mean(Avg_Utilization_Ratio))
