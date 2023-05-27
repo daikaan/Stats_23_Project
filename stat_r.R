@@ -66,6 +66,15 @@ myPalette <- brewer.pal(5, "Set2")
 cust.age.piechart <- pie(count(quantitative, age_group)$n, border="white", col=myPalette)
 cust.age.piechart
 
+# months on book (how long a customer is using the bank)
+
+#boxplot
+months.onbook.boxplot <- boxplot(quantitative$Months_on_book, ylab = "months")
+months.onbook.boxplot
+
+#using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, outliers
+boxplot.stats(quantitative$Months_on_book)$out
+
 
 #Avg utilization ratios by age groups
 avguti.agegrp <- quantitative %>% group_by(age_group) %>% summarise(avg_uti = mean(Avg_Utilization_Ratio))
