@@ -72,6 +72,27 @@ hist(bank_data$Contacts_Count_12_mon, col = yarrr::transparent('blue', trans.val
 
 hist(bank_data$Total_Trans_Ct)
 
+#boxplot
+cust.age.boxplot <- boxplot(new_bank_data$Customer_Age, ylab = "age")
+cust.age.boxplot
+
+#using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, 
+#it is seen that customers over the age of 70 are outliers
+boxplot.stats(new_bank_data$Customer_Age)$out
+
+# grouped age piechart
+library(RColorBrewer)
+myPalette <- brewer.pal(5, "Set2") 
+cust.age.piechart <- pie(count(new_bank_data, Customer_Age)$n, border="white", col=myPalette)
+cust.age.piechart
+
+#boxplot
+card.category.boxplot <- boxplot(new_bank_data$Card_Category, ylab = "category")
+card.category.boxplot
+
+#using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, outliers
+boxplot.stats(new_bank_data$Card_Category)$out
+
 #########
 library("dplyr")
 library("corrplot")
@@ -85,6 +106,8 @@ library(MASS)
 
 bank_data_origin <- read.csv('~/GitHub/Stats_23_Project/BankChurners.csv')
 bank_data <- data.frame(bank_data_origin)
+
+colSums(is.na(bank_data)) #there is no null value
 
 #Dimension of dataset
 dim(bank_data)
@@ -160,6 +183,12 @@ order_Card_Category <- list("Blue" = 1,
                             "Platinum" = 4)
 new_bank_data$Card_Category <- unlist(order_Card_Category[as.character(new_bank_data$Card_Category)])
 
+#Correlation matrix
+cor_mat_new <- cor(new_bank_data[2:15])
+corrplot(cor_mat_new,method = "number",type = "upper", tl.pos = "td",tl.cex=0.5, tl.col = "black" ,diag = FALSE)
+
+as.matrix(cor_mat_new)
+
 #calculate skewness in quant to find which are normally dist
 skewness(new_bank_data$Customer_Age)
 skewness(new_bank_data$Dependent_count)
@@ -210,7 +239,6 @@ encode_helmert <- function(df, var) {
 copy_new_bank_data$Card_Category1 <- ifelse(copy_new_bank_data$Card_Category == '1', 1, 0)
 copy_new_bank_data$Card_Category2 <- ifelse(copy_new_bank_data$Card_Category == '2', 1, 0)
 copy_new_bank_data$Card_Category3 <- ifelse(copy_new_bank_data$Card_Category == '3', 1, 0)
-copy_new_bank_data$Card_Category4 <- ifelse(copy_new_bank_data$Card_Category == '4', 1, 0)
 
 skewness(copy_new_bank_data$Card_Category)
 
@@ -240,36 +268,8 @@ colnames(copy_new_bank_data)[16] <- "log_Avg_Open_To_Buy"
 copy_new_bank_data$Credit_Limit <- log1p(copy_new_bank_data$Credit_Limit)
 colnames(copy_new_bank_data)[14] <- "log_Credit_Limit"
 
-
-# Train-test Split
-
-set.seed(0987)
-
-sample <- sample.split(copy_new_bank_data$Attrition_Flag,SplitRatio = 0.75)
-train <- subset(copy_new_bank_data[2:21],sample == TRUE)
-test <- subset(copy_new_bank_data[2:21],sample == FALSE)
-
-#Proportion of Attrited and Existing Customer
-prop.table(table(train$Attrition_Flag))
-prop.table(table(test$Attrition_Flag))
-
-
-#Original proportion of Attrited and Existing Customer
-prop.table(table(copy_new_bank_data$Attrition_Flag))
-
-#It's an unbalanced dataset.
-#It might be better to consider a resampling of the dataset
-
-# Under-sampling
-train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
-
-# Over-sampling
-train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
-
-#Mixed Sampling with 40% of Attrited Customer
-
-train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N =7595)$data
-
+#delete naive...1 and 2
+copy_new_bank_data <- subset(copy_new_bank_data, select = -c(Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
 
 
 #Thresholds for classification:
@@ -279,16 +279,10 @@ threshold3 <- 0.6
 
 
 
-
-
-
-
-
-
 #This part is to check how the rows containg at least one "unknown" are distributed (Probably useless)
 
 #Change Unknown value to NA
-bank_data_copy <- data.frame(bank_data)
+bank_data_copy <- data.frame(copy_new_bank_data)
 bank_data_copy[bank_data_copy=='Unknown'] <- NA
 
 #Build a dataset without missing values
@@ -312,10 +306,46 @@ bank_data_split$`Existing Customer`[bank_data_split$`Existing Customer`=='Unknow
 (dim(bank_data_split$`Existing Customer`)[1]-dim(na.omit(bank_data_split$`Existing Customer`))[1])/dim(bank_data_split$`Existing Customer`)[1]
 
 
-model <- lm(Attrition_Flag ~ ., data = train_mix)
+set.seed(0987)
+
+sample <- sample.split(bank_data_rev$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(bank_data_rev[2:21],sample == TRUE)
+test <- subset(bank_data_rev[2:21],sample == FALSE)
+
+#Proportion of Attrited and Existing Customer
+prop.table(table(train$Attrition_Flag))
+prop.table(table(test$Attrition_Flag))
+
+
+#Original proportion of Attrited and Existing Customer
+prop.table(table(copy_new_bank_data$Attrition_Flag))
+
+#It's an unbalanced dataset.
+#It might be better to consider a resampling of the dataset
+
+# Under-sampling
+train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+
+# Over-sampling
+train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+
+#Mixed Sampling with 40% of Attrited Customer
+
+train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N =7595)$data
+
+
+model <- glm(Attrition_Flag ~ ., data = train_mix)
 summary(model)$adj.r.squared
 summary(model)$coeff
 
+summary(model)
+
+pred <- (predict(model, train_mix) >= 0.5)*1
+
+mean(train_mix$Attrition_Flag == pred)
+
+#delete monts_on_book and try again, if we get all columns with triple stars we are ok
+#if we use linear regression
 model_back1 <- ols_step_backward_p(model, prem = 0.05, progress = TRUE, details = TRUE)
 
 model_back1$adjr
