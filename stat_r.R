@@ -39,20 +39,20 @@ table(bank_data$Income_Category)
 table(bank_data$Card_Category)
 
 #Change Unknown value to NA
-bank_data_copy <- data.frame(bank_data)
-bank_data_copy[bank_data_copy=='Unknown'] <- NA
+bank_data_NA <- data.frame(bank_data)
+bank_data_NA[bank_data_NA=='Unknown'] <- NA
 
 #Build a dataset without missing values
-bank_data_rev <- na.omit(bank_data_copy)
+bank_data_withoutNA <- na.omit(bank_data_NA)
 
 
 #We convert categorical variables into numerical
-bank_data_copy <- data.frame(bank_data_rev)
+bank_data_withoutNA_quan <- data.frame(bank_data_withoutNA)
 
-bank_data_copy$Attrition_Flag <- as.numeric(bank_data_copy$Attrition_Flag == "Attrited Customer")
+bank_data_withoutNA_quan$Attrition_Flag <- as.numeric(bank_data_withoutNA_quan$Attrition_Flag == "Attrited Customer")
 
-bank_data_copy$Gender <- as.numeric(bank_data_copy$Gender == "F")
-bank_data_copy <- bank_data_copy %>% rename("Is_Female" = "Gender")
+bank_data_withoutNA_quan$Gender <- as.numeric(bank_data_withoutNA_quan$Gender == "F")
+bank_data_withoutNA_quan <- bank_data_withoutNA_quan %>% rename("Is_Female" = "Gender")
 
 order_education_level <- list("Unknown" = 0,
                               "Uneducated" = 1,
@@ -61,13 +61,13 @@ order_education_level <- list("Unknown" = 0,
                               "Graduate" = 4,
                               "Post-Graduate" = 5,
                               "Doctorate" = 6)
-bank_data_copy$Education_Level <- unlist(order_education_level[as.character(bank_data_copy$Education_Level)])
+bank_data_withoutNA_quan$Education_Level <- unlist(order_education_level[as.character(bank_data_withoutNA_quan$Education_Level)])
 
 order_Marital_Status <- list("Unknown" = 0,
                              "Single" = 1,
                              "Married" = 2,
                              "Divorced" = 3)
-bank_data_copy$Marital_Status <- unlist(order_Marital_Status[as.character(bank_data_copy$Marital_Status)])
+bank_data_withoutNA_quan$Marital_Status <- unlist(order_Marital_Status[as.character(bank_data_withoutNA_quan$Marital_Status)])
 
 order_Income_Category <- list("Unknown" = 0,
                               "Less than $40K" = 1,
@@ -75,81 +75,83 @@ order_Income_Category <- list("Unknown" = 0,
                               "$60K - $80K" = 3,
                               "$80K - $120K" = 4,
                               "$120K +" = 5)
-bank_data_copy$Income_Category <- unlist(order_Income_Category[as.character(bank_data_copy$Income_Category)])
+bank_data_withoutNA_quan$Income_Category <- unlist(order_Income_Category[as.character(bank_data_withoutNA_quan$Income_Category)])
 
 
 order_Card_Category <- list("Blue" = 1,
                             "Silver" = 2,
                             "Gold" = 3,
                             "Platinum" = 4)
-bank_data_copy$Card_Category <- unlist(order_Card_Category[as.character(bank_data_copy$Card_Category)])
+bank_data_withoutNA_quan$Card_Category <- unlist(order_Card_Category[as.character(bank_data_withoutNA_quan$Card_Category)])
 
 #delete naive...1 and 2
-bank_data_copy <- subset(bank_data_copy, select = -c(Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
+bank_data_withoutNA_quan <- subset(bank_data_withoutNA_quan, select = -c(Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
+
+cleaned_bank_data_withoutNA_quan <- bank_data_withoutNA_quan
+
+age.exc.list <- boxplot.stats(cleaned_bank_data_withoutNA_quan$Customer_Age)$out
+card.exc.list <- c(2, 3, 4)
+
+cleaned_bank_data_withoutNA_quan <- subset(cleaned_bank_data_withoutNA_quan,!((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
+cleaned_bank_data_withoutNA_quan
 
 
 #Correlation matrix
-cor_mat_new <- cor(bank_data_copy[2:15])
+cor_mat_new <- cor(bank_data_withoutNA_quan[2:15])
 corrplot(cor_mat_new,method = "number",type = "upper", tl.pos = "td",tl.cex=0.5, tl.col = "black" ,diag = FALSE)
 
-as.matrix(cor_mat_new)
 
 #calculate skewness in quant to find which are normally dist
-skewness(bank_data_copy$Customer_Age)
-skewness(bank_data_copy$Dependent_count)
-skewness(bank_data_copy$Months_on_book)
-skewness(bank_data_copy$Total_Relationship_Count)
-skewness(bank_data_copy$Months_Inactive_12_mon)
-skewness(bank_data_copy$Contacts_Count_12_mon)
-skewness(bank_data_copy$Total_Revolving_Bal)
-skewness(bank_data_copy$Total_Trans_Ct)
-skewness(bank_data_copy$Avg_Utilization_Ratio)
-skewness(bank_data_copy$Is_Female)
-skewness(bank_data_copy$Education_Level)
-skewness(bank_data_copy$Marital_Status)
-skewness(bank_data_copy$Income_Category)
+skewness(cleaned_bank_data_withoutNA_quan$Customer_Age)
+skewness(cleaned_bank_data_withoutNA_quan$Dependent_count)
+skewness(cleaned_bank_data_withoutNA_quan$Months_on_book)
+skewness(cleaned_bank_data_withoutNA_quan$Total_Relationship_Count)
+skewness(cleaned_bank_data_withoutNA_quan$Months_Inactive_12_mon)
+skewness(cleaned_bank_data_withoutNA_quan$Contacts_Count_12_mon)
+skewness(cleaned_bank_data_withoutNA_quan$Total_Revolving_Bal)
+skewness(cleaned_bank_data_withoutNA_quan$Total_Trans_Ct)
+skewness(cleaned_bank_data_withoutNA_quan$Avg_Utilization_Ratio)
+skewness(cleaned_bank_data_withoutNA_quan$Is_Female)
+skewness(cleaned_bank_data_withoutNA_quan$Education_Level)
+skewness(cleaned_bank_data_withoutNA_quan$Marital_Status)
+skewness(cleaned_bank_data_withoutNA_quan$Income_Category)
 
 
 #we should take log to normalize and calculate skewness again for these
-skewness(bank_data_copy$Total_Ct_Chng_Q4_Q1)
-skewness(bank_data_copy$Total_Trans_Amt)
-skewness(bank_data_copy$Total_Amt_Chng_Q4_Q1)
-skewness(bank_data_copy$Avg_Open_To_Buy)
-skewness(bank_data_copy$Credit_Limit)
-skewness(bank_data_copy$Card_Category)
-
+skewness(cleaned_bank_data_withoutNA_quan$Total_Ct_Chng_Q4_Q1)
+skewness(cleaned_bank_data_withoutNA_quan$Total_Trans_Amt)
+skewness(cleaned_bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1)
+skewness(cleaned_bank_data_withoutNA_quan$Avg_Open_To_Buy)
+skewness(cleaned_bank_data_withoutNA_quan$Credit_Limit)
 
 #they are normally dist now
-skewness(log1p(bank_data_copy$Total_Ct_Chng_Q4_Q1))
-skewness(log1p(bank_data_copy$Total_Trans_Amt))
-skewness(log1p(bank_data_copy$Total_Amt_Chng_Q4_Q1))
-skewness(log1p(bank_data_copy$Avg_Open_To_Buy))
-skewness(log1p(bank_data_copy$Credit_Limit))
+skewness(log1p(cleaned_bank_data_withoutNA_quan$Total_Ct_Chng_Q4_Q1))
+skewness(log1p(cleaned_bank_data_withoutNA_quan$Total_Trans_Amt))
+skewness(log1p(cleaned_bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1))
+skewness(log1p(cleaned_bank_data_withoutNA_quan$Avg_Open_To_Buy))
+skewness(log1p(cleaned_bank_data_withoutNA_quan$Credit_Limit))
 
 
-log_bank_data_copy <- bank_data_copy
+log_cleaned_bank_data_withoutNA_quan <- cleaned_bank_data_withoutNA_quan
 
-age.exc.list <- boxplot.stats(log_bank_data_copy$Customer_Age)$out
-card.exc.list <- c("Silver", "Platinum", "Gold")
+log_cleaned_bank_data_withoutNA_quan$Total_Ct_Chng_Q4_Q1 <- log1p(log_cleaned_bank_data_withoutNA_quan$Total_Ct_Chng_Q4_Q1)
+colnames(log_cleaned_bank_data_withoutNA_quan)[20] <- "log_Total_Ct_Chng_Q4_Q1"
 
-bank_data_cleaned <- subset(log_bank_data_copy,!((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
-bank_data_cleaned
+log_cleaned_bank_data_withoutNA_quan$Total_Trans_Amt <- log1p(log_cleaned_bank_data_withoutNA_quan$Total_Trans_Amt)
+colnames(log_cleaned_bank_data_withoutNA_quan)[18] <- "log_Total_Trans_Amt"
 
-log_bank_data_copy$Total_Ct_Chng_Q4_Q1 <- log1p(log_bank_data_copy$Total_Ct_Chng_Q4_Q1)
-colnames(log_bank_data_copy)[20] <- "log_Total_Ct_Chng_Q4_Q1"
+log_cleaned_bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1 <- log1p(log_cleaned_bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1)
+colnames(log_cleaned_bank_data_withoutNA_quan)[17] <- "log_Total_Amt_Chng_Q4_Q1"
 
-log_bank_data_copy$Total_Trans_Amt <- log1p(log_bank_data_copy$Total_Trans_Amt)
-colnames(log_bank_data_copy)[18] <- "log_Total_Trans_Amt"
+log_cleaned_bank_data_withoutNA_quan$Avg_Open_To_Buy <- log1p(log_cleaned_bank_data_withoutNA_quan$Avg_Open_To_Buy)
+colnames(log_cleaned_bank_data_withoutNA_quan)[16] <- "log_Avg_Open_To_Buy"
 
-log_bank_data_copy$Total_Amt_Chng_Q4_Q1 <- log1p(log_bank_data_copy$Total_Amt_Chng_Q4_Q1)
-colnames(log_bank_data_copy)[17] <- "log_Total_Amt_Chng_Q4_Q1"
+log_cleaned_bank_data_withoutNA_quan$Credit_Limit <- log1p(log_cleaned_bank_data_withoutNA_quan$Credit_Limit)
+colnames(log_cleaned_bank_data_withoutNA_quan)[14] <- "log_Credit_Limit"
 
-log_bank_data_copy$Avg_Open_To_Buy <- log1p(log_bank_data_copy$Avg_Open_To_Buy)
-colnames(log_bank_data_copy)[16] <- "log_Avg_Open_To_Buy"
+#since we have only one card category we can remove it
 
-log_bank_data_copy$Credit_Limit <- log1p(log_bank_data_copy$Credit_Limit)
-colnames(log_bank_data_copy)[14] <- "log_Credit_Limit"
-
+log_cleaned_bank_data_withoutNA_quan <- subset(log_cleaned_bank_data_withoutNA_quan, select = -c(Card_Category))
 
 #Thresholds for classification:
 threshold1 <- 0.4
@@ -158,9 +160,66 @@ threshold3 <- 0.6
 
 set.seed(0987)
 
-sample <- sample.split(log_bank_data_copy$Attrition_Flag,SplitRatio = 0.75)
-train <- subset(log_bank_data_copy[2:21],sample == TRUE)
-test <- subset(log_bank_data_copy[2:21],sample == FALSE)
+sample <- sample.split(log_cleaned_bank_data_withoutNA_quan$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(log_cleaned_bank_data_withoutNA_quan[2:20],sample == TRUE)
+test <- subset(log_cleaned_bank_data_withoutNA_quan[2:20],sample == FALSE)
+
+# Under-sampling
+train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+
+# Over-sampling
+train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+
+#Mixed Sampling with 40% of Attrited Customer
+
+train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N = nrow(log_cleaned_bank_data_withoutNA_quan))$data
+
+
+model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
+summary(model)$coeff
+
+summary(model)
+
+pred <- (predict(model, train_mix) >= 0.5)*1
+
+mean(train_mix$Attrition_Flag == pred)
+
+
+log_cleaned_bank_data_withoutNA_quan1 <- subset(log_cleaned_bank_data_withoutNA_quan, select = -c(Months_on_book))
+
+set.seed(0987)
+
+sample <- sample.split(log_cleaned_bank_data_withoutNA_quan1$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(log_cleaned_bank_data_withoutNA_quan1[2:19],sample == TRUE)
+test <- subset(log_cleaned_bank_data_withoutNA_quan1[2:19],sample == FALSE)
+
+# Under-sampling
+train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+
+# Over-sampling
+train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+
+#Mixed Sampling with 40% of Attrited Customer
+
+train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N = nrow(log_cleaned_bank_data_withoutNA_quan))$data
+
+
+model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
+summary(model)$coeff
+
+summary(model)
+
+pred <- (predict(model, train_mix) >= 0.5)*1
+
+mean(train_mix$Attrition_Flag == pred)
+
+
+
+log_cleaned_bank_data_withoutNA_quan2 <- subset(log_cleaned_bank_data_withoutNA_quan1, select = -c(Education_Level))
+
+sample <- sample.split(log_cleaned_bank_data_withoutNA_quan2$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(log_cleaned_bank_data_withoutNA_quan2[2:18],sample == TRUE)
+test <- subset(log_cleaned_bank_data_withoutNA_quan2[2:18],sample == FALSE)
 
 # Under-sampling
 train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
@@ -183,39 +242,11 @@ pred <- (predict(model, train_mix) >= 0.5)*1
 mean(train_mix$Attrition_Flag == pred)
 
 
-log_bank_data_copy1 <- subset(log_bank_data_copy, select = -c(Marital_Status))
+log_cleaned_bank_data_withoutNA_quan3 <- subset(log_cleaned_bank_data_withoutNA_quan2, select = -c(Customer_Age))
 
-sample <- sample.split(log_bank_data_copy1$Attrition_Flag,SplitRatio = 0.75)
-train <- subset(log_bank_data_copy1[2:20],sample == TRUE)
-test <- subset(log_bank_data_copy1[2:20],sample == FALSE)
-
-# Under-sampling
-train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
-
-# Over-sampling
-train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
-
-#Mixed Sampling with 40% of Attrited Customer
-
-train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N =7595)$data
-
-
-model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
-summary(model)$coeff
-
-summary(model)
-
-pred <- (predict(model, train_mix) >= 0.5)*1
-
-mean(train_mix$Attrition_Flag == pred)
-
-
-
-log_bank_data_copy2 <- subset(log_bank_data_copy1, select = -c(Months_on_book))
-
-sample <- sample.split(log_bank_data_copy2$Attrition_Flag,SplitRatio = 0.75)
-train <- subset(log_bank_data_copy2[2:19],sample == TRUE)
-test <- subset(log_bank_data_copy2[2:19],sample == FALSE)
+sample <- sample.split(log_cleaned_bank_data_withoutNA_quan3$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(log_cleaned_bank_data_withoutNA_quan3[2:17],sample == TRUE)
+test <- subset(log_cleaned_bank_data_withoutNA_quan3[2:17],sample == FALSE)
 
 # Under-sampling
 train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
@@ -237,31 +268,10 @@ pred <- (predict(model, train_mix) >= 0.5)*1
 
 mean(train_mix$Attrition_Flag == pred)
 
-log_bank_data_copy3 <- subset(log_bank_data_copy1, select = -c(Customer_Age))
-
-sample <- sample.split(log_bank_data_copy3$Attrition_Flag,SplitRatio = 0.75)
-train <- subset(log_bank_data_copy3[2:18],sample == TRUE)
-test <- subset(log_bank_data_copy3[2:18],sample == FALSE)
-
-# Under-sampling
-train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
-
-# Over-sampling
-train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
-
-#Mixed Sampling with 40% of Attrited Customer
-
-train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N =7595)$data
 
 
-model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
-summary(model)$coeff
 
-summary(model)
 
-pred <- (predict(model, train_mix) >= 0.5)*1
-
-mean(train_mix$Attrition_Flag == pred)
 
 
 
