@@ -129,6 +129,12 @@ skewness(log1p(bank_data_copy$Credit_Limit))
 
 log_bank_data_copy <- bank_data_copy
 
+age.exc.list <- boxplot.stats(log_bank_data_copy$Customer_Age)$out
+card.exc.list <- c("Silver", "Platinum", "Gold")
+
+bank_data_cleaned <- subset(log_bank_data_copy,!((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
+bank_data_cleaned
+
 log_bank_data_copy$Total_Ct_Chng_Q4_Q1 <- log1p(log_bank_data_copy$Total_Ct_Chng_Q4_Q1)
 colnames(log_bank_data_copy)[20] <- "log_Total_Ct_Chng_Q4_Q1"
 
@@ -177,9 +183,7 @@ pred <- (predict(model, train_mix) >= 0.5)*1
 mean(train_mix$Attrition_Flag == pred)
 
 
-log_bank_data_copy1 <- subset(log_bank_data_copy, select = -c(Months_on_book))
-
-set.seed(0987)
+log_bank_data_copy1 <- subset(log_bank_data_copy, select = -c(Marital_Status))
 
 sample <- sample.split(log_bank_data_copy1$Attrition_Flag,SplitRatio = 0.75)
 train <- subset(log_bank_data_copy1[2:20],sample == TRUE)
@@ -207,13 +211,37 @@ mean(train_mix$Attrition_Flag == pred)
 
 
 
-log_bank_data_copy2 <- subset(log_bank_data_copy1, select = -c(Marital_Status))
-
-set.seed(0987)
+log_bank_data_copy2 <- subset(log_bank_data_copy1, select = -c(Months_on_book))
 
 sample <- sample.split(log_bank_data_copy2$Attrition_Flag,SplitRatio = 0.75)
 train <- subset(log_bank_data_copy2[2:19],sample == TRUE)
 test <- subset(log_bank_data_copy2[2:19],sample == FALSE)
+
+# Under-sampling
+train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+
+# Over-sampling
+train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+
+#Mixed Sampling with 40% of Attrited Customer
+
+train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N =7595)$data
+
+
+model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
+summary(model)$coeff
+
+summary(model)
+
+pred <- (predict(model, train_mix) >= 0.5)*1
+
+mean(train_mix$Attrition_Flag == pred)
+
+log_bank_data_copy3 <- subset(log_bank_data_copy1, select = -c(Customer_Age))
+
+sample <- sample.split(log_bank_data_copy3$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(log_bank_data_copy3[2:18],sample == TRUE)
+test <- subset(log_bank_data_copy3[2:18],sample == FALSE)
 
 # Under-sampling
 train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
