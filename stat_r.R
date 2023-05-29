@@ -63,7 +63,11 @@ cust.age.boxplot
 
 #using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, 
 #it is seen that customers over the age of 70 are outliers
-boxplot.stats(quantitative$Customer_Age)$out
+age.exc.list <- boxplot.stats(quantitative$Customer_Age)$out
+card.exc.list <- c("Silver", "Platinum", "Gold")
+
+bank_data_cleaned <- subset(bank_data_rev,!((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
+bank_data_cleaned
 
 
 #histogram
