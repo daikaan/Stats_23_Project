@@ -220,7 +220,7 @@ bank_data_rev <- na.omit(bank_data_copy)
 dim(bank_data_copy)[1] - dim(bank_data_rev)[1]
 
 #Split the initial data based on attrition flag
-bank_data_split <- split(bank_data,bank_data$Attrition_Flag)
+bank_data_split <- split(bank_data_origin,bank_data_origin$Attrition_Flag)
 
 dim(bank_data_split$`Attrited Customer`)
 dim(bank_data_split$`Existing Customer`)
