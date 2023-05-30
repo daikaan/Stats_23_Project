@@ -46,11 +46,12 @@ corrplot(cor_mat,method = "color",type = "upper", tl.pos = "td",tl.cex=0.5, tl.c
 
 bank_data %>% mutate_if(is.numeric, scale)
 
+bank_data$Attrition_Flag <- as.numeric(bank_data$Attrition_Flag == "Attrited Customer")
+
 
 #We convert categorical variables into numerical
 new_bank_data <- data.frame(bank_data)
 
-new_bank_data$Attrition_Flag <- as.numeric(new_bank_data$Attrition_Flag == "Attrited Customer")
 
 new_bank_data$Gender <- as.numeric(new_bank_data$Gender == "F")
 new_bank_data <- new_bank_data %>% rename("Is_Female" = "Gender")
@@ -102,7 +103,7 @@ corrplot(pcor,method = "color",type = "upper", tl.pos = "td",tl.cex=0.5, tl.col 
 corrplot(new_cor_mat[1,1:20,drop=FALSE],method = "number",cl.pos = "n",tl.col = "black" ,tl.cex=0.5,diag = FALSE)
 
 #We check how the variables with the bigger correlation with Attrition_flag change between Attrited and Existing Customer
-Customer <- bank_data$Attrition_Flag
+Customer <- bank_data_origin$Attrition_Flag
 a <- ggplot(new_bank_data, aes(x = Total_Trans_Ct, fill = Customer)) +
       geom_density(alpha=0.2) + ggtitle("Total_Trans_Ct")
 
@@ -132,13 +133,20 @@ ggarrange(a,b,c,d,e,f,nrow=2,ncol=3)
 
 set.seed(0987)
 
-sample <- sample.split(new_bank_data$Attrition_Flag,SplitRatio = 0.75)
-train <- subset(new_bank_data[2:21],sample == TRUE)
-test <- subset(new_bank_data[2:21],sample == FALSE)
+sample_1 <- sample.split(new_bank_data$Attrition_Flag,SplitRatio = 0.75)
+train_1 <- subset(new_bank_data[2:21],sample_1 == TRUE)
+test_1 <- subset(new_bank_data[2:21],sample_1 == FALSE)
+
+sample_2 <- sample.split(bank_data$Attrition_Flag,SplitRatio = 0.75)
+train_2 <- subset(bank_data[2:21],sample_2 == TRUE)
+test_2 <- subset(bank_data[2:21],sample_2 == FALSE)
 
 #Proportion of Attrited and Existing Customer
-prop.table(table(train$Attrition_Flag))
-prop.table(table(test$Attrition_Flag))
+prop.table(table(train_1$Attrition_Flag))
+prop.table(table(test_1$Attrition_Flag))
+
+prop.table(table(train_2$Attrition_Flag))
+prop.table(table(test_2$Attrition_Flag))
 
 
 #Original proportion of Attrited and Existing Customer
@@ -148,14 +156,14 @@ prop.table(table(new_bank_data$Attrition_Flag))
 #It might be better to consider a resampling of the dataset
 
 # Under-sampling
-train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+train_under <- ovun.sample(Attrition_Flag~.,data = train_2, method = "under")$data
 
 # Over-sampling
-train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+train_over <- ovun.sample(Attrition_Flag~.,data = train_2, method = "over")$data
 
 #Mixed Sampling with 40% of Attrited Customer
 
-train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N =7595)$data
+train_mix <- ovun.sample(Attrition_Flag~.,data = train_2, method = "both", p = 0.4, N =7595)$data
 
 
 
@@ -164,18 +172,38 @@ threshold1 <- 0.4
 threshold2 <- 0.5
 threshold3 <- 0.6
 
-glm <- glm(data = train,Attrition_Flag~ . -Avg_Open_To_Buy,family = "binomial")
-summary(glm)
+glm_1 <- glm(data = train_1,Attrition_Flag~ . -Avg_Open_To_Buy,family = "binomial")
+summary(glm_1)
 
-pred_glm <- predict(glm,test,type="response")
-pred_1 <- ifelse(pred_glm > threshold1 , 1,0)
-pred_2 <- ifelse(pred_glm > threshold2 , 1,0)
-pred_3 <- ifelse(pred_glm > threshold3 , 1,0)
+pred_glm_1 <- predict(glm_1,test_1,type="response")
+pred_1 <- ifelse(pred_glm_1 > threshold1 , 1,0)
+pred_2 <- ifelse(pred_glm_1 > threshold2 , 1,0)
+pred_3 <- ifelse(pred_glm_1 > threshold3 , 1,0)
 
-table(test$Attrition_Flag,pred_1)
-table(test$Attrition_Flag,pred_2)
-table(test$Attrition_Flag,pred_3)
+table(test_1$Attrition_Flag,pred_1)
+table(test_1$Attrition_Flag,pred_2)
+table(test_1$Attrition_Flag,pred_3)
 
+mean(pred_1==test_1$Attrition_Flag)
+mean(pred_2==test_1$Attrition_Flag)
+mean(pred_3==test_1$Attrition_Flag)
+
+
+glm_2 <- glm(data = train_2,Attrition_Flag~ . -Avg_Open_To_Buy,family = "binomial")
+summary(glm_2)
+
+pred_glm_2 <- predict(glm_2,test_2,type="response")
+pred_1_2 <- ifelse(pred_glm_2 > threshold1 , 1,0)
+pred_2_2 <- ifelse(pred_glm_2 > threshold2 , 1,0)
+pred_3_2 <- ifelse(pred_glm_2 > threshold3 , 1,0)
+
+table(test_2$Attrition_Flag,pred_1_2)
+table(test_2$Attrition_Flag,pred_2_2)
+table(test_2$Attrition_Flag,pred_3_2)
+
+mean(pred_1_2==test_2$Attrition_Flag)
+mean(pred_2_2==test_2$Attrition_Flag)
+mean(pred_3_2==test_2$Attrition_Flag)
 
 
 
