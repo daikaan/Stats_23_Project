@@ -153,6 +153,8 @@ colnames(log_cleaned_bank_data_withoutNA_quan)[14] <- "log_Credit_Limit"
 
 log_cleaned_bank_data_withoutNA_quan <- subset(log_cleaned_bank_data_withoutNA_quan, select = -c(Card_Category))
 
+cleaned_bank_data_withoutNA_quan <- subset(cleaned_bank_data_withoutNA_quan, select = -c(Card_Category))
+
 #Thresholds for classification:
 threshold1 <- 0.4
 threshold2 <- 0.5
@@ -321,5 +323,30 @@ mean(train_mix$Attrition_Flag == pred)
 
 
 
+#try to find accuracy with not normalized columns
+set.seed(0987)
+
+sample <- sample.split(cleaned_bank_data_withoutNA_quan$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(cleaned_bank_data_withoutNA_quan[2:20],sample == TRUE)
+test <- subset(cleaned_bank_data_withoutNA_quan[2:20],sample == FALSE)
+
+# Under-sampling
+train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+
+# Over-sampling
+train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+
+#Mixed Sampling with 40% of Attrited Customer
+
+train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N = nrow(cleaned_bank_data_withoutNA_quan))$data
+
+
+model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
+summary(model)$coeff
+
+summary(model)
+
+pred <- (predict(model, test) >= 0.5)*1
+mean(test$Attrition_Flag == pred)
 
 
