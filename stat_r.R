@@ -158,6 +158,7 @@ threshold1 <- 0.4
 threshold2 <- 0.5
 threshold3 <- 0.6
 
+
 set.seed(0987)
 
 sample <- sample.split(log_cleaned_bank_data_withoutNA_quan$Attrition_Flag,SplitRatio = 0.75)
@@ -270,61 +271,31 @@ mean(train_mix$Attrition_Flag == pred)
 
 
 
+#accuracy for not remove anything case
+bank_data_withoutNA_quan
 
 
+bank_data_withoutNA_quan$Total_Ct_Chng_Q4_Q1 <- log1p(bank_data_withoutNA_quan$Total_Ct_Chng_Q4_Q1)
+colnames(bank_data_withoutNA_quan)[20] <- "log_Total_Ct_Chng_Q4_Q1"
+
+bank_data_withoutNA_quan$Total_Trans_Amt <- log1p(bank_data_withoutNA_quan$Total_Trans_Amt)
+colnames(bank_data_withoutNA_quan)[18] <- "log_Total_Trans_Amt"
+
+bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1 <- log1p(bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1)
+colnames(bank_data_withoutNA_quan)[17] <- "log_Total_Amt_Chng_Q4_Q1"
+
+bank_data_withoutNA_quan$Avg_Open_To_Buy <- log1p(bank_data_withoutNA_quan$Avg_Open_To_Buy)
+colnames(bank_data_withoutNA_quan)[16] <- "log_Avg_Open_To_Buy"
+
+bank_data_withoutNA_quan$Credit_Limit <- log1p(bank_data_withoutNA_quan$Credit_Limit)
+colnames(bank_data_withoutNA_quan)[14] <- "log_Credit_Limit"
 
 
+set.seed(0987)
 
-
-
-
-
-#delete monts_on_book and try again, if we get all columns with triple stars we are ok
-#if we use linear regression
-model_back1 <- ols_step_backward_p(model, prem = 0.05, progress = TRUE, details = TRUE)
-
-model_back1$adjr
-
-model_back1$rmse
-
-model_back1$model$coefficients
-
-plot(model_back1)
-
-
-model_back <- ols_step_backward_p(model, prem = 0.1, progress = TRUE, details = FALSE)
-
-model_back$adjr
-
-model_back1$rmse
-
-library(forecast)
-pred <- predict(model_back$model, test, se.fit = TRUE)
-rmse <- accuracy(pred$fit, test$Attrition_Flag)[2]
-rmse
-
-resid <- test$Attrition_Flag - pred$fit
-plot(resid)
-abline(h = 0, col = "red")
-
-
-
-
-
-$Attrition_Flag,SplitRatio = 0.75)
-train <- subset(bank_data_rev[2:21],sample == TRUE)
-test <- subset(bank_data_rev[2:21],sample == FALSE)
-
-#Proportion of Attrited and Existing Customer
-prop.table(table(train$Attrition_Flag))
-prop.table(table(test$Attrition_Flag))
-
-
-#Original proportion of Attrited and Existing Customer
-prop.table(table(copy_new_bank_data$Attrition_Flag))
-
-#It's an unbalanced dataset.
-#It might be better to consider a resampling of the dataset
+sample <- sample.split(bank_data_withoutNA_quan$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(bank_data_withoutNA_quan[2:21],sample == TRUE)
+test <- subset(bank_data_withoutNA_quan[2:21],sample == FALSE)
 
 # Under-sampling
 train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
@@ -334,7 +305,7 @@ train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
 
 #Mixed Sampling with 40% of Attrited Customer
 
-train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N =7595)$data
+train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N = nrow(bank_data_withoutNA_quan))$data
 
 
 model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
@@ -346,282 +317,9 @@ pred <- (predict(model, train_mix) >= 0.5)*1
 
 mean(train_mix$Attrition_Flag == pred)
 
-#delete monts_on_book and try again, if we get all columns with triple stars we are ok
-#if we use linear regression
-model_back1 <- ols_step_backward_p(model, prem = 0.05, progress = TRUE, details = TRUE)
 
-model_back1$adjr
 
-model_back1$rmse
 
-model_back1$model$coefficients
-
-plot(model_back1)
-
-
-model_back <- ols_step_backward_p(model, prem = 0.1, progress = TRUE, details = FALSE)
-
-model_back$adjr
-
-model_back1$rmse
-
-library(forecast)
-pred <- predict(model_back$model, test, se.fit = TRUE)
-rmse <- accuracy(pred$fit, test$Attrition_Flag)[2]
-rmse
-
-resid <- test$Attrition_Flag - pred$fit
-plot(resid)
-abline(h = 0, col = "red")
-
-
-
-
-
-
-
-
-
-
-
-
-# Number of rows containing at least one "Unknown"
-dim(bank_data_copy)[1] - dim(bank_data_rev)[1]
-
-#Split the initial data based on attrition flag
-bank_data_split <- split(bank_data,bank_data$Attrition_Flag)
-
-dim(bank_data_split$`Attrited Customer`)
-dim(bank_data_split$`Existing Customer`)
-
-#We check how the rows containing "Unknown" are distributed in relation to the split dataset
-
-bank_data_split$`Attrited Customer`[bank_data_split$`Attrited Customer`=='Unknown'] <- NA
-(dim(bank_data_split$`Attrited Customer`)[1]-dim(na.omit(bank_data_split$`Attrited Customer`))[1])/dim(bank_data_split$`Attrited Customer`)[1]
-
-bank_data_split$`Existing Customer`[bank_data_split$`Existing Customer`=='Unknown'] <- NA
-(dim(bank_data_split$`Existing Customer`)[1]-dim(na.omit(bank_data_split$`Existing Customer`))[1])/dim(bank_data_split$`Existing Customer`)[1]
-
-
-set.seed(0987)
-
-sample <- sample.split(bank_data_rev$Attrition_Flag,SplitRatio = 0.75)
-train <- subset(bank_data_rev[2:21],sample == TRUE)
-test <- subset(bank_data_rev[2:21],sample == FALSE)
-
-#Proportion of Attrited and Existing Customer
-prop.table(table(train$Attrition_Flag))
-prop.table(table(test$Attrition_Flag))
-
-
-#Original proportion of Attrited and Existing Customer
-prop.table(table(copy_new_bank_data$Attrition_Flag))
-
-#It's an unbalanced dataset.
-#It might be better to consider a resampling of the dataset
-
-# Under-sampling
-train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
-
-# Over-sampling
-train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
-
-#Mixed Sampling with 40% of Attrited Customer
-
-train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N =7595)$data
-
-
-model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
-summary(model)$coeff
-
-summary(model)
-
-pred <- (predict(model, train_mix) >= 0.5)*1
-
-mean(train_mix$Attrition_Flag == pred)
-
-#delete monts_on_book and try again, if we get all columns with triple stars we are ok
-#if we use linear regression
-model_back1 <- ols_step_backward_p(model, prem = 0.05, progress = TRUE, details = TRUE)
-
-model_back1$adjr
-
-model_back1$rmse
-
-model_back1$model$coefficients
-
-plot(model_back1)
-
-
-model_back <- ols_step_backward_p(model, prem = 0.1, progress = TRUE, details = FALSE)
-
-model_back$adjr
-
-model_back1$rmse
-
-library(forecast)
-pred <- predict(model_back$model, test, se.fit = TRUE)
-rmse <- accuracy(pred$fit, test$Attrition_Flag)[2]
-rmse
-
-resid <- test$Attrition_Flag - pred$fit
-plot(resid)
-abline(h = 0, col = "red")
-
-
-
-
-
-
-helmert <- function(n) {
-  m <- t((diag(seq(n-1, 0)) - upper.tri(matrix(1, n, n)))[-n,])
-  t(apply(m, 1, rev))
-}
-encode_helmert <- function(df, var) {
-  x <- df[[var]]
-  x <- unique(x)
-  n <- length(x)
-  d <- as.data.frame(helmert(n))
-  d[[var]] <- rev(x)
-  names(d) <- c(paste0(var, 1:(n-1)), var)
-  d
-}
-
-copy_new_bank_data$Card_Category1 <- ifelse(copy_new_bank_data$Card_Category == '1', 1, 0)
-copy_new_bank_data$Card_Category2 <- ifelse(copy_new_bank_data$Card_Category == '2', 1, 0)
-copy_new_bank_data$Card_Category3 <- ifelse(copy_new_bank_data$Card_Category == '3', 1, 0)
-
-skewness(copy_new_bank_data$Card_Category)
-
-hist(log1p(copy_new_bank_data$Card_Category))
-
-encode_helmert(new_bank_data, 'Card_Category')
-
-a <- boxcox(lm(copy_new_bank_data$Card_Category ~ 1), lambda = seq(-200,3))
-hist(a)
-skewness((copy_new_bank_data$Card_Category^-11))
-hist(copy_new_bank_data$Card_Category^-19)
-
-copy_new_bank_data <- new_bank_data
-
-copy_new_bank_data$Total_Ct_Chng_Q4_Q1 <- log1p(copy_new_bank_data$Total_Ct_Chng_Q4_Q1)
-colnames(copy_new_bank_data)[20] <- "log_Total_Ct_Chng_Q4_Q1"
-
-copy_new_bank_data$Total_Trans_Amt <- log1p(copy_new_bank_data$Total_Trans_Amt)
-colnames(copy_new_bank_data)[18] <- "log_Total_Trans_Amt"
-
-copy_new_bank_data$Total_Amt_Chng_Q4_Q1 <- log1p(copy_new_bank_data$Total_Amt_Chng_Q4_Q1)
-colnames(copy_new_bank_data)[17] <- "log_Total_Amt_Chng_Q4_Q1"
-
-copy_new_bank_data$Avg_Open_To_Buy <- log1p(copy_new_bank_data$Avg_Open_To_Buy)
-colnames(copy_new_bank_data)[16] <- "log_Avg_Open_To_Buy"
-
-copy_new_bank_data$Credit_Limit <- log1p(copy_new_bank_data$Credit_Limit)
-colnames(copy_new_bank_data)[14] <- "log_Credit_Limit"
-
-#delete naive...1 and 2
-copy_new_bank_data <- subset(copy_new_bank_data, select = -c(Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
-
-
-#Thresholds for classification:
-threshold1 <- 0.4
-threshold2 <- 0.5
-threshold3 <- 0.6
-
-
-
-#This part is to check how the rows containg at least one "unknown" are distributed (Probably useless)
-
-#Change Unknown value to NA
-bank_data_copy <- data.frame(copy_new_bank_data)
-bank_data_copy[bank_data_copy=='Unknown'] <- NA
-
-#Build a dataset without missing values
-bank_data_rev <- na.omit(bank_data_copy)
-
-# Number of rows containing at least one "Unknown"
-dim(bank_data_copy)[1] - dim(bank_data_rev)[1]
-
-#Split the initial data based on attrition flag
-bank_data_split <- split(bank_data,bank_data$Attrition_Flag)
-
-dim(bank_data_split$`Attrited Customer`)
-dim(bank_data_split$`Existing Customer`)
-
-#We check how the rows containing "Unknown" are distributed in relation to the split dataset
-
-bank_data_split$`Attrited Customer`[bank_data_split$`Attrited Customer`=='Unknown'] <- NA
-(dim(bank_data_split$`Attrited Customer`)[1]-dim(na.omit(bank_data_split$`Attrited Customer`))[1])/dim(bank_data_split$`Attrited Customer`)[1]
-
-bank_data_split$`Existing Customer`[bank_data_split$`Existing Customer`=='Unknown'] <- NA
-(dim(bank_data_split$`Existing Customer`)[1]-dim(na.omit(bank_data_split$`Existing Customer`))[1])/dim(bank_data_split$`Existing Customer`)[1]
-
-
-set.seed(0987)
-
-sample <- sample.split(bank_data_rev$Attrition_Flag,SplitRatio = 0.75)
-train <- subset(bank_data_rev[2:21],sample == TRUE)
-test <- subset(bank_data_rev[2:21],sample == FALSE)
-
-#Proportion of Attrited and Existing Customer
-prop.table(table(train$Attrition_Flag))
-prop.table(table(test$Attrition_Flag))
-
-
-#Original proportion of Attrited and Existing Customer
-prop.table(table(copy_new_bank_data$Attrition_Flag))
-
-#It's an unbalanced dataset.
-#It might be better to consider a resampling of the dataset
-
-# Under-sampling
-train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
-
-# Over-sampling
-train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
-
-#Mixed Sampling with 40% of Attrited Customer
-
-train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N =7595)$data
-
-
-model <- glm(Attrition_Flag ~ ., data = train_mix)
-summary(model)$adj.r.squared
-summary(model)$coeff
-
-summary(model)
-
-pred <- (predict(model, train_mix) >= 0.5)*1
-
-mean(train_mix$Attrition_Flag == pred)
-
-#delete monts_on_book and try again, if we get all columns with triple stars we are ok
-#if we use linear regression
-model_back1 <- ols_step_backward_p(model, prem = 0.05, progress = TRUE, details = TRUE)
-
-model_back1$adjr
-
-model_back1$rmse
-
-model_back1$model$coefficients
-
-plot(model_back1)
-
-
-model_back <- ols_step_backward_p(model, prem = 0.1, progress = TRUE, details = FALSE)
-
-model_back$adjr
-
-model_back1$rmse
-
-library(forecast)
-pred <- predict(model_back$model, test, se.fit = TRUE)
-rmse <- accuracy(pred$fit, test$Attrition_Flag)[2]
-rmse
-
-resid <- test$Attrition_Flag - pred$fit
-plot(resid)
-abline(h = 0, col = "red")
 
 
 
