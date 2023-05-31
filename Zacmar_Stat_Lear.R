@@ -45,14 +45,26 @@ table(bank_data$Card_Category)
 cor_mat <- cor(bank_data[col_quant[2:15]])
 corrplot(cor_mat,method = "color",type = "upper", tl.pos = "td",tl.cex=0.5, tl.col = "black" ,diag = FALSE)
 
+bank_data$Contacts_Count_12_mon <- as.factor(bank_data$Contacts_Count_12_mon)
+bank_data$Months_Inactive_12_mon <- as.factor(bank_data$Months_Inactive_12_mon)
+bank_data$Total_Relationship_Count <- as.factor(bank_data$Total_Relationship_Count)
+bank_data$Dependent_count <- as.factor(bank_data$Dependent_count)
+
+
+
+#scale numeric values
 bank_data <- bank_data %>% mutate_if(is.numeric, scale)
+
+#Convert Character to factors
+bank_data <- as.data.frame(unclass(bank_data),stringsAsFactors = TRUE)
 
 bank_data$Attrition_Flag <- as.numeric(bank_data$Attrition_Flag == "Attrited Customer")
 
 
 #We convert categorical variables into numerical
-new_bank_data <- data.frame(bank_data)
+new_bank_data <- data.frame(bank_data_origin)
 
+new_bank_data$Attrition_Flag <- as.numeric(new_bank_data$Attrition_Flag == "Attrited Customer")
 
 new_bank_data$Gender <- as.numeric(new_bank_data$Gender == "F")
 new_bank_data <- new_bank_data %>% rename("Is_Female" = "Gender")
@@ -286,7 +298,21 @@ mean(pred_2==test_1$Attrition_Flag)
 mean(pred_3==test_1$Attrition_Flag)
 
 
+glm_1 <- glm(data = train_1,Attrition_Flag~ . -Avg_Open_To_Buy -Customer_Age -Education_Level - Total_Amt_Chng_Q4_Q1 - Dependent_count,family = "binomial")
+summary(glm_1)
 
+pred_glm_1 <- predict(glm_1,test_1,type="response")
+pred_1 <- ifelse(pred_glm_1 > threshold1 , 1,0)
+pred_2 <- ifelse(pred_glm_1 > threshold2 , 1,0)
+pred_3 <- ifelse(pred_glm_1 > threshold3 , 1,0)
+
+table(test_1$Attrition_Flag,pred_1)
+table(test_1$Attrition_Flag,pred_2)
+table(test_1$Attrition_Flag,pred_3)
+
+mean(pred_1==test_1$Attrition_Flag)
+mean(pred_2==test_1$Attrition_Flag)
+mean(pred_3==test_1$Attrition_Flag)
 
 
 
@@ -315,3 +341,4 @@ bank_data_split$`Attrited Customer`[bank_data_split$`Attrited Customer`=='Unknow
 
 bank_data_split$`Existing Customer`[bank_data_split$`Existing Customer`=='Unknown'] <- NA
 (dim(bank_data_split$`Existing Customer`)[1]-dim(na.omit(bank_data_split$`Existing Customer`))[1])/dim(bank_data_split$`Existing Customer`)[1]
+
