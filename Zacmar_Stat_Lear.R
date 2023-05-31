@@ -213,6 +213,13 @@ mean(pred_2_2==test_2$Attrition_Flag)
 mean(pred_3_2==test_2$Attrition_Flag)
 
 
+
+
+
+
+
+
+
 s_1 <- summary(glm_1)
 r2_1 <- 1 - (s_1$deviance/s_1$null.deviance)
 
@@ -226,6 +233,61 @@ r2_2 <- 1 - (s_2$deviance/s_2$null.deviance)
 1/(1-r2_2)
 
 vif(glm_2)
+
+
+glm_1 <- glm(data = train_1,Attrition_Flag~ . -Avg_Open_To_Buy -Customer_Age,family = "binomial")
+summary(glm_1)
+
+pred_glm_1 <- predict(glm_1,test_1,type="response")
+pred_1 <- ifelse(pred_glm_1 > threshold1 , 1,0)
+pred_2 <- ifelse(pred_glm_1 > threshold2 , 1,0)
+pred_3 <- ifelse(pred_glm_1 > threshold3 , 1,0)
+
+table(test_1$Attrition_Flag,pred_1)
+table(test_1$Attrition_Flag,pred_2)
+table(test_1$Attrition_Flag,pred_3)
+
+mean(pred_1==test_1$Attrition_Flag)
+mean(pred_2==test_1$Attrition_Flag)
+mean(pred_3==test_1$Attrition_Flag)
+
+
+glm_1 <- glm(data = train_1,Attrition_Flag~ . -Avg_Open_To_Buy -Customer_Age -Education_Level,family = "binomial")
+summary(glm_1)
+
+pred_glm_1 <- predict(glm_1,test_1,type="response")
+pred_1 <- ifelse(pred_glm_1 > threshold1 , 1,0)
+pred_2 <- ifelse(pred_glm_1 > threshold2 , 1,0)
+pred_3 <- ifelse(pred_glm_1 > threshold3 , 1,0)
+
+table(test_1$Attrition_Flag,pred_1)
+table(test_1$Attrition_Flag,pred_2)
+table(test_1$Attrition_Flag,pred_3)
+
+mean(pred_1==test_1$Attrition_Flag)
+mean(pred_2==test_1$Attrition_Flag)
+mean(pred_3==test_1$Attrition_Flag)
+
+
+glm_1 <- glm(data = train_1,Attrition_Flag~ . -Avg_Open_To_Buy -Customer_Age -Education_Level - Total_Amt_Chng_Q4_Q1,family = "binomial")
+summary(glm_1)
+
+pred_glm_1 <- predict(glm_1,test_1,type="response")
+pred_1 <- ifelse(pred_glm_1 > threshold1 , 1,0)
+pred_2 <- ifelse(pred_glm_1 > threshold2 , 1,0)
+pred_3 <- ifelse(pred_glm_1 > threshold3 , 1,0)
+
+table(test_1$Attrition_Flag,pred_1)
+table(test_1$Attrition_Flag,pred_2)
+table(test_1$Attrition_Flag,pred_3)
+
+mean(pred_1==test_1$Attrition_Flag)
+mean(pred_2==test_1$Attrition_Flag)
+mean(pred_3==test_1$Attrition_Flag)
+
+
+
+
 
 
 #This part is to check how the rows containg at least one "unknown" are distributed (Probably useless)
