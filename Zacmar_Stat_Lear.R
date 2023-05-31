@@ -45,7 +45,7 @@ table(bank_data$Card_Category)
 cor_mat <- cor(bank_data[col_quant[2:15]])
 corrplot(cor_mat,method = "color",type = "upper", tl.pos = "td",tl.cex=0.5, tl.col = "black" ,diag = FALSE)
 
-bank_data %>% mutate_if(is.numeric, scale)
+bank_data <- bank_data %>% mutate_if(is.numeric, scale)
 
 bank_data$Attrition_Flag <- as.numeric(bank_data$Attrition_Flag == "Attrited Customer")
 
@@ -213,12 +213,19 @@ mean(pred_2_2==test_2$Attrition_Flag)
 mean(pred_3_2==test_2$Attrition_Flag)
 
 
-s <- summary(glm_1)
-r2 <- 1 - (s$deviance/s$null.deviance)
+s_1 <- summary(glm_1)
+r2_1 <- 1 - (s_1$deviance/s_1$null.deviance)
 
-1/(1-r2)
+1/(1-r2_1)
 
 vif(glm_1)
+
+s_2 <- summary(glm_2)
+r2_2 <- 1 - (s_2$deviance/s_2$null.deviance)
+
+1/(1-r2_2)
+
+vif(glm_2)
 
 
 #This part is to check how the rows containg at least one "unknown" are distributed (Probably useless)
@@ -246,5 +253,3 @@ bank_data_split$`Attrited Customer`[bank_data_split$`Attrited Customer`=='Unknow
 
 bank_data_split$`Existing Customer`[bank_data_split$`Existing Customer`=='Unknown'] <- NA
 (dim(bank_data_split$`Existing Customer`)[1]-dim(na.omit(bank_data_split$`Existing Customer`))[1])/dim(bank_data_split$`Existing Customer`)[1]
-
->>>>>>> Stashed changes
