@@ -181,9 +181,9 @@ summary(model)$coeff
 
 summary(model)
 
-pred <- (predict(model, train_mix) >= 0.5)*1
+pred <- (predict(model, test) >= 0.5)*1
 
-mean(train_mix$Attrition_Flag == pred)
+mean(test$Attrition_Flag == pred)
 
 
 log_cleaned_bank_data_withoutNA_quan1 <- subset(log_cleaned_bank_data_withoutNA_quan, select = -c(Months_on_book))
@@ -210,9 +210,9 @@ summary(model)$coeff
 
 summary(model)
 
-pred <- (predict(model, train_mix) >= 0.5)*1
+pred <- (predict(model, test) >= 0.5)*1
 
-mean(train_mix$Attrition_Flag == pred)
+mean(test$Attrition_Flag == pred)
 
 
 
@@ -238,12 +238,12 @@ summary(model)$coeff
 
 summary(model)
 
-pred <- (predict(model, train_mix) >= 0.5)*1
+pred <- (predict(model, test) >= 0.5)*1
 
-mean(train_mix$Attrition_Flag == pred)
+mean(test$Attrition_Flag == pred)
 
 
-log_cleaned_bank_data_withoutNA_quan3 <- subset(log_cleaned_bank_data_withoutNA_quan2, select = -c(Customer_Age))
+log_cleaned_bank_data_withoutNA_quan3 <- subset(log_cleaned_bank_data_withoutNA_quan2, select = -c(Dependent_count))
 
 sample <- sample.split(log_cleaned_bank_data_withoutNA_quan3$Attrition_Flag,SplitRatio = 0.75)
 train <- subset(log_cleaned_bank_data_withoutNA_quan3[2:17],sample == TRUE)
@@ -265,9 +265,9 @@ summary(model)$coeff
 
 summary(model)
 
-pred <- (predict(model, train_mix) >= 0.5)*1
+pred <- (predict(model, test) >= 0.5)*1
 
-mean(train_mix$Attrition_Flag == pred)
+mean(test$Attrition_Flag == pred)
 
 
 
