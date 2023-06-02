@@ -64,10 +64,18 @@ cust.age.boxplot
 #using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, 
 #it is seen that customers over the age of 70 are outliers
 age.exc.list <- boxplot.stats(quantitative$Customer_Age)$out
+
+#Card Category
+ggplot(bank_data, aes(x=Months_on_book, y= Credit_Limit, shape = Card_Category, color= Card_Category))+
+  geom_point() + geom_smooth(method=lm, se=FALSE, fullrange=TRUE)
+
 card.exc.list <- c("Silver", "Platinum", "Gold")
 
-bank_data_cleaned <- subset(bank_data_rev,!((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
-bank_data_cleaned
+bank_data_bluecard <- subset(bank_data,!(Card_Category %in% card.exc.list))
+
+
+#bank_data_cleaned <- subset(bank_data_rev,!((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
+#bank_data_cleaned
 
 
 #histogram
@@ -209,7 +217,9 @@ normalizer_fnc <- function(x) {
 quan_normalized <- as.data.frame(lapply(quantitative[2:18], normalizer_fnc))
 qual_to_quant_normalized <- as.data.frame(lapply(qual_to_quant[2:6], normalizer_fnc))
 
+cdplot(factor(attrition_flag_binary)~ Total_Trans_Ct, data=quantitative)
 
+cdplot(factor(attrition_flag_binary)~ Total_Revolving_Bal, data=quantitative)
 
 #we need to calculate chi square for the categorical values 
 #to see are they dependent or not
@@ -283,3 +293,4 @@ hist(log1p(bank_data$Avg_Utilization_Ratio))
 hist(bank_data$Avg_Open_To_Buy)
 hist(log1p(bank_data$Avg_Open_To_Buy))
 hist(bank_data$Avg_Open_To_Buy)
+
