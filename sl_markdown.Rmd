@@ -1,0 +1,143 @@
+---
+title: "sl_project"
+output: html_document
+date: "2023-06-01"
+---
+
+Import Libraries We Need
+```{r}
+library(dplyr)
+library(corrplot)
+library(caTools)
+library(ggpubr)
+library(ROSE)
+library(correlation)
+library(moments) 
+library(olsrr) 
+library(MASS)
+library(knitr)
+library(forecast)
+library(ggplot2)
+library(PCAmixdata)
+library(purrr)
+```
+
+Introduction to Data
+
+In this project we are going to predict the probability of a customer attrition. We have a data contains demographic information about customers and their spending behavior. We downloaded the dataset from the Kaggle. Here is the link for the dataset. It can be found publicly.
+https://www.kaggle.com/datasets/thedevastator/predicting-credit-card-customer-attrition-with-m
+
+```{r}
+bank_data_origin <- read.csv('~/GitHub/Stats_23_Project/BankChurners.csv')
+head(bank_data_origin)
+```
+
+In the beginning we have 23 columns and 10127 rows, but we have 2 columsn named as "Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1" and "Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2". We don't need these 2 columns and deleting them will not affect any other columns. Finally, we have 21 columns and 10127 rows in the beginning.
+
+```{r}
+dim(bank_data_origin)
+bank_data_origin <- subset(bank_data_origin, select = -c(Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
+final_dim <- dim(bank_data_origin)
+final_dim
+
+```
+
+Our data has 15 numerical and 6 categorical columns.
+
+```{r}
+map(bank_data_origin,class)
+```
+
+Data Exploration
+
+There is no null value inside our data 
+
+```{r}
+colSums(is.na(bank_data_origin))
+```
+
+Education Level, Marital Status and Income Category columns have "Unknown" values. Since unknown values can cause misleading results, we decide to remove them. First we labeled them with "NA" and delete afterwards.
+
+```{r}
+bank_data_NA <- bank_data_origin
+bank_data_NA[bank_data_NA=='Unknown'] <- NA
+
+colSums(is.na(bank_data_NA))
+
+bank_data_withoutNA <- na.omit(bank_data_NA)
+```
+
+For the 6 categorical columns, we change their data type to the numeric to be able to work with them.
+
+```{r}
+bank_data_quan <- bank_data_withoutNA
+
+bank_data_quan$Attrition_Flag <- as.numeric(bank_data_quan$Attrition_Flag == "Attrited Customer")
+
+bank_data_quan$Gender <- as.numeric(bank_data_quan$Gender == "F")
+bank_data_quan <- bank_data_quan %>% rename("Is_Female" = "Gender")
+
+order_education_level <- list("Uneducated" = 1,
+                              "High School" = 2,
+                              "College" = 3,
+                              "Graduate" = 4,
+                              "Post-Graduate" = 5,
+                              "Doctorate" = 6)
+bank_data_quan$Education_Level <- unlist(order_education_level[as.character(bank_data_quan$Education_Level)])
+
+order_Marital_Status <- list("Single" = 1,
+                             "Married" = 2,
+                             "Divorced" = 3)
+bank_data_quan$Marital_Status <- unlist(order_Marital_Status[as.character(bank_data_quan$Marital_Status)])
+
+order_Income_Category <- list("Less than $40K" = 1,
+                              "$40K - $60K" = 2,
+                              "$60K - $80K" = 3,
+                              "$80K - $120K" = 4,
+                              "$120K +" = 5)
+bank_data_quan$Income_Category <- unlist(order_Income_Category[as.character(bank_data_quan$Income_Category)])
+
+
+order_Card_Category <- list("Blue" = 1,
+                            "Silver" = 2,
+                            "Gold" = 3,
+                            "Platinum" = 4)
+bank_data_quan$Card_Category <- unlist(order_Card_Category[as.character(bank_data_quan$Card_Category)])
+
+colSums(is.na(bank_data_quan))
+
+```
+
+Finally, since the people with age greater than or equal to 70 years and Card Category different than the blue is outliers, we remove them to our dataset.
+
+```{r}
+cleaned_bank_data <- bank_data_quan
+
+age.exc.list <- boxplot.stats(cleaned_bank_data$Customer_Age)$out
+card.exc.list <- c(2, 3, 4)
+
+cleaned_bank_data <- subset(cleaned_bank_data,!((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
+dim(cleaned_bank_data)
+```
+
+Data Preparation
+
+Since we are going to predict a probability, we will get a value between 0 and 1. We need to use logistic regression instead of linear regression.
+```{r}
+hist(cleaned_bank_data$Customer_Age, main = "Histogram for Customer Age", xlab = "Customer_Age", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Customer_Age)
+
+hist(cleaned_bank_data$Dependent_count, main = "Histogram for Dependent Count", xlab = "Dependent_count", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Dependent_count)
+
+hist(cleaned_bank_data$Months_on_book, main = "Histogram for Months On Book", xlab = "Months_on_book", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Months_on_book)
+
+hist(cleaned_bank_data$Total_Relationship_Count, main = "Histogram for Total Relationship Count", xlab = "Total_Relationship_Count", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Total_Relationship_Count)
+
+```
