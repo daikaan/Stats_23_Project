@@ -7,6 +7,7 @@ library("corpcor")
 library("car")
 library("correlation")
 library("ppcor")
+library("pROC")
 
 
 bank_data_origin <- read.csv('~/GitHub/Stats_23_Project/BankChurners.csv')
@@ -83,12 +84,19 @@ order_Card_Category <- list("Blue" = 1,
 bank_data$Card_Category <- unlist(order_Card_Category[as.character(bank_data$Card_Category)])
 
 
+#Remove outliers and Card_Category
+age.exc.list <- boxplot.stats(bank_data$Customer_Age)$out
+
+bank_data <- subset(bank_data,!((Customer_Age %in% age.exc.list)))
+
+bank_data <- subset(bank_data,select = -c(Card_Category))
+
 #Correlation matrix
 cor_mat_tot <- cor(bank_data)
 corrplot(cor_mat_tot,method = "number",type = "upper",number.cex = 0.6, tl.pos = "td",tl.cex=0.5, tl.col = "black" ,diag = FALSE)
 
 #Correlation with Attrition_Flag
-corrplot(cor_mat_tot[1,1:20,drop=FALSE],method = "number",number.cex = 0.6, cl.pos = "n",tl.col = "black" ,tl.cex=0.5,diag = FALSE)
+corrplot(cor_mat_tot[1,,drop=FALSE],method = "number",number.cex = 0.6, cl.pos = "n",tl.col = "black" ,tl.cex=0.5,diag = FALSE)
 
 #Since Credit_Limit and Avg_Open_To_Buy have correlation 1 we can remove Credit_Limit
 bank_data <- subset(bank_data, select = -c(Credit_Limit))
@@ -107,27 +115,67 @@ a <- ggplot(bank_data, aes(x = Total_Trans_Ct, fill = Customer)) +
       geom_density(alpha=0.3) + ggtitle("Total_Trans_Ct") +
       scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
 
-b <- ggplot(bank_data, aes(x = Total_Ct_Chng_Q4_Q1, fill = Customer)) +
-      geom_density(alpha=0.3) + ggtitle("Total_Ct_Chng_Q4_Q1")+
-  scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
-
-c <- ggplot(bank_data, aes(x = Total_Revolving_Bal, fill = Customer)) +
-      geom_density(alpha=0.3) + ggtitle("Total_Revolving_Bal") + 
-  scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
-
-d <- ggplot(bank_data, aes(x = Contacts_Count_12_mon, fill = Customer)) +
-      geom_bar(aes(y = after_stat(prop) ),alpha=0.3) + ggtitle("Contacts_Count_12_mon") +
-  scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
-
-e <- ggplot(bank_data, aes(x = Avg_Utilization_Ratio, fill = Customer)) +
-     geom_density(alpha=0.3) + ggtitle("Avg_Utilization_Ratio") +
-  scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
-
-f <- ggplot(bank_data, aes(x = Total_Trans_Amt, fill = Customer)) +
+b <- ggplot(bank_data, aes(x = Total_Trans_Amt, fill = Customer)) +
   geom_density(alpha=0.3) + ggtitle("Total_Trans_Amt") +
   scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
 
+c <- ggplot(bank_data, aes(x = Total_Ct_Chng_Q4_Q1, fill = Customer)) +
+      geom_density(alpha=0.3) + ggtitle("Total_Ct_Chng_Q4_Q1")+
+  scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
+
+d <- ggplot(bank_data, aes(x = Total_Revolving_Bal, fill = Customer)) +
+      geom_density(alpha=0.3) + ggtitle("Total_Revolving_Bal") + 
+    scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
+
+e <- ggplot(bank_data, aes(x = Contacts_Count_12_mon, fill = Customer)) +
+      geom_bar(aes(y = after_stat(prop) ),alpha=0.3, position = "dodge") + ggtitle("Contacts_Count_12_mon") +
+      scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
+
+f <- ggplot(bank_data, aes(x = Total_Relationship_Count, fill = Customer)) +
+    geom_bar(aes(y = after_stat(prop) ),alpha=0.3, position = "dodge") + ggtitle("Total_Relationship_Count") +
+    scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
+
+
 ggarrange(a,b,c,d,e,f,nrow=2,ncol=3)
+
+
+#calculate skewness in quant to find which are normally dist
+skewness(bank_data$Customer_Age)
+skewness(bank_data$Dependent_count)
+skewness(bank_data$Months_on_book)
+skewness(bank_data$Total_Relationship_Count)
+skewness(bank_data$Months_Inactive_12_mon)
+skewness(bank_data$Contacts_Count_12_mon)
+skewness(bank_data$Total_Revolving_Bal)
+skewness(bank_data$Total_Trans_Ct)
+skewness(bank_data$Avg_Utilization_Ratio)
+skewness(bank_data$Is_Female)
+skewness(bank_data$Education_Level)
+skewness(bank_data$Marital_Status)
+skewness(bank_data$Income_Category)
+
+
+#we should take log to normalize and calculate skewness again for these
+skewness(bank_data$Total_Ct_Chng_Q4_Q1)
+skewness(bank_data$Total_Trans_Amt)
+skewness(bank_data$Total_Amt_Chng_Q4_Q1)
+skewness(bank_data$Avg_Open_To_Buy)
+
+#they are normally dist now
+skewness(log1p(bank_data$Total_Ct_Chng_Q4_Q1))
+skewness(log1p(bank_data$Total_Trans_Amt))
+skewness(log1p(bank_data$Total_Amt_Chng_Q4_Q1))
+skewness(log1p(bank_data$Avg_Open_To_Buy))
+
+
+bank_data$Total_Ct_Chng_Q4_Q1 <- log1p(bank_data$Total_Ct_Chng_Q4_Q1)
+
+bank_data$Total_Trans_Amt <- log1p(bank_data$Total_Trans_Amt)
+
+bank_data$Total_Amt_Chng_Q4_Q1 <- log1p(bank_data$Total_Amt_Chng_Q4_Q1)
+
+bank_data$Avg_Open_To_Buy <- log1p(bank_data$Avg_Open_To_Buy)
+
 
 
 
@@ -148,16 +196,10 @@ sample_1 <- sample.split(bank_data_withoutNA$Attrition_Flag,SplitRatio = 0.75)
 train_1 <- subset(bank_data_withoutNA,sample_1 == TRUE)
 test_1 <- subset(bank_data_withoutNA,sample_1 == FALSE)
 
-sample_2 <- sample.split(bank_data$Attrition_Flag,SplitRatio = 0.75)
-train_2 <- subset(bank_data,sample_2 == TRUE)
-test_2 <- subset(bank_data,sample_2 == FALSE)
 
 #Proportion of Attrited and Existing Customer
 prop.table(table(train_1$Attrition_Flag))
 prop.table(table(test_1$Attrition_Flag))
-
-prop.table(table(train_2$Attrition_Flag))
-prop.table(table(test_2$Attrition_Flag))
 
 
 #Original proportion of Attrited and Existing Customer
@@ -173,96 +215,149 @@ train_under <- ovun.sample(Attrition_Flag~.,data = train_1, method = "under")$da
 train_over <- ovun.sample(Attrition_Flag~.,data = train_1, method = "over")$data
 
 #Mixed Sampling with 40% of Attrited Customer
-
 train_mix <- ovun.sample(Attrition_Flag~.,data = train_1, method = "both", p = 0.4, N =5311)$data
 
 
-
-#Thresholds for classification:
-threshold1 <- 0.4
-threshold2 <- 0.5
-threshold3 <- 0.6
+#Thresholds
+Threshold1 <- 0.4
+Threshold2 <- 0.5
+Threshold3 <- 0.6
 
 glm_1 <- glm(data = train_1,Attrition_Flag~ .,family = "binomial")
 summary(glm_1)
 
-pred_glm_1 <- predict(glm_1,test_1,type="response")
-pred_1 <- ifelse(pred_glm_1 > threshold1 , 1,0)
-pred_2 <- ifelse(pred_glm_1 > threshold2 , 1,0)
-pred_3 <- ifelse(pred_glm_1 > threshold3 , 1,0)
+pred_glm_i <- predict(glm_1,test_1,type="response")
+pred_1_i <- ifelse(pred_glm_i >= Threshold1 , 1,0)
+pred_2_i <- ifelse(pred_glm_i >= Threshold2 , 1,0)
+pred_3_i <- ifelse(pred_glm_i >= Threshold3 , 1,0)
 
-table(test_1$Attrition_Flag,pred_1)
-table(test_1$Attrition_Flag,pred_2)
-table(test_1$Attrition_Flag,pred_3)
+#Confusion matrix
 
-mean(pred_1==test_1$Attrition_Flag)
-mean(pred_2==test_1$Attrition_Flag)
-mean(pred_3==test_1$Attrition_Flag)
+c_mat_1_i <- table(test_1$Attrition_Flag,pred_1_i)
+c_mat_2_i <- table(test_1$Attrition_Flag,pred_2_i)
+c_mat_3_i <- table(test_1$Attrition_Flag,pred_3_i)
+c_mat_1_i
+c_mat_2_i
+c_mat_3_i
 
+#Accuracy
+
+mean(pred_1_i==test_1$Attrition_Flag)*100
+mean(pred_2_i==test_1$Attrition_Flag)*100
+mean(pred_3_i==test_1$Attrition_Flag)*100
+
+#Precision
+
+Prec_1_i <- c_mat_1_i[2,2]/sum(c_mat_1_i[,2])
+Prec_2_i <- c_mat_2_i[2,2]/sum(c_mat_2_i[,2])
+Prec_3_i <- c_mat_3_i[2,2]/sum(c_mat_3_i[,2])
+Prec_1_i
+Prec_2_i
+Prec_3_i
+
+#Recall
+
+Rec_1_i <- c_mat_1_i[2,2]/sum(c_mat_1_i[2,])
+Rec_2_i <- c_mat_2_i[2,2]/sum(c_mat_2_i[2,])
+Rec_3_i <- c_mat_3_i[2,2]/sum(c_mat_3_i[2,])
+Rec_1_i
+Rec_2_i
+Rec_3_i
+
+#F1 Score
+
+F1_1_i <- 2 * (Prec_1_i * Rec_1_i)/(Prec_1_i + Rec_1_i)
+F1_2_i <- 2 * (Prec_2_i * Rec_2_i)/(Prec_2_i + Rec_2_i)
+F1_3_i <- 2 * (Prec_3_i * Rec_3_i)/(Prec_3_i + Rec_3_i)
+F1_1_i
+F1_2_i
+F1_3_i
+
+#VIF
 
 vif(glm_1)
 
+#Update Checking p-values and AIC
 
-glm_2 <- update(glm_1, . ~ . - Education_Level - Months_on_book -Avg_Utilization_Ratio - Avg_Open_To_Buy)
+glm_2 <- update(glm_1, . ~ . - Education_Level - Customer_Age - Months_on_book)
 summary(glm_2)
 
 
-glm_3 <- update(glm_2, . ~ . + Total_Trans_Amt:Total_Trans_Ct + Total_Trans_Amt:Total_Relationship_Count + Total_Trans_Amt:Total_Revolving_Bal)
+glm_3 <- update(glm_2, . ~ . + Total_Trans_Ct*Total_Trans_Amt + Total_Trans_Ct*Total_Revolving_Bal + Total_Trans_Ct*Is_Female + Total_Trans_Ct*Avg_Utilization_Ratio + Total_Trans_Ct*Marital_Status)
 summary(glm_3)
 
 
-glm_4 <- update(glm_3, . ~ . -Card_Category -Customer_Age)
+glm_4 <- update(glm_3, . ~ . + Total_Relationship_Count*Total_Trans_Amt + Total_Relationship_Count*Contacts_Count_12_mon)
 summary(glm_4)
 
 
-glm_5 <- update(glm_4, . ~ . + Is_Female:Income_Category + Is_Female:Total_Trans_Amt )
+glm_5 <- update(glm_4, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio + Total_Revolving_Bal*Avg_Open_To_Buy)
 summary(glm_5)
 
 
-glm_6 <- update(glm_5, . ~ . +Total_Amt_Chng_Q4_Q1:Total_Trans_Amt +Marital_Status:Total_Trans_Amt)
+glm_6 <- update(glm_5, . ~ . + Is_Female*Income_Category + Is_Female*Avg_Utilization_Ratio)
 summary(glm_6)
 
 
-pred_glm_6 <- predict(glm_6,test_1,type="response")
-pred_1 <- ifelse(pred_glm_6 > threshold1 , 1,0)
-pred_2 <- ifelse(pred_glm_6 > threshold2 , 1,0)
-pred_3 <- ifelse(pred_glm_6 > threshold3 , 1,0)
-
-table(test_1$Attrition_Flag,pred_1)
-table(test_1$Attrition_Flag,pred_2)
-table(test_1$Attrition_Flag,pred_3)
-
-mean(pred_1==test_1$Attrition_Flag)
-mean(pred_2==test_1$Attrition_Flag)
-mean(pred_3==test_1$Attrition_Flag)
+glm_7 <- update(glm_6, . ~ . + Dependent_count*Total_Trans_Ct)
+summary(glm_7)
 
 
-#Trying an alternative choice for the model
+pred_glm_f <- predict(glm_7,test_1,type="response")
+pred_1_f <- ifelse(pred_glm_f >= Threshold1 , 1,0)
+pred_2_f <- ifelse(pred_glm_f >= Threshold2 , 1,0)
+pred_3_f <- ifelse(pred_glm_f >= Threshold3 , 1,0)
+
+#Confusion matrix
+
+c_mat_1_f <- table(test_1$Attrition_Flag,pred_1_f)
+c_mat_2_f <- table(test_1$Attrition_Flag,pred_2_f)
+c_mat_3_f <- table(test_1$Attrition_Flag,pred_3_f)
+c_mat_1_f
+c_mat_2_f
+c_mat_3_f
+
+#Accuracy
+
+mean(pred_1_f==test_1$Attrition_Flag)*100
+mean(pred_2_f==test_1$Attrition_Flag)*100
+mean(pred_3_f==test_1$Attrition_Flag)*100
+
+#Precision
+
+Prec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[,2])
+Prec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[,2])
+Prec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[,2])
+Prec_1_f
+Prec_2_f
+Prec_3_f
+
+#Recall
+
+Rec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[2,])
+Rec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[2,])
+Rec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[2,])
+Rec_1_f
+Rec_2_f
+Rec_3_f
+
+#F1 Score
+
+F1_1_f <- 2 * (Prec_1_f * Rec_1_f)/(Prec_1_f + Rec_1_f)
+F1_2_f <- 2 * (Prec_2_f * Rec_2_f)/(Prec_2_f + Rec_2_f)
+F1_3_f <- 2 * (Prec_3_f * Rec_3_f)/(Prec_3_f + Rec_3_f)
+F1_1_f
+F1_2_f
+F1_3_f
 
 
-glm_2_alt <- update(glm_1, . ~ . + Total_Trans_Amt:Total_Trans_Ct + Total_Trans_Amt:Total_Relationship_Count)
-summary(glm_2_alt)
+#ROC curves
+roc_i <- roc(test_1$Attrition_Flag ~ pred_glm_i)
+roc_f <- roc(test_1$Attrition_Flag ~ pred_glm_f)
 
-glm_3_alt <- update(glm_2_alt, . ~ . + Avg_Open_To_Buy:Total_Revolving_Bal + Avg_Open_To_Buy:Avg_Utilization_Ratio)
-summary(glm_3_alt)
-
-glm_4_alt <- update(glm_3_alt, . ~ . + Customer_Age:Months_on_book + Total_Revolving_Bal:Total_Trans_Ct)
-summary(glm_4_alt)
-
-glm_5_alt <- update(glm_4_alt, . ~ . - Income_Category - Card_Category - Education_Level - Marital_Status + Dependent_count:Total_Trans_Amt)
-summary(glm_5_alt)
-
-pred_glm_5_alt <- predict(glm_5_alt,test_1,type="response")
-pred_1 <- ifelse(pred_glm_5_alt > threshold1 , 1,0)
-pred_2 <- ifelse(pred_glm_5_alt > threshold2 , 1,0)
-pred_3 <- ifelse(pred_glm_5_alt > threshold3 , 1,0)
-
-table(test_1$Attrition_Flag,pred_1)
-table(test_1$Attrition_Flag,pred_2)
-table(test_1$Attrition_Flag,pred_3)
-
-mean(pred_1==test_1$Attrition_Flag)
-mean(pred_2==test_1$Attrition_Flag)
-mean(pred_3==test_1$Attrition_Flag)
+AUC_i <- auc(roc_i)
+AUC_f <- auc(roc_f)
 
 
+plot(roc_i, col = "black",print.auc = TRUE, auc.polygon = TRUE, max.auc.polygon = TRUE, lwd=2,print.auc.x = 0.5,print.auc.y = 0.5)
+plot(roc_f,add = TRUE,col = "blue", print.auc = TRUE, lwd=2, print.auc.x = 0.5,print.auc.y = 0.43)
