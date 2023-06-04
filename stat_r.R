@@ -353,3 +353,76 @@ mean(test$Attrition_Flag == pred)
 
 cdplot(factor(Attrition_Flag)~ log_Total_Ct_Chng_Q4_Q1, data=bank_data_withoutNA_quan)
 
+log_cleaned_bank_data_withoutNA_quan
+
+colnames(log_cleaned_bank_data_withoutNA_quan)[3:20]
+x <- log_cleaned_bank_data_withoutNA_quan$Attrition_Flag
+predictors <- data.matrix(log_cleaned_bank_data_withoutNA_quan[, c('Customer_Age', 'Is_Female', 'Dependent_count',
+                                                          'Education_Level', 'Marital_Status', 'Income_Category',
+                                                          'Months_on_book', 'Total_Relationship_Count', 'Months_Inactive_12_mon',
+                                                          'Contacts_Count_12_mon', 'log_Credit_Limit', 'Total_Revolving_Bal',
+                                                          'log_Avg_Open_To_Buy', 'log_Total_Amt_Chng_Q4_Q1', 'log_Total_Trans_Amt',
+                                                          'Total_Trans_Ct', 'log_Total_Ct_Chng_Q4_Q1', 'Avg_Utilization_Ratio')]) 
+
+set.seed(222)
+
+ind <- sample(2, nrow(log_cleaned_bank_data_withoutNA_quan), replace = TRUE, prob = c(0.7, 0.3))
+
+train <- log_cleaned_bank_data_withoutNA_quan[ind==1,]
+
+head(log_cleaned_bank_data_withoutNA_quan)
+
+test <- log_cleaned_bank_data_withoutNA_quan[ind==2,]
+
+custom <- trainControl(method = "repeatedcv",
+                       
+                       number = 10,
+                       
+                       repeats = 5,
+                       
+                       verboseIter = TRUE)
+
+set.seed(1234)
+
+log_cleaned_bank_data_withoutNA_quan = data.frame(log_cleaned_bank_data_withoutNA_quan)
+
+model <- train(
+  Attrition_Flag ~ .,
+  data = log_cleaned_bank_data_withoutNA_quan,
+  method = 'lasso'
+)
+model
+
+log_cleaned_bank_data_withoutNA_quan$Attrition_Flag = as.factor(log_cleaned_bank_data_withoutNA_quan$Attrition_Flag)
+
+plot(model)
+
+plot(varImp(model))
+
+set.seed(1)
+
+inTraining <- createDataPartition(log_cleaned_bank_data_withoutNA_quan$Attrition_Flag, p = .80, list = FALSE)
+training <- log_cleaned_bank_data_withoutNA_quan[inTraining,]
+testing  <- log_cleaned_bank_data_withoutNA_quan[-inTraining,]
+
+training = data.frame(training)
+
+set.seed(1)
+model <- train(
+  Attrition_Flag ~ .,
+  data = training,
+  method = 'lasso',
+  preProcess = c("center", "scale")
+)
+model1
+
+test.features = subset(testing, select=-c(Attrition_Flag))
+test.target = subset(testing, select=Attrition_Flag)[,1]
+
+predictions = predict(model3, newdata = test.features)
+
+# RMSE
+sqrt(mean((test.target - predictions)^2))
+
+#R2
+cor(test.target, predictions) ^ 2
