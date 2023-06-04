@@ -1,0 +1,1288 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={sl\_project},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{sl\_project}
+\author{}
+\date{\vspace{-2.5em}2023-06-01}
+
+\begin{document}
+\maketitle
+
+Import Libraries We Need
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(dplyr)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'dplyr' was built under R version 4.2.3
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'dplyr'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(corrplot)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'corrplot' was built under R version 4.2.3
+\end{verbatim}
+
+\begin{verbatim}
+## corrplot 0.92 loaded
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(caTools)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'caTools' was built under R version 4.2.3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggpubr)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'ggpubr' was built under R version 4.2.3
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: ggplot2
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'ggplot2' was built under R version 4.2.3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ROSE)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'ROSE' was built under R version 4.2.3
+\end{verbatim}
+
+\begin{verbatim}
+## Loaded ROSE 0.0-4
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(correlation)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'correlation' was built under R version 4.2.3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(moments) }
+\FunctionTok{library}\NormalTok{(olsrr) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'olsrr' was built under R version 4.2.3
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'olsrr'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:datasets':
+## 
+##     rivers
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(MASS)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'MASS'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:olsrr':
+## 
+##     cement
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:dplyr':
+## 
+##     select
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(knitr)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'knitr' was built under R version 4.2.3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(forecast)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'forecast' was built under R version 4.2.3
+\end{verbatim}
+
+\begin{verbatim}
+## Registered S3 method overwritten by 'quantmod':
+##   method            from
+##   as.zoo.data.frame zoo
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'forecast'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:ggpubr':
+## 
+##     gghistogram
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(PCAmixdata)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'PCAmixdata' was built under R version 4.2.3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(purrr)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'purrr' was built under R version 4.2.3
+\end{verbatim}
+
+Introduction to Data
+
+In this project we are going to predict the probability of a customer
+attrition. We have a data contains demographic information about
+customers and their spending behavior. We downloaded the dataset from
+the Kaggle. Here is the link for the dataset. It can be found publicly.
+\url{https://www.kaggle.com/datasets/thedevastator/predicting-credit-card-customer-attrition-with-m}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bank\_data\_origin }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(}\StringTok{\textquotesingle{}\textasciitilde{}/GitHub/Stats\_23\_Project/BankChurners.csv\textquotesingle{}}\NormalTok{)}
+\FunctionTok{head}\NormalTok{(bank\_data\_origin)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   CLIENTNUM    Attrition_Flag Customer_Age Gender Dependent_count
+## 1 768805383 Existing Customer           45      M               3
+## 2 818770008 Existing Customer           49      F               5
+## 3 713982108 Existing Customer           51      M               3
+## 4 769911858 Existing Customer           40      F               4
+## 5 709106358 Existing Customer           40      M               3
+## 6 713061558 Existing Customer           44      M               2
+##   Education_Level Marital_Status Income_Category Card_Category Months_on_book
+## 1     High School        Married     $60K - $80K          Blue             39
+## 2        Graduate         Single  Less than $40K          Blue             44
+## 3        Graduate        Married    $80K - $120K          Blue             36
+## 4     High School        Unknown  Less than $40K          Blue             34
+## 5      Uneducated        Married     $60K - $80K          Blue             21
+## 6        Graduate        Married     $40K - $60K          Blue             36
+##   Total_Relationship_Count Months_Inactive_12_mon Contacts_Count_12_mon
+## 1                        5                      1                     3
+## 2                        6                      1                     2
+## 3                        4                      1                     0
+## 4                        3                      4                     1
+## 5                        5                      1                     0
+## 6                        3                      1                     2
+##   Credit_Limit Total_Revolving_Bal Avg_Open_To_Buy Total_Amt_Chng_Q4_Q1
+## 1        12691                 777           11914                1.335
+## 2         8256                 864            7392                1.541
+## 3         3418                   0            3418                2.594
+## 4         3313                2517             796                1.405
+## 5         4716                   0            4716                2.175
+## 6         4010                1247            2763                1.376
+##   Total_Trans_Amt Total_Trans_Ct Total_Ct_Chng_Q4_Q1 Avg_Utilization_Ratio
+## 1            1144             42               1.625                 0.061
+## 2            1291             33               3.714                 0.105
+## 3            1887             20               2.333                 0.000
+## 4            1171             20               2.333                 0.760
+## 5             816             28               2.500                 0.000
+## 6            1088             24               0.846                 0.311
+##   Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1
+## 1                                                                                                                         9.3448e-05
+## 2                                                                                                                         5.6861e-05
+## 3                                                                                                                         2.1081e-05
+## 4                                                                                                                         1.3366e-04
+## 5                                                                                                                         2.1676e-05
+## 6                                                                                                                         5.5077e-05
+##   Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2
+## 1                                                                                                                            0.99991
+## 2                                                                                                                            0.99994
+## 3                                                                                                                            0.99998
+## 4                                                                                                                            0.99987
+## 5                                                                                                                            0.99998
+## 6                                                                                                                            0.99994
+\end{verbatim}
+
+In the beginning we have 23 columns and 10127 rows, but we have 2
+columsn named as
+``Naive\_Bayes\_Classifier\_Attrition\_Flag\_Card\_Category\_Contacts\_Count\_12\_mon\_Dependent\_count\_Education\_Level\_Months\_Inactive\_12\_mon\_1''
+and
+``Naive\_Bayes\_Classifier\_Attrition\_Flag\_Card\_Category\_Contacts\_Count\_12\_mon\_Dependent\_count\_Education\_Level\_Months\_Inactive\_12\_mon\_2''.
+We don't need these 2 columns and deleting them will not affect any
+other columns. Finally, we have 21 columns and 10127 rows in the
+beginning.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{dim}\NormalTok{(bank\_data\_origin)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 10127    23
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bank\_data\_origin }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(bank\_data\_origin, }\AttributeTok{select =} \SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(Naive\_Bayes\_Classifier\_Attrition\_Flag\_Card\_Category\_Contacts\_Count\_12\_mon\_Dependent\_count\_Education\_Level\_Months\_Inactive\_12\_mon\_1, Naive\_Bayes\_Classifier\_Attrition\_Flag\_Card\_Category\_Contacts\_Count\_12\_mon\_Dependent\_count\_Education\_Level\_Months\_Inactive\_12\_mon\_2))}
+\NormalTok{final\_dim }\OtherTok{\textless{}{-}} \FunctionTok{dim}\NormalTok{(bank\_data\_origin)}
+\NormalTok{final\_dim}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 10127    21
+\end{verbatim}
+
+Our data has 15 numerical and 6 categorical columns.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{map}\NormalTok{(bank\_data\_origin,class)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## $CLIENTNUM
+## [1] "integer"
+## 
+## $Attrition_Flag
+## [1] "character"
+## 
+## $Customer_Age
+## [1] "integer"
+## 
+## $Gender
+## [1] "character"
+## 
+## $Dependent_count
+## [1] "integer"
+## 
+## $Education_Level
+## [1] "character"
+## 
+## $Marital_Status
+## [1] "character"
+## 
+## $Income_Category
+## [1] "character"
+## 
+## $Card_Category
+## [1] "character"
+## 
+## $Months_on_book
+## [1] "integer"
+## 
+## $Total_Relationship_Count
+## [1] "integer"
+## 
+## $Months_Inactive_12_mon
+## [1] "integer"
+## 
+## $Contacts_Count_12_mon
+## [1] "integer"
+## 
+## $Credit_Limit
+## [1] "numeric"
+## 
+## $Total_Revolving_Bal
+## [1] "integer"
+## 
+## $Avg_Open_To_Buy
+## [1] "numeric"
+## 
+## $Total_Amt_Chng_Q4_Q1
+## [1] "numeric"
+## 
+## $Total_Trans_Amt
+## [1] "integer"
+## 
+## $Total_Trans_Ct
+## [1] "integer"
+## 
+## $Total_Ct_Chng_Q4_Q1
+## [1] "numeric"
+## 
+## $Avg_Utilization_Ratio
+## [1] "numeric"
+\end{verbatim}
+
+Data Exploration
+
+There is no null value inside our data
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{colSums}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(bank\_data\_origin))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                CLIENTNUM           Attrition_Flag             Customer_Age 
+##                        0                        0                        0 
+##                   Gender          Dependent_count          Education_Level 
+##                        0                        0                        0 
+##           Marital_Status          Income_Category            Card_Category 
+##                        0                        0                        0 
+##           Months_on_book Total_Relationship_Count   Months_Inactive_12_mon 
+##                        0                        0                        0 
+##    Contacts_Count_12_mon             Credit_Limit      Total_Revolving_Bal 
+##                        0                        0                        0 
+##          Avg_Open_To_Buy     Total_Amt_Chng_Q4_Q1          Total_Trans_Amt 
+##                        0                        0                        0 
+##           Total_Trans_Ct      Total_Ct_Chng_Q4_Q1    Avg_Utilization_Ratio 
+##                        0                        0                        0
+\end{verbatim}
+
+Education Level, Marital Status and Income Category columns have
+``Unknown'' values. Since unknown values can cause misleading results,
+we decide to remove them. First we labeled them with ``NA'' and delete
+afterwards.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bank\_data\_NA }\OtherTok{\textless{}{-}}\NormalTok{ bank\_data\_origin}
+\NormalTok{bank\_data\_NA[bank\_data\_NA}\SpecialCharTok{==}\StringTok{\textquotesingle{}Unknown\textquotesingle{}}\NormalTok{] }\OtherTok{\textless{}{-}} \ConstantTok{NA}
+
+\FunctionTok{colSums}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(bank\_data\_NA))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                CLIENTNUM           Attrition_Flag             Customer_Age 
+##                        0                        0                        0 
+##                   Gender          Dependent_count          Education_Level 
+##                        0                        0                     1519 
+##           Marital_Status          Income_Category            Card_Category 
+##                      749                     1112                        0 
+##           Months_on_book Total_Relationship_Count   Months_Inactive_12_mon 
+##                        0                        0                        0 
+##    Contacts_Count_12_mon             Credit_Limit      Total_Revolving_Bal 
+##                        0                        0                        0 
+##          Avg_Open_To_Buy     Total_Amt_Chng_Q4_Q1          Total_Trans_Amt 
+##                        0                        0                        0 
+##           Total_Trans_Ct      Total_Ct_Chng_Q4_Q1    Avg_Utilization_Ratio 
+##                        0                        0                        0
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bank\_data\_withoutNA }\OtherTok{\textless{}{-}} \FunctionTok{na.omit}\NormalTok{(bank\_data\_NA)}
+\end{Highlighting}
+\end{Shaded}
+
+For the 6 categorical columns, we change their data type to the numeric
+to be able to work with them.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bank\_data\_quan }\OtherTok{\textless{}{-}}\NormalTok{ bank\_data\_withoutNA}
+
+\NormalTok{bank\_data\_quan}\SpecialCharTok{$}\NormalTok{Attrition\_Flag }\OtherTok{\textless{}{-}} \FunctionTok{as.numeric}\NormalTok{(bank\_data\_quan}\SpecialCharTok{$}\NormalTok{Attrition\_Flag }\SpecialCharTok{==} \StringTok{"Attrited Customer"}\NormalTok{)}
+
+\NormalTok{bank\_data\_quan}\SpecialCharTok{$}\NormalTok{Gender }\OtherTok{\textless{}{-}} \FunctionTok{as.numeric}\NormalTok{(bank\_data\_quan}\SpecialCharTok{$}\NormalTok{Gender }\SpecialCharTok{==} \StringTok{"F"}\NormalTok{)}
+\NormalTok{bank\_data\_quan }\OtherTok{\textless{}{-}}\NormalTok{ bank\_data\_quan }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{rename}\NormalTok{(}\StringTok{"Is\_Female"} \OtherTok{=} \StringTok{"Gender"}\NormalTok{)}
+
+\NormalTok{order\_education\_level }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{(}\StringTok{"Uneducated"} \OtherTok{=} \DecValTok{1}\NormalTok{,}
+                              \StringTok{"High School"} \OtherTok{=} \DecValTok{2}\NormalTok{,}
+                              \StringTok{"College"} \OtherTok{=} \DecValTok{3}\NormalTok{,}
+                              \StringTok{"Graduate"} \OtherTok{=} \DecValTok{4}\NormalTok{,}
+                              \StringTok{"Post{-}Graduate"} \OtherTok{=} \DecValTok{5}\NormalTok{,}
+                              \StringTok{"Doctorate"} \OtherTok{=} \DecValTok{6}\NormalTok{)}
+\NormalTok{bank\_data\_quan}\SpecialCharTok{$}\NormalTok{Education\_Level }\OtherTok{\textless{}{-}} \FunctionTok{unlist}\NormalTok{(order\_education\_level[}\FunctionTok{as.character}\NormalTok{(bank\_data\_quan}\SpecialCharTok{$}\NormalTok{Education\_Level)])}
+
+\NormalTok{order\_Marital\_Status }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{(}\StringTok{"Single"} \OtherTok{=} \DecValTok{1}\NormalTok{,}
+                             \StringTok{"Married"} \OtherTok{=} \DecValTok{2}\NormalTok{,}
+                             \StringTok{"Divorced"} \OtherTok{=} \DecValTok{3}\NormalTok{)}
+\NormalTok{bank\_data\_quan}\SpecialCharTok{$}\NormalTok{Marital\_Status }\OtherTok{\textless{}{-}} \FunctionTok{unlist}\NormalTok{(order\_Marital\_Status[}\FunctionTok{as.character}\NormalTok{(bank\_data\_quan}\SpecialCharTok{$}\NormalTok{Marital\_Status)])}
+
+\NormalTok{order\_Income\_Category }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{(}\StringTok{"Less than $40K"} \OtherTok{=} \DecValTok{1}\NormalTok{,}
+                              \StringTok{"$40K {-} $60K"} \OtherTok{=} \DecValTok{2}\NormalTok{,}
+                              \StringTok{"$60K {-} $80K"} \OtherTok{=} \DecValTok{3}\NormalTok{,}
+                              \StringTok{"$80K {-} $120K"} \OtherTok{=} \DecValTok{4}\NormalTok{,}
+                              \StringTok{"$120K +"} \OtherTok{=} \DecValTok{5}\NormalTok{)}
+\NormalTok{bank\_data\_quan}\SpecialCharTok{$}\NormalTok{Income\_Category }\OtherTok{\textless{}{-}} \FunctionTok{unlist}\NormalTok{(order\_Income\_Category[}\FunctionTok{as.character}\NormalTok{(bank\_data\_quan}\SpecialCharTok{$}\NormalTok{Income\_Category)])}
+
+
+\NormalTok{order\_Card\_Category }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{(}\StringTok{"Blue"} \OtherTok{=} \DecValTok{1}\NormalTok{,}
+                            \StringTok{"Silver"} \OtherTok{=} \DecValTok{2}\NormalTok{,}
+                            \StringTok{"Gold"} \OtherTok{=} \DecValTok{3}\NormalTok{,}
+                            \StringTok{"Platinum"} \OtherTok{=} \DecValTok{4}\NormalTok{)}
+\NormalTok{bank\_data\_quan}\SpecialCharTok{$}\NormalTok{Card\_Category }\OtherTok{\textless{}{-}} \FunctionTok{unlist}\NormalTok{(order\_Card\_Category[}\FunctionTok{as.character}\NormalTok{(bank\_data\_quan}\SpecialCharTok{$}\NormalTok{Card\_Category)])}
+
+\FunctionTok{colSums}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(bank\_data\_quan))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                CLIENTNUM           Attrition_Flag             Customer_Age 
+##                        0                        0                        0 
+##                Is_Female          Dependent_count          Education_Level 
+##                        0                        0                        0 
+##           Marital_Status          Income_Category            Card_Category 
+##                        0                        0                        0 
+##           Months_on_book Total_Relationship_Count   Months_Inactive_12_mon 
+##                        0                        0                        0 
+##    Contacts_Count_12_mon             Credit_Limit      Total_Revolving_Bal 
+##                        0                        0                        0 
+##          Avg_Open_To_Buy     Total_Amt_Chng_Q4_Q1          Total_Trans_Amt 
+##                        0                        0                        0 
+##           Total_Trans_Ct      Total_Ct_Chng_Q4_Q1    Avg_Utilization_Ratio 
+##                        0                        0                        0
+\end{verbatim}
+
+Finally, since the people with age greater than or equal to 70 years and
+Card Category different than the blue is outliers, we remove them to our
+dataset.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cleaned\_bank\_data }\OtherTok{\textless{}{-}}\NormalTok{ bank\_data\_quan}
+
+\NormalTok{age.exc.list }\OtherTok{\textless{}{-}} \FunctionTok{boxplot.stats}\NormalTok{(cleaned\_bank\_data}\SpecialCharTok{$}\NormalTok{Customer\_Age)}\SpecialCharTok{$}\NormalTok{out}
+\NormalTok{card.exc.list }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{3}\NormalTok{, }\DecValTok{4}\NormalTok{)}
+
+\NormalTok{cleaned\_bank\_data }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(cleaned\_bank\_data,}\SpecialCharTok{!}\NormalTok{((Customer\_Age }\SpecialCharTok{\%in\%}\NormalTok{ age.exc.list)}\SpecialCharTok{|}\NormalTok{ (Card\_Category }\SpecialCharTok{\%in\%}\NormalTok{ card.exc.list)))}
+\FunctionTok{dim}\NormalTok{(cleaned\_bank\_data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 6596   21
+\end{verbatim}
+
+Data Preparation
+
+Since we have 0 and 1's as outcome and the outcomes for each row are
+independent we can use Logistic Regression. In our data, we are going to
+predict a probability of credit card churn. As a result, we will get a
+value between 0 and 1.
+
+Since we have only one card category, we can remove Card Category column
+from now on.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cleaned\_bank\_data }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(cleaned\_bank\_data, }\AttributeTok{select =} \SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(Card\_Category))}
+\FunctionTok{head}\NormalTok{(cleaned\_bank\_data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   CLIENTNUM Attrition_Flag Customer_Age Is_Female Dependent_count
+## 1 768805383              0           45         0               3
+## 2 818770008              0           49         1               5
+## 3 713982108              0           51         0               3
+## 5 709106358              0           40         0               3
+## 6 713061558              0           44         0               2
+## 9 710930508              0           37         0               3
+##   Education_Level Marital_Status Income_Category Months_on_book
+## 1               2              2               3             39
+## 2               4              1               1             44
+## 3               4              2               4             36
+## 5               1              2               3             21
+## 6               4              2               2             36
+## 9               1              1               3             36
+##   Total_Relationship_Count Months_Inactive_12_mon Contacts_Count_12_mon
+## 1                        5                      1                     3
+## 2                        6                      1                     2
+## 3                        4                      1                     0
+## 5                        5                      1                     0
+## 6                        3                      1                     2
+## 9                        5                      2                     0
+##   Credit_Limit Total_Revolving_Bal Avg_Open_To_Buy Total_Amt_Chng_Q4_Q1
+## 1        12691                 777           11914                1.335
+## 2         8256                 864            7392                1.541
+## 3         3418                   0            3418                2.594
+## 5         4716                   0            4716                2.175
+## 6         4010                1247            2763                1.376
+## 9        22352                2517           19835                3.355
+##   Total_Trans_Amt Total_Trans_Ct Total_Ct_Chng_Q4_Q1 Avg_Utilization_Ratio
+## 1            1144             42               1.625                 0.061
+## 2            1291             33               3.714                 0.105
+## 3            1887             20               2.333                 0.000
+## 5             816             28               2.500                 0.000
+## 6            1088             24               0.846                 0.311
+## 9            1350             24               1.182                 0.113
+\end{verbatim}
+
+We are going to create our Logistic Regression model with 75\% train
+size.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{0987}\NormalTok{)}
+
+\NormalTok{sample }\OtherTok{\textless{}{-}} \FunctionTok{sample.split}\NormalTok{(cleaned\_bank\_data}\SpecialCharTok{$}\NormalTok{Attrition\_Flag,}\AttributeTok{SplitRatio =} \FloatTok{0.75}\NormalTok{)}
+\NormalTok{train }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(cleaned\_bank\_data[}\DecValTok{2}\SpecialCharTok{:}\DecValTok{20}\NormalTok{],sample }\SpecialCharTok{==} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{test }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(cleaned\_bank\_data[}\DecValTok{2}\SpecialCharTok{:}\DecValTok{20}\NormalTok{],sample }\SpecialCharTok{==} \ConstantTok{FALSE}\NormalTok{)}
+
+\NormalTok{train\_under }\OtherTok{\textless{}{-}} \FunctionTok{ovun.sample}\NormalTok{(Attrition\_Flag}\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}\AttributeTok{data =}\NormalTok{ train, }\AttributeTok{method =} \StringTok{"under"}\NormalTok{)}\SpecialCharTok{$}\NormalTok{data}
+
+\NormalTok{train\_over }\OtherTok{\textless{}{-}} \FunctionTok{ovun.sample}\NormalTok{(Attrition\_Flag}\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}\AttributeTok{data =}\NormalTok{ train, }\AttributeTok{method =} \StringTok{"over"}\NormalTok{)}\SpecialCharTok{$}\NormalTok{data}
+
+\NormalTok{train\_mix }\OtherTok{\textless{}{-}} \FunctionTok{ovun.sample}\NormalTok{(Attrition\_Flag}\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}\AttributeTok{data =}\NormalTok{ train, }\AttributeTok{method =} \StringTok{"both"}\NormalTok{, }\AttributeTok{p =} \FloatTok{0.4}\NormalTok{, }\AttributeTok{N =} \FunctionTok{nrow}\NormalTok{(cleaned\_bank\_data))}\SpecialCharTok{$}\NormalTok{data}
+
+\NormalTok{model }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(Attrition\_Flag }\SpecialCharTok{\textasciitilde{}}\NormalTok{ ., }\AttributeTok{data =}\NormalTok{ train\_mix, }\AttributeTok{family =} \StringTok{\textquotesingle{}binomial\textquotesingle{}}\NormalTok{)}
+\FunctionTok{summary}\NormalTok{(model)}\SpecialCharTok{$}\NormalTok{coeff}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                               Estimate   Std. Error     z value      Pr(>|z|)
+## (Intercept)               7.198197e+00 4.344867e-01  16.5671272  1.204441e-61
+## Customer_Age             -3.504081e-02 7.701881e-03  -4.5496436  5.373684e-06
+## Is_Female                 9.045939e-01 1.265595e-01   7.1475752  8.832415e-13
+## Dependent_count           1.731885e-01 3.095622e-02   5.5946276  2.210958e-08
+## Education_Level           4.715246e-02 2.685035e-02   1.7561206  7.906783e-02
+## Marital_Status           -2.607453e-01 6.354131e-02  -4.1035556  4.068486e-05
+## Income_Category           1.648116e-01 4.975364e-02   3.3125548  9.244801e-04
+## Months_on_book            7.262860e-03 7.545102e-03   0.9625928  3.357519e-01
+## Total_Relationship_Count -4.013712e-01 2.643508e-02 -15.1832759  4.564064e-52
+## Months_Inactive_12_mon    5.141444e-01 3.942989e-02  13.0394593  7.297271e-39
+## Contacts_Count_12_mon     3.667024e-01 3.658076e-02  10.0244599  1.190085e-23
+## Credit_Limit             -1.633036e-05 6.654605e-06  -2.4539945  1.412792e-02
+## Total_Revolving_Bal      -7.789850e-04 6.993268e-05 -11.1390700  8.096034e-29
+## Total_Amt_Chng_Q4_Q1     -2.800388e-01 1.878825e-01  -1.4904998  1.360929e-01
+## Total_Trans_Amt           5.051978e-04 2.371989e-05  21.2984927 1.172331e-100
+## Total_Trans_Ct           -1.177242e-01 3.722705e-03 -31.6232878 1.767009e-219
+## Total_Ct_Chng_Q4_Q1      -3.208238e+00 1.899130e-01 -16.8931931  5.049472e-64
+## Avg_Utilization_Ratio    -5.923240e-01 2.318537e-01  -2.5547318  1.062696e-02
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(model)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## glm(formula = Attrition_Flag ~ ., family = "binomial", data = train_mix)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.7601  -0.4916  -0.1658   0.4348   2.9846  
+## 
+## Coefficients: (1 not defined because of singularities)
+##                            Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)               7.198e+00  4.345e-01  16.567  < 2e-16 ***
+## Customer_Age             -3.504e-02  7.702e-03  -4.550 5.37e-06 ***
+## Is_Female                 9.046e-01  1.266e-01   7.148 8.83e-13 ***
+## Dependent_count           1.732e-01  3.096e-02   5.595 2.21e-08 ***
+## Education_Level           4.715e-02  2.685e-02   1.756 0.079068 .  
+## Marital_Status           -2.607e-01  6.354e-02  -4.104 4.07e-05 ***
+## Income_Category           1.648e-01  4.975e-02   3.313 0.000924 ***
+## Months_on_book            7.263e-03  7.545e-03   0.963 0.335752    
+## Total_Relationship_Count -4.014e-01  2.644e-02 -15.183  < 2e-16 ***
+## Months_Inactive_12_mon    5.141e-01  3.943e-02  13.039  < 2e-16 ***
+## Contacts_Count_12_mon     3.667e-01  3.658e-02  10.024  < 2e-16 ***
+## Credit_Limit             -1.633e-05  6.655e-06  -2.454 0.014128 *  
+## Total_Revolving_Bal      -7.790e-04  6.993e-05 -11.139  < 2e-16 ***
+## Avg_Open_To_Buy                  NA         NA      NA       NA    
+## Total_Amt_Chng_Q4_Q1     -2.800e-01  1.879e-01  -1.490 0.136093    
+## Total_Trans_Amt           5.052e-04  2.372e-05  21.298  < 2e-16 ***
+## Total_Trans_Ct           -1.177e-01  3.723e-03 -31.623  < 2e-16 ***
+## Total_Ct_Chng_Q4_Q1      -3.208e+00  1.899e-01 -16.893  < 2e-16 ***
+## Avg_Utilization_Ratio    -5.923e-01  2.319e-01  -2.555 0.010627 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 8882.1  on 6595  degrees of freedom
+## Residual deviance: 4528.1  on 6578  degrees of freedom
+## AIC: 4564.1
+## 
+## Number of Fisher Scoring iterations: 6
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pred }\OtherTok{\textless{}{-}}\NormalTok{ (}\FunctionTok{predict}\NormalTok{(model, test) }\SpecialCharTok{\textgreater{}=} \FloatTok{0.5}\NormalTok{)}\SpecialCharTok{*}\DecValTok{1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type == :
+## prediction from a rank-deficient fit may be misleading
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mean}\NormalTok{(test}\SpecialCharTok{$}\NormalTok{Attrition\_Flag }\SpecialCharTok{==}\NormalTok{ pred)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.8877427
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cor\_mat\_new }\OtherTok{\textless{}{-}} \FunctionTok{cor}\NormalTok{(cleaned\_bank\_data[}\DecValTok{2}\SpecialCharTok{:}\DecValTok{20}\NormalTok{])}
+\FunctionTok{corrplot}\NormalTok{(cor\_mat\_new,}\AttributeTok{method =} \StringTok{"number"}\NormalTok{,}\AttributeTok{type =} \StringTok{"upper"}\NormalTok{, }\AttributeTok{tl.pos =} \StringTok{"td"}\NormalTok{,}\AttributeTok{tl.cex=}\FloatTok{0.5}\NormalTok{, }\AttributeTok{tl.col =} \StringTok{"black"}\NormalTok{ ,}\AttributeTok{diag =} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{sl_markdown_files/figure-latex/unnamed-chunk-11-1.pdf}
+Since we have almost perfectly correlation between Credit Limit and
+Average Open to Buy columns, we got NA on the summary. Because they will
+not given independent information in the model. So, we can drop Average
+Open to Buy
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{0987}\NormalTok{)}
+
+\NormalTok{cleaned\_bank\_data1 }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(cleaned\_bank\_data, }\AttributeTok{select =} \SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(Avg\_Open\_To\_Buy))}
+
+\NormalTok{sample }\OtherTok{\textless{}{-}} \FunctionTok{sample.split}\NormalTok{(cleaned\_bank\_data1}\SpecialCharTok{$}\NormalTok{Attrition\_Flag,}\AttributeTok{SplitRatio =} \FloatTok{0.75}\NormalTok{)}
+\NormalTok{train }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(cleaned\_bank\_data1[}\DecValTok{2}\SpecialCharTok{:}\DecValTok{19}\NormalTok{],sample }\SpecialCharTok{==} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{test }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(cleaned\_bank\_data1[}\DecValTok{2}\SpecialCharTok{:}\DecValTok{19}\NormalTok{],sample }\SpecialCharTok{==} \ConstantTok{FALSE}\NormalTok{)}
+
+\NormalTok{train\_under }\OtherTok{\textless{}{-}} \FunctionTok{ovun.sample}\NormalTok{(Attrition\_Flag}\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}\AttributeTok{data =}\NormalTok{ train, }\AttributeTok{method =} \StringTok{"under"}\NormalTok{)}\SpecialCharTok{$}\NormalTok{data}
+
+\NormalTok{train\_over }\OtherTok{\textless{}{-}} \FunctionTok{ovun.sample}\NormalTok{(Attrition\_Flag}\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}\AttributeTok{data =}\NormalTok{ train, }\AttributeTok{method =} \StringTok{"over"}\NormalTok{)}\SpecialCharTok{$}\NormalTok{data}
+
+\NormalTok{train\_mix }\OtherTok{\textless{}{-}} \FunctionTok{ovun.sample}\NormalTok{(Attrition\_Flag}\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}\AttributeTok{data =}\NormalTok{ train, }\AttributeTok{method =} \StringTok{"both"}\NormalTok{, }\AttributeTok{p =} \FloatTok{0.4}\NormalTok{, }\AttributeTok{N =} \FunctionTok{nrow}\NormalTok{(cleaned\_bank\_data1))}\SpecialCharTok{$}\NormalTok{data}
+
+\NormalTok{model }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(Attrition\_Flag }\SpecialCharTok{\textasciitilde{}}\NormalTok{ ., }\AttributeTok{data =}\NormalTok{ train\_mix, }\AttributeTok{family =} \StringTok{\textquotesingle{}binomial\textquotesingle{}}\NormalTok{)}
+\FunctionTok{summary}\NormalTok{(model)}\SpecialCharTok{$}\NormalTok{coeff}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                               Estimate   Std. Error     z value      Pr(>|z|)
+## (Intercept)               7.198197e+00 4.344867e-01  16.5671272  1.204441e-61
+## Customer_Age             -3.504081e-02 7.701881e-03  -4.5496436  5.373684e-06
+## Is_Female                 9.045939e-01 1.265595e-01   7.1475752  8.832415e-13
+## Dependent_count           1.731885e-01 3.095622e-02   5.5946276  2.210958e-08
+## Education_Level           4.715246e-02 2.685035e-02   1.7561206  7.906783e-02
+## Marital_Status           -2.607453e-01 6.354131e-02  -4.1035556  4.068486e-05
+## Income_Category           1.648116e-01 4.975364e-02   3.3125548  9.244801e-04
+## Months_on_book            7.262860e-03 7.545102e-03   0.9625928  3.357519e-01
+## Total_Relationship_Count -4.013712e-01 2.643508e-02 -15.1832759  4.564064e-52
+## Months_Inactive_12_mon    5.141444e-01 3.942989e-02  13.0394593  7.297271e-39
+## Contacts_Count_12_mon     3.667024e-01 3.658076e-02  10.0244599  1.190085e-23
+## Credit_Limit             -1.633036e-05 6.654605e-06  -2.4539945  1.412792e-02
+## Total_Revolving_Bal      -7.789850e-04 6.993268e-05 -11.1390700  8.096034e-29
+## Total_Amt_Chng_Q4_Q1     -2.800388e-01 1.878825e-01  -1.4904998  1.360929e-01
+## Total_Trans_Amt           5.051978e-04 2.371989e-05  21.2984927 1.172331e-100
+## Total_Trans_Ct           -1.177242e-01 3.722705e-03 -31.6232878 1.767009e-219
+## Total_Ct_Chng_Q4_Q1      -3.208238e+00 1.899130e-01 -16.8931931  5.049472e-64
+## Avg_Utilization_Ratio    -5.923240e-01 2.318537e-01  -2.5547318  1.062696e-02
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(model)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## glm(formula = Attrition_Flag ~ ., family = "binomial", data = train_mix)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.7601  -0.4916  -0.1658   0.4348   2.9846  
+## 
+## Coefficients:
+##                            Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)               7.198e+00  4.345e-01  16.567  < 2e-16 ***
+## Customer_Age             -3.504e-02  7.702e-03  -4.550 5.37e-06 ***
+## Is_Female                 9.046e-01  1.266e-01   7.148 8.83e-13 ***
+## Dependent_count           1.732e-01  3.096e-02   5.595 2.21e-08 ***
+## Education_Level           4.715e-02  2.685e-02   1.756 0.079068 .  
+## Marital_Status           -2.607e-01  6.354e-02  -4.104 4.07e-05 ***
+## Income_Category           1.648e-01  4.975e-02   3.313 0.000924 ***
+## Months_on_book            7.263e-03  7.545e-03   0.963 0.335752    
+## Total_Relationship_Count -4.014e-01  2.644e-02 -15.183  < 2e-16 ***
+## Months_Inactive_12_mon    5.141e-01  3.943e-02  13.039  < 2e-16 ***
+## Contacts_Count_12_mon     3.667e-01  3.658e-02  10.024  < 2e-16 ***
+## Credit_Limit             -1.633e-05  6.655e-06  -2.454 0.014128 *  
+## Total_Revolving_Bal      -7.790e-04  6.993e-05 -11.139  < 2e-16 ***
+## Total_Amt_Chng_Q4_Q1     -2.800e-01  1.879e-01  -1.490 0.136093    
+## Total_Trans_Amt           5.052e-04  2.372e-05  21.298  < 2e-16 ***
+## Total_Trans_Ct           -1.177e-01  3.723e-03 -31.623  < 2e-16 ***
+## Total_Ct_Chng_Q4_Q1      -3.208e+00  1.899e-01 -16.893  < 2e-16 ***
+## Avg_Utilization_Ratio    -5.923e-01  2.319e-01  -2.555 0.010627 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 8882.1  on 6595  degrees of freedom
+## Residual deviance: 4528.1  on 6578  degrees of freedom
+## AIC: 4564.1
+## 
+## Number of Fisher Scoring iterations: 6
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pred }\OtherTok{\textless{}{-}}\NormalTok{ (}\FunctionTok{predict}\NormalTok{(model, test) }\SpecialCharTok{\textgreater{}=} \FloatTok{0.5}\NormalTok{)}\SpecialCharTok{*}\DecValTok{1}
+
+\FunctionTok{mean}\NormalTok{(test}\SpecialCharTok{$}\NormalTok{Attrition\_Flag }\SpecialCharTok{==}\NormalTok{ pred)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.8877427
+\end{verbatim}
+
+From now on, we assume 95\% confidence interwal for our model. We will
+delete columns with high p values by one by until we get all columns
+with at least '*'.
+
+So as a first step, we delete Months On Book.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{0987}\NormalTok{)}
+
+\NormalTok{cleaned\_bank\_data2 }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(cleaned\_bank\_data1, }\AttributeTok{select =} \SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(Months\_on\_book))}
+
+\NormalTok{sample }\OtherTok{\textless{}{-}} \FunctionTok{sample.split}\NormalTok{(cleaned\_bank\_data2}\SpecialCharTok{$}\NormalTok{Attrition\_Flag,}\AttributeTok{SplitRatio =} \FloatTok{0.75}\NormalTok{)}
+\NormalTok{train }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(cleaned\_bank\_data2[}\DecValTok{2}\SpecialCharTok{:}\DecValTok{18}\NormalTok{],sample }\SpecialCharTok{==} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{test }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(cleaned\_bank\_data2[}\DecValTok{2}\SpecialCharTok{:}\DecValTok{18}\NormalTok{],sample }\SpecialCharTok{==} \ConstantTok{FALSE}\NormalTok{)}
+
+\NormalTok{train\_under }\OtherTok{\textless{}{-}} \FunctionTok{ovun.sample}\NormalTok{(Attrition\_Flag}\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}\AttributeTok{data =}\NormalTok{ train, }\AttributeTok{method =} \StringTok{"under"}\NormalTok{)}\SpecialCharTok{$}\NormalTok{data}
+
+\NormalTok{train\_over }\OtherTok{\textless{}{-}} \FunctionTok{ovun.sample}\NormalTok{(Attrition\_Flag}\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}\AttributeTok{data =}\NormalTok{ train, }\AttributeTok{method =} \StringTok{"over"}\NormalTok{)}\SpecialCharTok{$}\NormalTok{data}
+
+\NormalTok{train\_mix }\OtherTok{\textless{}{-}} \FunctionTok{ovun.sample}\NormalTok{(Attrition\_Flag}\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}\AttributeTok{data =}\NormalTok{ train, }\AttributeTok{method =} \StringTok{"both"}\NormalTok{, }\AttributeTok{p =} \FloatTok{0.4}\NormalTok{, }\AttributeTok{N =} \FunctionTok{nrow}\NormalTok{(cleaned\_bank\_data2))}\SpecialCharTok{$}\NormalTok{data}
+
+\NormalTok{model }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(Attrition\_Flag }\SpecialCharTok{\textasciitilde{}}\NormalTok{ ., }\AttributeTok{data =}\NormalTok{ train\_mix, }\AttributeTok{family =} \StringTok{\textquotesingle{}binomial\textquotesingle{}}\NormalTok{)}
+\FunctionTok{summary}\NormalTok{(model)}\SpecialCharTok{$}\NormalTok{coeff}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                               Estimate   Std. Error    z value      Pr(>|z|)
+## (Intercept)               7.197073e+00 4.345989e-01  16.560266  1.349951e-61
+## Customer_Age             -2.923985e-02 4.787442e-03  -6.107616  1.011306e-09
+## Is_Female                 8.995436e-01 1.264444e-01   7.114143  1.126100e-12
+## Dependent_count           1.720749e-01 3.094096e-02   5.561395  2.676274e-08
+## Education_Level           4.692204e-02 2.685178e-02   1.747446  8.055998e-02
+## Marital_Status           -2.614775e-01 6.355217e-02  -4.114376  3.882275e-05
+## Income_Category           1.614109e-01 4.965235e-02   3.250821  1.150724e-03
+## Total_Relationship_Count -4.009793e-01 2.642900e-02 -15.171947  5.424344e-52
+## Months_Inactive_12_mon    5.171926e-01 3.926651e-02  13.171342  1.282966e-39
+## Contacts_Count_12_mon     3.658387e-01 3.656410e-02  10.005407  1.442974e-23
+## Credit_Limit             -1.621017e-05 6.648579e-06  -2.438141  1.476301e-02
+## Total_Revolving_Bal      -7.756354e-04 6.978568e-05 -11.114535  1.066042e-28
+## Total_Amt_Chng_Q4_Q1     -2.824986e-01 1.878764e-01  -1.503641  1.326739e-01
+## Total_Trans_Amt           5.039814e-04 2.368947e-05  21.274488 1.956367e-100
+## Total_Trans_Ct           -1.175927e-01 3.718645e-03 -31.622464 1.813707e-219
+## Total_Ct_Chng_Q4_Q1      -3.207596e+00 1.898336e-01 -16.896881  4.743456e-64
+## Avg_Utilization_Ratio    -6.017448e-01 2.314983e-01  -2.599348  9.340092e-03
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(model)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## glm(formula = Attrition_Flag ~ ., family = "binomial", data = train_mix)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.7425  -0.4926  -0.1667   0.4294   2.9823  
+## 
+## Coefficients:
+##                            Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)               7.197e+00  4.346e-01  16.560  < 2e-16 ***
+## Customer_Age             -2.924e-02  4.787e-03  -6.108 1.01e-09 ***
+## Is_Female                 8.995e-01  1.264e-01   7.114 1.13e-12 ***
+## Dependent_count           1.721e-01  3.094e-02   5.561 2.68e-08 ***
+## Education_Level           4.692e-02  2.685e-02   1.747  0.08056 .  
+## Marital_Status           -2.615e-01  6.355e-02  -4.114 3.88e-05 ***
+## Income_Category           1.614e-01  4.965e-02   3.251  0.00115 ** 
+## Total_Relationship_Count -4.010e-01  2.643e-02 -15.172  < 2e-16 ***
+## Months_Inactive_12_mon    5.172e-01  3.927e-02  13.171  < 2e-16 ***
+## Contacts_Count_12_mon     3.658e-01  3.656e-02  10.005  < 2e-16 ***
+## Credit_Limit             -1.621e-05  6.649e-06  -2.438  0.01476 *  
+## Total_Revolving_Bal      -7.756e-04  6.979e-05 -11.115  < 2e-16 ***
+## Total_Amt_Chng_Q4_Q1     -2.825e-01  1.879e-01  -1.504  0.13267    
+## Total_Trans_Amt           5.040e-04  2.369e-05  21.274  < 2e-16 ***
+## Total_Trans_Ct           -1.176e-01  3.719e-03 -31.622  < 2e-16 ***
+## Total_Ct_Chng_Q4_Q1      -3.208e+00  1.898e-01 -16.897  < 2e-16 ***
+## Avg_Utilization_Ratio    -6.017e-01  2.315e-01  -2.599  0.00934 ** 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 8882.1  on 6595  degrees of freedom
+## Residual deviance: 4529.0  on 6579  degrees of freedom
+## AIC: 4563
+## 
+## Number of Fisher Scoring iterations: 6
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pred }\OtherTok{\textless{}{-}}\NormalTok{ (}\FunctionTok{predict}\NormalTok{(model, test) }\SpecialCharTok{\textgreater{}=} \FloatTok{0.5}\NormalTok{)}\SpecialCharTok{*}\DecValTok{1}
+
+\FunctionTok{mean}\NormalTok{(test}\SpecialCharTok{$}\NormalTok{Attrition\_Flag }\SpecialCharTok{==}\NormalTok{ pred)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.8883495
+\end{verbatim}
+
+Second step, delete Total Amount Change Q4-1.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{0987}\NormalTok{)}
+
+\NormalTok{cleaned\_bank\_data3 }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(cleaned\_bank\_data2, }\AttributeTok{select =} \SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(Total\_Amt\_Chng\_Q4\_Q1))}
+
+\NormalTok{sample }\OtherTok{\textless{}{-}} \FunctionTok{sample.split}\NormalTok{(cleaned\_bank\_data3}\SpecialCharTok{$}\NormalTok{Attrition\_Flag,}\AttributeTok{SplitRatio =} \FloatTok{0.75}\NormalTok{)}
+\NormalTok{train }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(cleaned\_bank\_data3[}\DecValTok{2}\SpecialCharTok{:}\DecValTok{17}\NormalTok{],sample }\SpecialCharTok{==} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{test }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(cleaned\_bank\_data3[}\DecValTok{2}\SpecialCharTok{:}\DecValTok{17}\NormalTok{],sample }\SpecialCharTok{==} \ConstantTok{FALSE}\NormalTok{)}
+
+\NormalTok{train\_under }\OtherTok{\textless{}{-}} \FunctionTok{ovun.sample}\NormalTok{(Attrition\_Flag}\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}\AttributeTok{data =}\NormalTok{ train, }\AttributeTok{method =} \StringTok{"under"}\NormalTok{)}\SpecialCharTok{$}\NormalTok{data}
+
+\NormalTok{train\_over }\OtherTok{\textless{}{-}} \FunctionTok{ovun.sample}\NormalTok{(Attrition\_Flag}\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}\AttributeTok{data =}\NormalTok{ train, }\AttributeTok{method =} \StringTok{"over"}\NormalTok{)}\SpecialCharTok{$}\NormalTok{data}
+
+\NormalTok{train\_mix }\OtherTok{\textless{}{-}} \FunctionTok{ovun.sample}\NormalTok{(Attrition\_Flag}\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}\AttributeTok{data =}\NormalTok{ train, }\AttributeTok{method =} \StringTok{"both"}\NormalTok{, }\AttributeTok{p =} \FloatTok{0.4}\NormalTok{, }\AttributeTok{N =} \FunctionTok{nrow}\NormalTok{(cleaned\_bank\_data3))}\SpecialCharTok{$}\NormalTok{data}
+
+\NormalTok{model }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(Attrition\_Flag }\SpecialCharTok{\textasciitilde{}}\NormalTok{ ., }\AttributeTok{data =}\NormalTok{ train\_mix, }\AttributeTok{family =} \StringTok{\textquotesingle{}binomial\textquotesingle{}}\NormalTok{)}
+\FunctionTok{summary}\NormalTok{(model)}\SpecialCharTok{$}\NormalTok{coeff}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                               Estimate   Std. Error    z value      Pr(>|z|)
+## (Intercept)               7.017343e+00 4.170161e-01  16.827509  1.534211e-63
+## Customer_Age             -2.856931e-02 4.762337e-03  -5.999011  1.985235e-09
+## Is_Female                 9.021349e-01 1.263299e-01   7.141104  9.258403e-13
+## Dependent_count           1.749276e-01 3.089582e-02   5.661853  1.497471e-08
+## Education_Level           4.856430e-02 2.681131e-02   1.811336  7.008881e-02
+## Marital_Status           -2.621922e-01 6.355943e-02  -4.125150  3.704938e-05
+## Income_Category           1.607157e-01 4.960131e-02   3.240151  1.194666e-03
+## Total_Relationship_Count -4.034640e-01 2.637223e-02 -15.298820  7.785592e-53
+## Months_Inactive_12_mon    5.184554e-01 3.923951e-02  13.212585  7.423043e-40
+## Contacts_Count_12_mon     3.678783e-01 3.651704e-02  10.074155  7.187572e-24
+## Credit_Limit             -1.626029e-05 6.648201e-06  -2.445818  1.445241e-02
+## Total_Revolving_Bal      -7.778475e-04 6.966909e-05 -11.164887  6.056841e-29
+## Total_Trans_Amt           5.015737e-04 2.366946e-05  21.190751  1.162289e-99
+## Total_Trans_Ct           -1.175110e-01 3.722084e-03 -31.571285 9.152969e-219
+## Total_Ct_Chng_Q4_Q1      -3.302860e+00 1.793193e-01 -18.418882  9.269924e-76
+## Avg_Utilization_Ratio    -6.088122e-01 2.310970e-01  -2.634444  8.427515e-03
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(model)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## glm(formula = Attrition_Flag ~ ., family = "binomial", data = train_mix)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.7724  -0.4916  -0.1662   0.4278   2.9674  
+## 
+## Coefficients:
+##                            Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)               7.017e+00  4.170e-01  16.828  < 2e-16 ***
+## Customer_Age             -2.857e-02  4.762e-03  -5.999 1.99e-09 ***
+## Is_Female                 9.021e-01  1.263e-01   7.141 9.26e-13 ***
+## Dependent_count           1.749e-01  3.090e-02   5.662 1.50e-08 ***
+## Education_Level           4.856e-02  2.681e-02   1.811  0.07009 .  
+## Marital_Status           -2.622e-01  6.356e-02  -4.125 3.70e-05 ***
+## Income_Category           1.607e-01  4.960e-02   3.240  0.00119 ** 
+## Total_Relationship_Count -4.035e-01  2.637e-02 -15.299  < 2e-16 ***
+## Months_Inactive_12_mon    5.185e-01  3.924e-02  13.213  < 2e-16 ***
+## Contacts_Count_12_mon     3.679e-01  3.652e-02  10.074  < 2e-16 ***
+## Credit_Limit             -1.626e-05  6.648e-06  -2.446  0.01445 *  
+## Total_Revolving_Bal      -7.778e-04  6.967e-05 -11.165  < 2e-16 ***
+## Total_Trans_Amt           5.016e-04  2.367e-05  21.191  < 2e-16 ***
+## Total_Trans_Ct           -1.175e-01  3.722e-03 -31.571  < 2e-16 ***
+## Total_Ct_Chng_Q4_Q1      -3.303e+00  1.793e-01 -18.419  < 2e-16 ***
+## Avg_Utilization_Ratio    -6.088e-01  2.311e-01  -2.634  0.00843 ** 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 8882.1  on 6595  degrees of freedom
+## Residual deviance: 4531.3  on 6580  degrees of freedom
+## AIC: 4563.3
+## 
+## Number of Fisher Scoring iterations: 6
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pred }\OtherTok{\textless{}{-}}\NormalTok{ (}\FunctionTok{predict}\NormalTok{(model, test) }\SpecialCharTok{\textgreater{}=} \FloatTok{0.5}\NormalTok{)}\SpecialCharTok{*}\DecValTok{1}
+
+\FunctionTok{mean}\NormalTok{(test}\SpecialCharTok{$}\NormalTok{Attrition\_Flag }\SpecialCharTok{==}\NormalTok{ pred)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.8889563
+\end{verbatim}
+
+Third step, delete Education Level.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{0987}\NormalTok{)}
+
+\NormalTok{cleaned\_bank\_data4 }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(cleaned\_bank\_data3, }\AttributeTok{select =} \SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(Education\_Level))}
+
+\NormalTok{sample }\OtherTok{\textless{}{-}} \FunctionTok{sample.split}\NormalTok{(cleaned\_bank\_data4}\SpecialCharTok{$}\NormalTok{Attrition\_Flag,}\AttributeTok{SplitRatio =} \FloatTok{0.75}\NormalTok{)}
+\NormalTok{train }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(cleaned\_bank\_data4[}\DecValTok{2}\SpecialCharTok{:}\DecValTok{16}\NormalTok{],sample }\SpecialCharTok{==} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{test }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(cleaned\_bank\_data4[}\DecValTok{2}\SpecialCharTok{:}\DecValTok{16}\NormalTok{],sample }\SpecialCharTok{==} \ConstantTok{FALSE}\NormalTok{)}
+
+\NormalTok{train\_under }\OtherTok{\textless{}{-}} \FunctionTok{ovun.sample}\NormalTok{(Attrition\_Flag}\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}\AttributeTok{data =}\NormalTok{ train, }\AttributeTok{method =} \StringTok{"under"}\NormalTok{)}\SpecialCharTok{$}\NormalTok{data}
+
+\NormalTok{train\_over }\OtherTok{\textless{}{-}} \FunctionTok{ovun.sample}\NormalTok{(Attrition\_Flag}\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}\AttributeTok{data =}\NormalTok{ train, }\AttributeTok{method =} \StringTok{"over"}\NormalTok{)}\SpecialCharTok{$}\NormalTok{data}
+
+\NormalTok{train\_mix }\OtherTok{\textless{}{-}} \FunctionTok{ovun.sample}\NormalTok{(Attrition\_Flag}\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}\AttributeTok{data =}\NormalTok{ train, }\AttributeTok{method =} \StringTok{"both"}\NormalTok{, }\AttributeTok{p =} \FloatTok{0.4}\NormalTok{, }\AttributeTok{N =} \FunctionTok{nrow}\NormalTok{(cleaned\_bank\_data4))}\SpecialCharTok{$}\NormalTok{data}
+
+\NormalTok{model }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(Attrition\_Flag }\SpecialCharTok{\textasciitilde{}}\NormalTok{ ., }\AttributeTok{data =}\NormalTok{ train\_mix, }\AttributeTok{family =} \StringTok{\textquotesingle{}binomial\textquotesingle{}}\NormalTok{)}
+\FunctionTok{summary}\NormalTok{(model)}\SpecialCharTok{$}\NormalTok{coeff}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                               Estimate   Std. Error    z value      Pr(>|z|)
+## (Intercept)               7.187866e+00 4.065036e-01  17.682170  5.753819e-70
+## Customer_Age             -2.879796e-02 4.760115e-03  -6.049844  1.449858e-09
+## Is_Female                 9.027716e-01 1.263325e-01   7.145999  8.934382e-13
+## Dependent_count           1.720466e-01 3.081754e-02   5.582750  2.367452e-08
+## Marital_Status           -2.590021e-01 6.346447e-02  -4.081057  4.483138e-05
+## Income_Category           1.610424e-01 4.963898e-02   3.244272  1.177511e-03
+## Total_Relationship_Count -4.032598e-01 2.635350e-02 -15.301946  7.420479e-53
+## Months_Inactive_12_mon    5.199828e-01 3.925362e-02  13.246745  4.711996e-40
+## Contacts_Count_12_mon     3.657354e-01 3.650862e-02  10.017784  1.273258e-23
+## Credit_Limit             -1.651472e-05 6.648509e-06  -2.483973  1.299256e-02
+## Total_Revolving_Bal      -7.750027e-04 6.961101e-05 -11.133334  8.634414e-29
+## Total_Trans_Amt           5.012099e-04 2.366131e-05  21.182676  1.379678e-99
+## Total_Trans_Ct           -1.174736e-01 3.720581e-03 -31.573999 8.400490e-219
+## Total_Ct_Chng_Q4_Q1      -3.312072e+00 1.792977e-01 -18.472474  3.439528e-76
+## Avg_Utilization_Ratio    -6.183846e-01 2.309372e-01  -2.677717  7.412578e-03
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(model)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## glm(formula = Attrition_Flag ~ ., family = "binomial", data = train_mix)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.7571  -0.4911  -0.1660   0.4362   2.9331  
+## 
+## Coefficients:
+##                            Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)               7.188e+00  4.065e-01  17.682  < 2e-16 ***
+## Customer_Age             -2.880e-02  4.760e-03  -6.050 1.45e-09 ***
+## Is_Female                 9.028e-01  1.263e-01   7.146 8.93e-13 ***
+## Dependent_count           1.720e-01  3.082e-02   5.583 2.37e-08 ***
+## Marital_Status           -2.590e-01  6.346e-02  -4.081 4.48e-05 ***
+## Income_Category           1.610e-01  4.964e-02   3.244  0.00118 ** 
+## Total_Relationship_Count -4.033e-01  2.635e-02 -15.302  < 2e-16 ***
+## Months_Inactive_12_mon    5.200e-01  3.925e-02  13.247  < 2e-16 ***
+## Contacts_Count_12_mon     3.657e-01  3.651e-02  10.018  < 2e-16 ***
+## Credit_Limit             -1.652e-05  6.649e-06  -2.484  0.01299 *  
+## Total_Revolving_Bal      -7.750e-04  6.961e-05 -11.133  < 2e-16 ***
+## Total_Trans_Amt           5.012e-04  2.366e-05  21.183  < 2e-16 ***
+## Total_Trans_Ct           -1.175e-01  3.721e-03 -31.574  < 2e-16 ***
+## Total_Ct_Chng_Q4_Q1      -3.312e+00  1.793e-01 -18.472  < 2e-16 ***
+## Avg_Utilization_Ratio    -6.184e-01  2.309e-01  -2.678  0.00741 ** 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 8882.1  on 6595  degrees of freedom
+## Residual deviance: 4534.6  on 6581  degrees of freedom
+## AIC: 4564.6
+## 
+## Number of Fisher Scoring iterations: 6
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pred }\OtherTok{\textless{}{-}}\NormalTok{ (}\FunctionTok{predict}\NormalTok{(model, test) }\SpecialCharTok{\textgreater{}=} \FloatTok{0.5}\NormalTok{)}\SpecialCharTok{*}\DecValTok{1}
+
+\FunctionTok{mean}\NormalTok{(test}\SpecialCharTok{$}\NormalTok{Attrition\_Flag }\SpecialCharTok{==}\NormalTok{ pred)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.8871359
+\end{verbatim}
+
+Finally, we get 88.7\% Credit Card Churn accuracy, but we can increase
+the accuracy with normalizing all the available columns. If we normalize
+all the columns, model converges faster.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{hist}\NormalTok{(cleaned\_bank\_data}\SpecialCharTok{$}\NormalTok{Customer\_Age, }\AttributeTok{main =} \StringTok{"Histogram for Customer Age"}\NormalTok{, }\AttributeTok{xlab =} \StringTok{"Customer\_Age"}\NormalTok{, }\AttributeTok{ylab =} \StringTok{"Count"}\NormalTok{, }\AttributeTok{col =} \StringTok{"cornflowerblue"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{sl_markdown_files/figure-latex/unnamed-chunk-16-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{skewness}\NormalTok{(cleaned\_bank\_data}\SpecialCharTok{$}\NormalTok{Customer\_Age)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] -0.04128799
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{hist}\NormalTok{(cleaned\_bank\_data}\SpecialCharTok{$}\NormalTok{Dependent\_count, }\AttributeTok{main =} \StringTok{"Histogram for Dependent Count"}\NormalTok{, }\AttributeTok{xlab =} \StringTok{"Dependent\_count"}\NormalTok{, }\AttributeTok{ylab =} \StringTok{"Count"}\NormalTok{, }\AttributeTok{col =} \StringTok{"cornflowerblue"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{sl_markdown_files/figure-latex/unnamed-chunk-16-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{skewness}\NormalTok{(cleaned\_bank\_data}\SpecialCharTok{$}\NormalTok{Dependent\_count)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] -0.01561999
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{hist}\NormalTok{(cleaned\_bank\_data}\SpecialCharTok{$}\NormalTok{Months\_on\_book, }\AttributeTok{main =} \StringTok{"Histogram for Months On Book"}\NormalTok{, }\AttributeTok{xlab =} \StringTok{"Months\_on\_book"}\NormalTok{, }\AttributeTok{ylab =} \StringTok{"Count"}\NormalTok{, }\AttributeTok{col =} \StringTok{"cornflowerblue"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{sl_markdown_files/figure-latex/unnamed-chunk-16-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{skewness}\NormalTok{(cleaned\_bank\_data}\SpecialCharTok{$}\NormalTok{Months\_on\_book)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] -0.07716855
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{hist}\NormalTok{(cleaned\_bank\_data}\SpecialCharTok{$}\NormalTok{Total\_Relationship\_Count, }\AttributeTok{main =} \StringTok{"Histogram for Total Relationship Count"}\NormalTok{, }\AttributeTok{xlab =} \StringTok{"Total\_Relationship\_Count"}\NormalTok{, }\AttributeTok{ylab =} \StringTok{"Count"}\NormalTok{, }\AttributeTok{col =} \StringTok{"cornflowerblue"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{sl_markdown_files/figure-latex/unnamed-chunk-16-4.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{skewness}\NormalTok{(cleaned\_bank\_data}\SpecialCharTok{$}\NormalTok{Total\_Relationship\_Count)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] -0.1937823
+\end{verbatim}
+
+\end{document}
