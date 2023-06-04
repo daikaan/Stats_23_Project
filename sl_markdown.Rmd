@@ -122,7 +122,152 @@ dim(cleaned_bank_data)
 
 Data Preparation
 
-Since we are going to predict a probability, we will get a value between 0 and 1. We need to use logistic regression instead of linear regression.
+Since we have 0 and 1's as outcome and the outcomes for each row are independent we can use Logistic Regression. In our data, we are going to predict a probability of credit card churn. As a result, we will get a value between 0 and 1. 
+
+Since we have only one card category, we can remove Card Category column from now on.
+
+```{r}
+cleaned_bank_data <- subset(cleaned_bank_data, select = -c(Card_Category))
+head(cleaned_bank_data)
+```
+We are going to create our Logistic Regression model with 75% train size.
+```{r}
+set.seed(0987)
+
+sample <- sample.split(cleaned_bank_data$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(cleaned_bank_data[2:20],sample == TRUE)
+test <- subset(cleaned_bank_data[2:20],sample == FALSE)
+
+train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+
+train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+
+train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N = nrow(cleaned_bank_data))$data
+
+model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
+summary(model)$coeff
+
+summary(model)
+
+pred <- (predict(model, test) >= 0.5)*1
+
+mean(test$Attrition_Flag == pred)
+```
+
+
+```{r}
+cor_mat_new <- cor(cleaned_bank_data[2:20])
+corrplot(cor_mat_new,method = "number",type = "upper", tl.pos = "td",tl.cex=0.5, tl.col = "black" ,diag = FALSE)
+```
+Since we have almost perfectly correlation between Credit Limit and Average Open to Buy columns, we got NA on the summary. Because they will not given independent information in the model. So, we can drop Average Open to Buy
+
+```{r}
+set.seed(0987)
+
+cleaned_bank_data1 <- subset(cleaned_bank_data, select = -c(Avg_Open_To_Buy))
+
+sample <- sample.split(cleaned_bank_data1$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(cleaned_bank_data1[2:19],sample == TRUE)
+test <- subset(cleaned_bank_data1[2:19],sample == FALSE)
+
+train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+
+train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+
+train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N = nrow(cleaned_bank_data1))$data
+
+model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
+summary(model)$coeff
+
+summary(model)
+
+pred <- (predict(model, test) >= 0.5)*1
+
+mean(test$Attrition_Flag == pred)
+```
+From now on, we assume 95% confidence interwal for our model. We will delete columns with high p values by one by until we get all columns with at least '*'.
+
+So as a first step, we delete Months On Book.
+
+
+```{r}
+set.seed(0987)
+
+cleaned_bank_data2 <- subset(cleaned_bank_data1, select = -c(Months_on_book))
+
+sample <- sample.split(cleaned_bank_data2$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(cleaned_bank_data2[2:18],sample == TRUE)
+test <- subset(cleaned_bank_data2[2:18],sample == FALSE)
+
+train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+
+train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+
+train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N = nrow(cleaned_bank_data2))$data
+
+model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
+summary(model)$coeff
+
+summary(model)
+
+pred <- (predict(model, test) >= 0.5)*1
+
+mean(test$Attrition_Flag == pred)
+```
+Second step, delete Total Amount Change Q4-1.
+
+```{r}
+set.seed(0987)
+
+cleaned_bank_data3 <- subset(cleaned_bank_data2, select = -c(Total_Amt_Chng_Q4_Q1))
+
+sample <- sample.split(cleaned_bank_data3$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(cleaned_bank_data3[2:17],sample == TRUE)
+test <- subset(cleaned_bank_data3[2:17],sample == FALSE)
+
+train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+
+train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+
+train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N = nrow(cleaned_bank_data3))$data
+
+model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
+summary(model)$coeff
+
+summary(model)
+
+pred <- (predict(model, test) >= 0.5)*1
+
+mean(test$Attrition_Flag == pred)
+```
+Third step, delete Education Level.
+
+```{r}
+set.seed(0987)
+
+cleaned_bank_data4 <- subset(cleaned_bank_data3, select = -c(Education_Level))
+
+sample <- sample.split(cleaned_bank_data4$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(cleaned_bank_data4[2:16],sample == TRUE)
+test <- subset(cleaned_bank_data4[2:16],sample == FALSE)
+
+train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+
+train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+
+train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N = nrow(cleaned_bank_data4))$data
+
+model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
+summary(model)$coeff
+
+summary(model)
+
+pred <- (predict(model, test) >= 0.5)*1
+
+mean(test$Attrition_Flag == pred)
+```
+Finally, we get 88.7% Credit Card Churn accuracy, but we can increase the accuracy with normalizing all the available columns. If we normalize all the columns, model converges faster.
+
 ```{r}
 hist(cleaned_bank_data$Customer_Age, main = "Histogram for Customer Age", xlab = "Customer_Age", ylab = "Count", col = "cornflowerblue")
 
