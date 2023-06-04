@@ -30,10 +30,6 @@ colSums(is.na(bank_data)) #no null value
 
 #Customer age
 
-Cust.age.hist <- hist(quantitative$Customer_Age, xlab="age", ylab="freq",
-                      main="Customer age distribution", col="orange")
-Cust.age.hist
-
 #boxplot
 cust.age.boxplot <- boxplot(quantitative$Customer_Age, ylab = "age")
 cust.age.boxplot
@@ -41,6 +37,26 @@ cust.age.boxplot
 #using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, 
 #it is seen that customers over the age of 70 are outliers
 age.exc.list <- boxplot.stats(quantitative$Customer_Age)$out
+
+#Creating age groups
+quantitative[quantitative$Customer_Age <= 34, "age_group"] <- 1
+quantitative[quantitative$Customer_Age > 34 & quantitative$Customer_Age <= 44, "age_group"] <- 2
+quantitative[quantitative$Customer_Age > 44 & quantitative$Customer_Age <= 54, "age_group"] <- 3
+quantitative[quantitative$Customer_Age > 54, "age_group"] <- 4
+
+unique(bank_data$Attrition_Flag) #to make sure there are only 2 strings
+#change 'Existing Customer' to 1 and 'Attrited Customer' to 0 and add new column to quantitative
+quantitative$attrition_flag_binary <- ifelse(bank_data$Attrition_Flag=='Existing Customer', 1, 0)
+
+#grouped age histogram
+Grouped.age.hist <- hist(as.numeric(quantitative$age_group), xlab="age_group", ylab="freq", breaks=4,
+                         main="Customer age group distribution", col="green")
+
+# grouped age piechart
+library(RColorBrewer)
+myPalette <- brewer.pal(5, "Set2") 
+cust.age.piechart <- pie(count(quantitative, age_group)$n, border="white", col=myPalette)
+cust.age.piechart
 
 unique(bank_data$Attrition_Flag) #to make sure there are only 2 strings
 #change 'Existing Customer' to 1 and 'Attrited Customer' to 0 and add new column to quantitative
