@@ -78,10 +78,10 @@ order_Income_Category <- list("Unknown" = 0,
 bank_data$Income_Category <- unlist(order_Income_Category[as.character(bank_data$Income_Category)])
 
 
-order_Card_Category <- list("Blue" = 1,
-                            "Silver" = 2,
-                            "Gold" = 3,
-                            "Platinum" = 4)
+order_Card_Category <- list("Blue" = 0,
+                            "Silver" = 1,
+                            "Gold" = 2,
+                            "Platinum" = 3)
 bank_data$Card_Category <- unlist(order_Card_Category[as.character(bank_data$Card_Category)])
 
 
@@ -218,9 +218,9 @@ train_mix_2 <- ovun.sample(Attrition_Flag~.,data = train_2, method = "both", p =
 
 
 #Thresholds
-Threshold1 <- 0.4
-Threshold2 <- 0.5
-Threshold3 <- 0.6
+Threshold1 <- 0.3
+Threshold2 <- 0.4
+Threshold3 <- 0.5
 
 glm_1 <- glm(data = train_1,Attrition_Flag~ .,family = "binomial")
 summary(glm_1)
@@ -245,7 +245,17 @@ mean(pred_1_i==test_1$Attrition_Flag)*100
 mean(pred_2_i==test_1$Attrition_Flag)*100
 mean(pred_3_i==test_1$Attrition_Flag)*100
 
-#Precision
+#True Negative Rate / Specificity
+
+Spec_1_i <- c_mat_1_i[1,1]/sum(c_mat_1_i[1,])
+Spec_2_i <- c_mat_2_i[1,1]/sum(c_mat_2_i[1,])
+Spec_3_i <- c_mat_3_i[1,1]/sum(c_mat_3_i[1,])
+Spec_1_i
+Spec_2_i
+Spec_3_i
+
+
+#Precision / Positive Predicted Value
 
 Prec_1_i <- c_mat_1_i[2,2]/sum(c_mat_1_i[,2])
 Prec_2_i <- c_mat_2_i[2,2]/sum(c_mat_2_i[,2])
@@ -254,7 +264,7 @@ Prec_1_i
 Prec_2_i
 Prec_3_i
 
-#Recall
+#Recall / True Positive Rate / Sensitivity
 
 Rec_1_i <- c_mat_1_i[2,2]/sum(c_mat_1_i[2,])
 Rec_2_i <- c_mat_2_i[2,2]/sum(c_mat_2_i[2,])
@@ -326,7 +336,17 @@ mean(pred_1_f==test_1$Attrition_Flag)*100
 mean(pred_2_f==test_1$Attrition_Flag)*100
 mean(pred_3_f==test_1$Attrition_Flag)*100
 
-#Precision
+#True Negative Rate / Specificity
+
+Spec_1_f <- c_mat_1_f[1,1]/sum(c_mat_1_f[1,])
+Spec_2_f <- c_mat_2_f[1,1]/sum(c_mat_2_f[1,])
+Spec_3_f <- c_mat_3_f[1,1]/sum(c_mat_3_f[1,])
+Spec_1_f
+Spec_2_f
+Spec_3_f
+
+
+#Precision / Positive Predicted Value
 
 Prec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[,2])
 Prec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[,2])
@@ -335,7 +355,7 @@ Prec_1_f
 Prec_2_f
 Prec_3_f
 
-#Recall
+#Recall / True Positive Rate / Sensitivity
 
 Rec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[2,])
 Rec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[2,])
@@ -364,4 +384,648 @@ AUC_f <- auc(roc_f)
 
 plot(roc_i, col = "black",print.auc = TRUE, auc.polygon = TRUE, max.auc.polygon = TRUE, lwd=2,print.auc.x = 0.5,print.auc.y = 0.5)
 plot(roc_f,add = TRUE,col = "blue", print.auc = TRUE, lwd=2, print.auc.x = 0.5,print.auc.y = 0.43)
+
+#Best thresholds and Best Sensitivity and Specificity
+Best_Treshold_i <- coords(roc_i,"best",best.method = "youden")$threshold
+Best_pred_i <- ifelse(pred_glm_i >= Best_Treshold_i , 1,0)
+Best_c_mat_i <- table(test_1$Attrition_Flag,Best_pred_i)
+Best_Spec_i <- Best_c_mat_i[1,1]/sum(Best_c_mat_i[1,])
+Best_Sens_i <- Best_c_mat_i[2,2]/sum(Best_c_mat_i[2,])
+
+Best_Treshold_f <- coords(roc_f,"best",best.method = "youden")$threshold
+Best_pred_f <- ifelse(pred_glm_f >= Best_Treshold_f , 1,0)
+Best_c_mat_f <- table(test_1$Attrition_Flag,Best_pred_f)
+Best_Spec_f <- Best_c_mat_f[1,1]/sum(Best_c_mat_f[1,])
+Best_Sens_f <- Best_c_mat_f[2,2]/sum(Best_c_mat_f[2,])
+
+#Table to showing them
+Table_mat <-  matrix(c(Best_Treshold_i,Best_Spec_i,Best_Sens_i,Best_Treshold_f,Best_Spec_f,Best_Sens_f), ncol=3, byrow=TRUE)
+colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
+rownames(Table_mat) <- c("Initial model","Final model")
+Tab <- as.table(Table_mat)
+show(Tab)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Model without Unknown
+
+glm_1 <- glm(data = train_2,Attrition_Flag~ .,family = "binomial")
+summary(glm_1)
+
+pred_glm_i <- predict(glm_1,test_2,type="response")
+pred_1_i <- ifelse(pred_glm_i >= Threshold1 , 1,0)
+pred_2_i <- ifelse(pred_glm_i >= Threshold2 , 1,0)
+pred_3_i <- ifelse(pred_glm_i >= Threshold3 , 1,0)
+
+#Confusion matrix
+
+c_mat_1_i <- table(test_2$Attrition_Flag,pred_1_i)
+c_mat_2_i <- table(test_2$Attrition_Flag,pred_2_i)
+c_mat_3_i <- table(test_2$Attrition_Flag,pred_3_i)
+c_mat_1_i
+c_mat_2_i
+c_mat_3_i
+
+#Accuracy
+
+mean(pred_1_i==test_2$Attrition_Flag)*100
+mean(pred_2_i==test_2$Attrition_Flag)*100
+mean(pred_3_i==test_2$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_1_i <- c_mat_1_i[1,1]/sum(c_mat_1_i[1,])
+Spec_2_i <- c_mat_2_i[1,1]/sum(c_mat_2_i[1,])
+Spec_3_i <- c_mat_3_i[1,1]/sum(c_mat_3_i[1,])
+Spec_1_i
+Spec_2_i
+Spec_3_i
+
+
+#Precision / Positive Predicted Value
+
+Prec_1_i <- c_mat_1_i[2,2]/sum(c_mat_1_i[,2])
+Prec_2_i <- c_mat_2_i[2,2]/sum(c_mat_2_i[,2])
+Prec_3_i <- c_mat_3_i[2,2]/sum(c_mat_3_i[,2])
+Prec_1_i
+Prec_2_i
+Prec_3_i
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_1_i <- c_mat_1_i[2,2]/sum(c_mat_1_i[2,])
+Rec_2_i <- c_mat_2_i[2,2]/sum(c_mat_2_i[2,])
+Rec_3_i <- c_mat_3_i[2,2]/sum(c_mat_3_i[2,])
+Rec_1_i
+Rec_2_i
+Rec_3_i
+
+#F1 Score
+
+F1_1_i <- 2 * (Prec_1_i * Rec_1_i)/(Prec_1_i + Rec_1_i)
+F1_2_i <- 2 * (Prec_2_i * Rec_2_i)/(Prec_2_i + Rec_2_i)
+F1_3_i <- 2 * (Prec_3_i * Rec_3_i)/(Prec_3_i + Rec_3_i)
+F1_1_i
+F1_2_i
+F1_3_i
+
+#VIF
+
+vif(glm_1)
+
+#Update Checking p-values and AIC
+
+glm_2 <- update(glm_1, . ~ . - Education_Level - Customer_Age - Months_on_book - Credit_Limit - Avg_Utilization_Ratio)
+summary(glm_2)
+
+
+glm_3 <- update(glm_2, . ~ . + Total_Trans_Ct*Total_Trans_Amt + Total_Trans_Ct*Total_Revolving_Bal + Total_Trans_Ct*Is_Female + Total_Trans_Ct*Avg_Utilization_Ratio + Total_Trans_Ct*Marital_Status)
+summary(glm_3)
+
+
+glm_4 <- update(glm_3, . ~ . + Total_Relationship_Count*Total_Trans_Amt )
+summary(glm_4)
+
+
+glm_5 <- update(glm_4, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio + Total_Revolving_Bal*Credit_Limit - Total_Trans_Amt:Total_Trans_Ct)
+summary(glm_5)
+
+
+glm_6 <- update(glm_5, . ~ . + Is_Female*Avg_Utilization_Ratio)
+summary(glm_6)
+
+
+glm_7 <- update(glm_6, . ~ . + Dependent_count*Total_Trans_Ct)
+summary(glm_7)
+
+
+glm_8 <- update(glm_7, . ~ . + Credit_Limit*Total_Trans_Amt -Total_Trans_Ct:Avg_Utilization_Ratio - Is_Female:Total_Trans_Ct + Total_Trans_Amt*Total_Trans_Ct)
+summary(glm_8)
+
+
+pred_glm_f <- predict(glm_8,test_2,type="response")
+pred_1_f <- ifelse(pred_glm_f >= Threshold1 , 1,0)
+pred_2_f <- ifelse(pred_glm_f >= Threshold2 , 1,0)
+pred_3_f <- ifelse(pred_glm_f >= Threshold3 , 1,0)
+
+#Confusion matrix
+
+c_mat_1_f <- table(test_2$Attrition_Flag,pred_1_f)
+c_mat_2_f <- table(test_2$Attrition_Flag,pred_2_f)
+c_mat_3_f <- table(test_2$Attrition_Flag,pred_3_f)
+c_mat_1_f
+c_mat_2_f
+c_mat_3_f
+
+#Accuracy
+
+mean(pred_1_f==test_2$Attrition_Flag)*100
+mean(pred_2_f==test_2$Attrition_Flag)*100
+mean(pred_3_f==test_2$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_1_f <- c_mat_1_f[1,1]/sum(c_mat_1_f[1,])
+Spec_2_f <- c_mat_2_f[1,1]/sum(c_mat_2_f[1,])
+Spec_3_f <- c_mat_3_f[1,1]/sum(c_mat_3_f[1,])
+Spec_1_f
+Spec_2_f
+Spec_3_f
+
+
+#Precision / Positive Predicted Value
+
+Prec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[,2])
+Prec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[,2])
+Prec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[,2])
+Prec_1_f
+Prec_2_f
+Prec_3_f
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[2,])
+Rec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[2,])
+Rec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[2,])
+Rec_1_f
+Rec_2_f
+Rec_3_f
+
+#F1 Score
+
+F1_1_f <- 2 * (Prec_1_f * Rec_1_f)/(Prec_1_f + Rec_1_f)
+F1_2_f <- 2 * (Prec_2_f * Rec_2_f)/(Prec_2_f + Rec_2_f)
+F1_3_f <- 2 * (Prec_3_f * Rec_3_f)/(Prec_3_f + Rec_3_f)
+F1_1_f
+F1_2_f
+F1_3_f
+
+
+#ROC curves
+roc_i <- roc(test_2$Attrition_Flag ~ pred_glm_i)
+roc_f <- roc(test_2$Attrition_Flag ~ pred_glm_f)
+
+AUC_i <- auc(roc_i)
+AUC_f <- auc(roc_f)
+
+
+plot(roc_i, col = "black",print.auc = TRUE, auc.polygon = TRUE, max.auc.polygon = TRUE, lwd=2,print.auc.x = 0.5,print.auc.y = 0.5)
+plot(roc_f,add = TRUE,col = "blue", print.auc = TRUE, lwd=2, print.auc.x = 0.5,print.auc.y = 0.43)
+
+#Best thresholds and Best Sensitivity and Specificity
+Best_Treshold_i <- coords(roc_i,"best",best.method = "youden")$threshold
+Best_pred_i <- ifelse(pred_glm_i >= Best_Treshold_i , 1,0)
+Best_c_mat_i <- table(test_2$Attrition_Flag,Best_pred_i)
+Best_Spec_i <- Best_c_mat_i[1,1]/sum(Best_c_mat_i[1,])
+Best_Sens_i <- Best_c_mat_i[2,2]/sum(Best_c_mat_i[2,])
+
+Best_Treshold_f <- coords(roc_f,"best",best.method = "youden")$threshold
+Best_pred_f <- ifelse(pred_glm_f >= Best_Treshold_f , 1,0)
+Best_c_mat_f <- table(test_2$Attrition_Flag,Best_pred_f)
+Best_Spec_f <- Best_c_mat_f[1,1]/sum(Best_c_mat_f[1,])
+Best_Sens_f <- Best_c_mat_f[2,2]/sum(Best_c_mat_f[2,])
+
+#Table to showing them
+Table_mat <-  matrix(c(Best_Treshold_i,Best_Spec_i,Best_Sens_i,Best_Treshold_f,Best_Spec_f,Best_Sens_f), ncol=3, byrow=TRUE)
+colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
+rownames(Table_mat) <- c("Initial model","Final model")
+Tab <- as.table(Table_mat)
+show(Tab)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Let's check the model built on the balanced dataset
+
+
+
+#Thresholds
+Threshold1 <- 0.4
+Threshold2 <- 0.5
+Threshold3 <- 0.6
+
+glm_1 <- glm(data = train_mix_1,Attrition_Flag~ .,family = "binomial")
+summary(glm_1)
+
+pred_glm_i <- predict(glm_1,test_1,type="response")
+pred_1_i <- ifelse(pred_glm_i >= Threshold1 , 1,0)
+pred_2_i <- ifelse(pred_glm_i >= Threshold2 , 1,0)
+pred_3_i <- ifelse(pred_glm_i >= Threshold3 , 1,0)
+
+#Confusion matrix
+
+c_mat_1_i <- table(test_1$Attrition_Flag,pred_1_i)
+c_mat_2_i <- table(test_1$Attrition_Flag,pred_2_i)
+c_mat_3_i <- table(test_1$Attrition_Flag,pred_3_i)
+c_mat_1_i
+c_mat_2_i
+c_mat_3_i
+
+#Accuracy
+
+mean(pred_1_i==test_1$Attrition_Flag)*100
+mean(pred_2_i==test_1$Attrition_Flag)*100
+mean(pred_3_i==test_1$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_1_i <- c_mat_1_i[1,1]/sum(c_mat_1_i[1,])
+Spec_2_i <- c_mat_2_i[1,1]/sum(c_mat_2_i[1,])
+Spec_3_i <- c_mat_3_i[1,1]/sum(c_mat_3_i[1,])
+Spec_1_i
+Spec_2_i
+Spec_3_i
+
+
+#Precision / Positive Predicted Value
+
+Prec_1_i <- c_mat_1_i[2,2]/sum(c_mat_1_i[,2])
+Prec_2_i <- c_mat_2_i[2,2]/sum(c_mat_2_i[,2])
+Prec_3_i <- c_mat_3_i[2,2]/sum(c_mat_3_i[,2])
+Prec_1_i
+Prec_2_i
+Prec_3_i
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_1_i <- c_mat_1_i[2,2]/sum(c_mat_1_i[2,])
+Rec_2_i <- c_mat_2_i[2,2]/sum(c_mat_2_i[2,])
+Rec_3_i <- c_mat_3_i[2,2]/sum(c_mat_3_i[2,])
+Rec_1_i
+Rec_2_i
+Rec_3_i
+
+#F1 Score
+
+F1_1_i <- 2 * (Prec_1_i * Rec_1_i)/(Prec_1_i + Rec_1_i)
+F1_2_i <- 2 * (Prec_2_i * Rec_2_i)/(Prec_2_i + Rec_2_i)
+F1_3_i <- 2 * (Prec_3_i * Rec_3_i)/(Prec_3_i + Rec_3_i)
+F1_1_i
+F1_2_i
+F1_3_i
+
+#VIF
+
+vif(glm_1)
+
+#Update Checking p-values and AIC
+
+glm_2 <- update(glm_1, . ~ . - Months_on_book - Education_Level)
+summary(glm_2)
+
+
+glm_3 <- update(glm_2, . ~ .  + Total_Trans_Ct*Is_Female + Total_Trans_Ct*Marital_Status)
+summary(glm_3)
+
+
+glm_4 <- update(glm_3, . ~ . + Total_Relationship_Count*Total_Trans_Amt - Credit_Limit)
+summary(glm_4)
+
+
+glm_5 <- update(glm_4, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio + Total_Revolving_Bal*Credit_Limit)
+summary(glm_5)
+
+
+glm_6 <- update(glm_5, . ~ . + Is_Female*Credit_Limit + Income_Category*Credit_Limit)
+summary(glm_6)
+
+
+glm_7 <- update(glm_6, . ~ . + Dependent_count*Total_Trans_Ct + Customer_Age*Months_on_book )
+summary(glm_7)
+
+
+glm_8 <- update(glm_7, . ~ . + Credit_Limit*Total_Trans_Amt - Total_Revolving_Bal:Credit_Limit)
+summary(glm_8)
+
+
+glm_9 <- update(glm_8, . ~ . + Avg_Utilization_Ratio*Credit_Limit + Avg_Utilization_Ratio*Total_Trans_Amt - Avg_Utilization_Ratio )
+summary(glm_9)
+
+
+pred_glm_f <- predict(glm_9,test_1,type="response")
+pred_1_f <- ifelse(pred_glm_f >= Threshold1 , 1,0)
+pred_2_f <- ifelse(pred_glm_f >= Threshold2 , 1,0)
+pred_3_f <- ifelse(pred_glm_f >= Threshold3 , 1,0)
+
+#Confusion matrix
+
+c_mat_1_f <- table(test_1$Attrition_Flag,pred_1_f)
+c_mat_2_f <- table(test_1$Attrition_Flag,pred_2_f)
+c_mat_3_f <- table(test_1$Attrition_Flag,pred_3_f)
+c_mat_1_f
+c_mat_2_f
+c_mat_3_f
+
+#Accuracy
+
+mean(pred_1_f==test_1$Attrition_Flag)*100
+mean(pred_2_f==test_1$Attrition_Flag)*100
+mean(pred_3_f==test_1$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_1_f <- c_mat_1_f[1,1]/sum(c_mat_1_f[1,])
+Spec_2_f <- c_mat_2_f[1,1]/sum(c_mat_2_f[1,])
+Spec_3_f <- c_mat_3_f[1,1]/sum(c_mat_3_f[1,])
+Spec_1_f
+Spec_2_f
+Spec_3_f
+
+
+#Precision / Positive Predicted Value
+
+Prec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[,2])
+Prec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[,2])
+Prec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[,2])
+Prec_1_f
+Prec_2_f
+Prec_3_f
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[2,])
+Rec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[2,])
+Rec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[2,])
+Rec_1_f
+Rec_2_f
+Rec_3_f
+
+#F1 Score
+
+F1_1_f <- 2 * (Prec_1_f * Rec_1_f)/(Prec_1_f + Rec_1_f)
+F1_2_f <- 2 * (Prec_2_f * Rec_2_f)/(Prec_2_f + Rec_2_f)
+F1_3_f <- 2 * (Prec_3_f * Rec_3_f)/(Prec_3_f + Rec_3_f)
+F1_1_f
+F1_2_f
+F1_3_f
+
+
+#ROC curves
+roc_i <- roc(test_1$Attrition_Flag ~ pred_glm_i)
+roc_f <- roc(test_1$Attrition_Flag ~ pred_glm_f)
+
+AUC_i <- auc(roc_i)
+AUC_f <- auc(roc_f)
+
+
+plot(roc_i, col = "black",print.auc = TRUE, auc.polygon = TRUE, max.auc.polygon = TRUE, lwd=2,print.auc.x = 0.5,print.auc.y = 0.5)
+plot(roc_f,add = TRUE,col = "blue", print.auc = TRUE, lwd=2, print.auc.x = 0.5,print.auc.y = 0.43)
+
+#Best thresholds and Best Sensitivity and Specificity
+Best_Treshold_i <- coords(roc_i,"best",best.method = "youden")$threshold
+Best_pred_i <- ifelse(pred_glm_i >= Best_Treshold_i , 1,0)
+Best_c_mat_i <- table(test_1$Attrition_Flag,Best_pred_i)
+Best_Spec_i <- Best_c_mat_i[1,1]/sum(Best_c_mat_i[1,])
+Best_Sens_i <- Best_c_mat_i[2,2]/sum(Best_c_mat_i[2,])
+
+Best_Treshold_f <- coords(roc_f,"best",best.method = "youden")$threshold
+Best_pred_f <- ifelse(pred_glm_f >= Best_Treshold_f , 1,0)
+Best_c_mat_f <- table(test_1$Attrition_Flag,Best_pred_f)
+Best_Spec_f <- Best_c_mat_f[1,1]/sum(Best_c_mat_f[1,])
+Best_Sens_f <- Best_c_mat_f[2,2]/sum(Best_c_mat_f[2,])
+
+#Table to showing them
+Table_mat <-  matrix(c(Best_Treshold_i,Best_Spec_i,Best_Sens_i,Best_Treshold_f,Best_Spec_f,Best_Sens_f), ncol=3, byrow=TRUE)
+colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
+rownames(Table_mat) <- c("Initial model","Final model")
+Tab <- as.table(Table_mat)
+show(Tab)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Model without Unknown
+
+glm_1 <- glm(data = train_2,Attrition_Flag~ .,family = "binomial")
+summary(glm_1)
+
+pred_glm_i <- predict(glm_1,test_2,type="response")
+pred_1_i <- ifelse(pred_glm_i >= Threshold1 , 1,0)
+pred_2_i <- ifelse(pred_glm_i >= Threshold2 , 1,0)
+pred_3_i <- ifelse(pred_glm_i >= Threshold3 , 1,0)
+
+#Confusion matrix
+
+c_mat_1_i <- table(test_2$Attrition_Flag,pred_1_i)
+c_mat_2_i <- table(test_2$Attrition_Flag,pred_2_i)
+c_mat_3_i <- table(test_2$Attrition_Flag,pred_3_i)
+c_mat_1_i
+c_mat_2_i
+c_mat_3_i
+
+#Accuracy
+
+mean(pred_1_i==test_2$Attrition_Flag)*100
+mean(pred_2_i==test_2$Attrition_Flag)*100
+mean(pred_3_i==test_2$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_1_i <- c_mat_1_i[1,1]/sum(c_mat_1_i[1,])
+Spec_2_i <- c_mat_2_i[1,1]/sum(c_mat_2_i[1,])
+Spec_3_i <- c_mat_3_i[1,1]/sum(c_mat_3_i[1,])
+Spec_1_i
+Spec_2_i
+Spec_3_i
+
+
+#Precision / Positive Predicted Value
+
+Prec_1_i <- c_mat_1_i[2,2]/sum(c_mat_1_i[,2])
+Prec_2_i <- c_mat_2_i[2,2]/sum(c_mat_2_i[,2])
+Prec_3_i <- c_mat_3_i[2,2]/sum(c_mat_3_i[,2])
+Prec_1_i
+Prec_2_i
+Prec_3_i
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_1_i <- c_mat_1_i[2,2]/sum(c_mat_1_i[2,])
+Rec_2_i <- c_mat_2_i[2,2]/sum(c_mat_2_i[2,])
+Rec_3_i <- c_mat_3_i[2,2]/sum(c_mat_3_i[2,])
+Rec_1_i
+Rec_2_i
+Rec_3_i
+
+#F1 Score
+
+F1_1_i <- 2 * (Prec_1_i * Rec_1_i)/(Prec_1_i + Rec_1_i)
+F1_2_i <- 2 * (Prec_2_i * Rec_2_i)/(Prec_2_i + Rec_2_i)
+F1_3_i <- 2 * (Prec_3_i * Rec_3_i)/(Prec_3_i + Rec_3_i)
+F1_1_i
+F1_2_i
+F1_3_i
+
+#VIF
+
+vif(glm_1)
+
+#Update Checking p-values and AIC
+
+glm_2 <- update(glm_1, . ~ . - Education_Level - Customer_Age - Months_on_book - Credit_Limit - Avg_Utilization_Ratio)
+summary(glm_2)
+
+
+glm_3 <- update(glm_2, . ~ . + Total_Trans_Ct*Total_Trans_Amt + Total_Trans_Ct*Total_Revolving_Bal + Total_Trans_Ct*Is_Female + Total_Trans_Ct*Avg_Utilization_Ratio + Total_Trans_Ct*Marital_Status)
+summary(glm_3)
+
+
+glm_4 <- update(glm_3, . ~ . + Total_Relationship_Count*Total_Trans_Amt )
+summary(glm_4)
+
+
+glm_5 <- update(glm_4, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio + Total_Revolving_Bal*Credit_Limit - Total_Trans_Amt:Total_Trans_Ct)
+summary(glm_5)
+
+
+glm_6 <- update(glm_5, . ~ . + Is_Female*Avg_Utilization_Ratio)
+summary(glm_6)
+
+
+glm_7 <- update(glm_6, . ~ . + Dependent_count*Total_Trans_Ct)
+summary(glm_7)
+
+
+glm_8 <- update(glm_7, . ~ . + Credit_Limit*Total_Trans_Amt -Total_Trans_Ct:Avg_Utilization_Ratio - Is_Female:Total_Trans_Ct + Total_Trans_Amt*Total_Trans_Ct)
+summary(glm_8)
+
+
+pred_glm_f <- predict(glm_8,test_2,type="response")
+pred_1_f <- ifelse(pred_glm_f >= Threshold1 , 1,0)
+pred_2_f <- ifelse(pred_glm_f >= Threshold2 , 1,0)
+pred_3_f <- ifelse(pred_glm_f >= Threshold3 , 1,0)
+
+#Confusion matrix
+
+c_mat_1_f <- table(test_2$Attrition_Flag,pred_1_f)
+c_mat_2_f <- table(test_2$Attrition_Flag,pred_2_f)
+c_mat_3_f <- table(test_2$Attrition_Flag,pred_3_f)
+c_mat_1_f
+c_mat_2_f
+c_mat_3_f
+
+#Accuracy
+
+mean(pred_1_f==test_2$Attrition_Flag)*100
+mean(pred_2_f==test_2$Attrition_Flag)*100
+mean(pred_3_f==test_2$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_1_f <- c_mat_1_f[1,1]/sum(c_mat_1_f[1,])
+Spec_2_f <- c_mat_2_f[1,1]/sum(c_mat_2_f[1,])
+Spec_3_f <- c_mat_3_f[1,1]/sum(c_mat_3_f[1,])
+Spec_1_f
+Spec_2_f
+Spec_3_f
+
+
+#Precision / Positive Predicted Value
+
+Prec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[,2])
+Prec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[,2])
+Prec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[,2])
+Prec_1_f
+Prec_2_f
+Prec_3_f
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[2,])
+Rec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[2,])
+Rec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[2,])
+Rec_1_f
+Rec_2_f
+Rec_3_f
+
+#F1 Score
+
+F1_1_f <- 2 * (Prec_1_f * Rec_1_f)/(Prec_1_f + Rec_1_f)
+F1_2_f <- 2 * (Prec_2_f * Rec_2_f)/(Prec_2_f + Rec_2_f)
+F1_3_f <- 2 * (Prec_3_f * Rec_3_f)/(Prec_3_f + Rec_3_f)
+F1_1_f
+F1_2_f
+F1_3_f
+
+
+#ROC curves
+roc_i <- roc(test_2$Attrition_Flag ~ pred_glm_i)
+roc_f <- roc(test_2$Attrition_Flag ~ pred_glm_f)
+
+AUC_i <- auc(roc_i)
+AUC_f <- auc(roc_f)
+
+
+plot(roc_i, col = "black",print.auc = TRUE, auc.polygon = TRUE, max.auc.polygon = TRUE, lwd=2,print.auc.x = 0.5,print.auc.y = 0.5)
+plot(roc_f,add = TRUE,col = "blue", print.auc = TRUE, lwd=2, print.auc.x = 0.5,print.auc.y = 0.43)
+
+#Best thresholds and Best Sensitivity and Specificity
+Best_Treshold_i <- coords(roc_i,"best",best.method = "youden")$threshold
+Best_pred_i <- ifelse(pred_glm_i >= Best_Treshold_i , 1,0)
+Best_c_mat_i <- table(test_2$Attrition_Flag,Best_pred_i)
+Best_Spec_i <- Best_c_mat_i[1,1]/sum(Best_c_mat_i[1,])
+Best_Sens_i <- Best_c_mat_i[2,2]/sum(Best_c_mat_i[2,])
+
+Best_Treshold_f <- coords(roc_f,"best",best.method = "youden")$threshold
+Best_pred_f <- ifelse(pred_glm_f >= Best_Treshold_f , 1,0)
+Best_c_mat_f <- table(test_2$Attrition_Flag,Best_pred_f)
+Best_Spec_f <- Best_c_mat_f[1,1]/sum(Best_c_mat_f[1,])
+Best_Sens_f <- Best_c_mat_f[2,2]/sum(Best_c_mat_f[2,])
+
+#Table to showing them
+Table_mat <-  matrix(c(Best_Treshold_i,Best_Spec_i,Best_Sens_i,Best_Treshold_f,Best_Spec_f,Best_Sens_f), ncol=3, byrow=TRUE)
+colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
+rownames(Table_mat) <- c("Initial model","Final model")
+Tab <- as.table(Table_mat)
+show(Tab)
 
