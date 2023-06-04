@@ -29,16 +29,18 @@ colSums(is.na(bank_data)) #no null value
 # Descriptive Graphs
 
 #Customer age
+
 Cust.age.hist <- hist(quantitative$Customer_Age, xlab="age", ylab="freq",
                       main="Customer age distribution", col="orange")
 Cust.age.hist
-#using the histogram, dividing ages into 4 groups seems satisfying
 
-#Creating age groups
-quantitative[quantitative$Customer_Age <= 34, "age_group"] <- 1
-quantitative[quantitative$Customer_Age > 34 & quantitative$Customer_Age <= 44, "age_group"] <- 2
-quantitative[quantitative$Customer_Age > 44 & quantitative$Customer_Age <= 54, "age_group"] <- 3
-quantitative[quantitative$Customer_Age > 54, "age_group"] <- 4
+#boxplot
+cust.age.boxplot <- boxplot(quantitative$Customer_Age, ylab = "age")
+cust.age.boxplot
+
+#using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, 
+#it is seen that customers over the age of 70 are outliers
+age.exc.list <- boxplot.stats(quantitative$Customer_Age)$out
 
 unique(bank_data$Attrition_Flag) #to make sure there are only 2 strings
 #change 'Existing Customer' to 1 and 'Attrited Customer' to 0 and add new column to quantitative
