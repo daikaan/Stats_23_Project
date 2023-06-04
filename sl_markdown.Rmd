@@ -1,6 +1,8 @@
 ---
 title: "sl_project"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 date: "2023-06-01"
 ---
 
@@ -268,14 +270,32 @@ mean(test$Attrition_Flag == pred)
 ```
 Finally, we get 88.7% Credit Card Churn accuracy, but we can increase the accuracy with normalizing all the available columns. If we normalize all the columns, model converges faster.
 
+In order to make the columns, we investigate the skewness of the each column. If the skewness between -1 and 1, we can say the column is normally distributed. Otherwise, we should rescale the column with applying some functions and look their skewness again until we get desired value.
+
 ```{r}
 hist(cleaned_bank_data$Customer_Age, main = "Histogram for Customer Age", xlab = "Customer_Age", ylab = "Count", col = "cornflowerblue")
 
 skewness(cleaned_bank_data$Customer_Age)
 
+hist(cleaned_bank_data$Is_Female, main = "Histogram for Sex", xlab = "Is_Female", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Is_Female)
+
 hist(cleaned_bank_data$Dependent_count, main = "Histogram for Dependent Count", xlab = "Dependent_count", ylab = "Count", col = "cornflowerblue")
 
 skewness(cleaned_bank_data$Dependent_count)
+
+hist(cleaned_bank_data$Education_Level, main = "Histogram for Education Level", xlab = "Education Level", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Education_Level)
+
+hist(cleaned_bank_data$Marital_Status, main = "Histogram for Marital Status", xlab = "Marital_Status", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Marital_Status)
+
+hist(cleaned_bank_data$Income_Category, main = "Histogram for Income Category", xlab = "Income_Category", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Income_Category)
 
 hist(cleaned_bank_data$Months_on_book, main = "Histogram for Months On Book", xlab = "Months_on_book", ylab = "Count", col = "cornflowerblue")
 
@@ -285,4 +305,208 @@ hist(cleaned_bank_data$Total_Relationship_Count, main = "Histogram for Total Rel
 
 skewness(cleaned_bank_data$Total_Relationship_Count)
 
+hist(cleaned_bank_data$Months_Inactive_12_mon, main = "Histogram for Months Inactive in 12 Months", xlab = "Months_Inactive_12_mon", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Months_Inactive_12_mon)
+
+hist(cleaned_bank_data$Contacts_Count_12_mon, main = "Histogram for Contacts Count in 12 Months", xlab = "Contacts_Count_12_mon", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Contacts_Count_12_mon)
+
+hist(cleaned_bank_data$Credit_Limit, main = "Histogram for Credit Limit", xlab = "Credit_Limit", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Credit_Limit)
+
+hist(log1p(cleaned_bank_data$Credit_Limit), main = "Histogram for Log Credit Limit", xlab = "Log_Credit_Limit", ylab = "Count", col = "cornflowerblue")
+
+skewness(log1p(cleaned_bank_data$Credit_Limit))
+
+hist(cleaned_bank_data$Total_Revolving_Bal, main = "Histogram for Total Revolving Balance", xlab = "Total_Revolving_Bal", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Total_Revolving_Bal)
+
+hist(cleaned_bank_data$Avg_Open_To_Buy, main = "Histogram for Average Open To Buy", xlab = "Avg_Open_To_Buy", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Avg_Open_To_Buy)
+
+hist(log1p(cleaned_bank_data$Avg_Open_To_Buy), main = "Histogram for Log Average Open To Buy", xlab = "Log_Avg_Open_To_Buy", ylab = "Count", col = "cornflowerblue")
+
+skewness(log1p(cleaned_bank_data$Avg_Open_To_Buy))
+
+hist(cleaned_bank_data$Total_Amt_Chng_Q4_Q1, main = "Histogram for Total Amount Change Q4-Q1", xlab = "Total_Amt_Chng_Q4_Q1", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Total_Amt_Chng_Q4_Q1)
+
+hist(log1p(cleaned_bank_data$Total_Amt_Chng_Q4_Q1), main = "Histogram for Log Total Amount Change Q4-Q1", xlab = "Log_Total_Amt_Chng_Q4_Q1", ylab = "Count", col = "cornflowerblue")
+
+skewness(log1p(cleaned_bank_data$Total_Amt_Chng_Q4_Q1))
+
+hist(cleaned_bank_data$Total_Trans_Amt, main = "Histogram for Total Transaction Amount", xlab = "Total_Trans_Amt", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Total_Trans_Amt)
+
+hist(log1p(cleaned_bank_data$Total_Trans_Amt), main = "Histogram for Log Total Transaction Amount", xlab = "Log_Total_Trans_Amt", ylab = "Count", col = "cornflowerblue")
+
+skewness(log1p(cleaned_bank_data$Total_Trans_Amt))
+
+hist(cleaned_bank_data$Total_Trans_Ct, main = "Histogram for Total Transaction Count", xlab = "Total_Trans_Ct", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Total_Trans_Ct)
+
+hist(cleaned_bank_data$Total_Ct_Chng_Q4_Q1, main = "Histogram for Total Count Change in 12 Months", xlab = "Total_Ct_Chng_Q4_Q1", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Total_Ct_Chng_Q4_Q1)
+
+hist(log1p(cleaned_bank_data$Total_Ct_Chng_Q4_Q1), main = "Histogram for Log Total Count Change in 12 Months", xlab = "Log_Total_Ct_Chng_Q4_Q1", ylab = "Count", col = "cornflowerblue")
+
+skewness(log1p(cleaned_bank_data$Total_Ct_Chng_Q4_Q1))
+
+hist(cleaned_bank_data$Avg_Utilization_Ratio, main = "Histogram for Average Utilitization Ratio", xlab = "Avg_Utilization_Ratio", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Avg_Utilization_Ratio)
 ```
+
+Create new table with taking logarithm for the columns:
+Credit_Limit
+Avg_Open_To_Buy
+Total_Amt_Chng_Q4_Q1
+Total_Trans_Amt
+Total_Ct_Chng_Q4_Q1
+
+```{r}
+log_cleaned_bank_data <- cleaned_bank_data
+
+log_cleaned_bank_data$Credit_Limit <- log1p(log_cleaned_bank_data$Credit_Limit)
+colnames(log_cleaned_bank_data)[13] <- "log_Credit_Limit"
+
+log_cleaned_bank_data$Avg_Open_To_Buy <- log1p(log_cleaned_bank_data$Avg_Open_To_Buy)
+colnames(log_cleaned_bank_data)[15] <- "log_Avg_Open_To_Buy"
+
+log_cleaned_bank_data$Total_Amt_Chng_Q4_Q1 <- log1p(log_cleaned_bank_data$Total_Amt_Chng_Q4_Q1)
+colnames(log_cleaned_bank_data)[16] <- "log_Total_Amt_Chng_Q4_Q1"
+
+log_cleaned_bank_data$Total_Trans_Amt <- log1p(log_cleaned_bank_data$Total_Trans_Amt)
+colnames(log_cleaned_bank_data)[17] <- "log_Total_Trans_Amt"
+
+log_cleaned_bank_data$Total_Ct_Chng_Q4_Q1 <- log1p(log_cleaned_bank_data$Total_Ct_Chng_Q4_Q1)
+colnames(log_cleaned_bank_data)[19] <- "log_Total_Ct_Chng_Q4_Q1"
+
+head(log_cleaned_bank_data)
+```
+
+And now, create Logistic Regression Model again with the latest table.
+
+```{r}
+set.seed(0987)
+
+sample <- sample.split(log_cleaned_bank_data$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(log_cleaned_bank_data[2:20],sample == TRUE)
+test <- subset(log_cleaned_bank_data[2:20],sample == FALSE)
+
+train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+
+train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+
+train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N = nrow(log_cleaned_bank_data))$data
+
+model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
+summary(model)$coeff
+
+summary(model)
+
+pred <- (predict(model, test) >= 0.5)*1
+
+mean(test$Attrition_Flag == pred)
+```
+
+First, we should remove Months On Book.
+
+```{r}
+log_cleaned_bank_data1 <- subset(log_cleaned_bank_data, select = -c(Months_on_book))
+
+set.seed(0987)
+
+sample <- sample.split(log_cleaned_bank_data1$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(log_cleaned_bank_data1[2:19],sample == TRUE)
+test <- subset(log_cleaned_bank_data1[2:19],sample == FALSE)
+
+# Under-sampling
+train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+
+# Over-sampling
+train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+
+#Mixed Sampling with 40% of Attrited Customer
+
+train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N = nrow(log_cleaned_bank_data1))$data
+
+
+model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
+summary(model)$coeff
+
+summary(model)
+
+pred <- (predict(model, test) >= 0.5)*1
+
+mean(test$Attrition_Flag == pred)
+```
+Than, we should remove Education Level.
+
+```{r}
+log_cleaned_bank_data2 <- subset(log_cleaned_bank_data1, select = -c(Education_Level))
+
+sample <- sample.split(log_cleaned_bank_data2$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(log_cleaned_bank_data2[2:18],sample == TRUE)
+test <- subset(log_cleaned_bank_data2[2:18],sample == FALSE)
+
+# Under-sampling
+train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+
+# Over-sampling
+train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+
+#Mixed Sampling with 40% of Attrited Customer
+
+train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N = nrow(log_cleaned_bank_data2))$data
+
+
+model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
+summary(model)$coeff
+
+summary(model)
+
+pred <- (predict(model, test) >= 0.5)*1
+
+mean(test$Attrition_Flag == pred)
+```
+Finally, we should remove Dependent Count.
+
+```{r}
+log_cleaned_bank_data3 <- subset(log_cleaned_bank_data2, select = -c(Dependent_count))
+
+sample <- sample.split(log_cleaned_bank_data3$Attrition_Flag,SplitRatio = 0.75)
+train <- subset(log_cleaned_bank_data3[2:17],sample == TRUE)
+test <- subset(log_cleaned_bank_data3[2:17],sample == FALSE)
+
+# Under-sampling
+train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+
+# Over-sampling
+train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+
+#Mixed Sampling with 40% of Attrited Customer
+
+train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N = nrow(log_cleaned_bank_data3))$data
+
+
+model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
+summary(model)$coeff
+
+summary(model)
+
+pred <- (predict(model, test) >= 0.5)*1
+
+mean(test$Attrition_Flag == pred)
+```
+
+As a result, we get 90.4% Credit Card Churn accuracy.
