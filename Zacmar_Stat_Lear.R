@@ -5,6 +5,7 @@ library("ggpubr")
 library("ROSE")
 library("corpcor")
 library("car")
+library("e1071")
 library("correlation")
 library("ppcor")
 library("pROC")
@@ -98,8 +99,8 @@ corrplot(cor_mat_tot,method = "number",type = "upper",number.cex = 0.6, tl.pos =
 #Correlation with Attrition_Flag
 corrplot(cor_mat_tot[1,,drop=FALSE],method = "number",number.cex = 0.6, cl.pos = "n",tl.col = "black" ,tl.cex=0.5,diag = FALSE)
 
-#Since Credit_Limit and Avg_Open_To_Buy have correlation 1 we can remove Credit_Limit
-bank_data <- subset(bank_data, select = -c(Credit_Limit))
+#Since Credit_Limit and Avg_Open_To_Buy have correlation 1 we can remove Avg_Open_To_Buy
+bank_data <- subset(bank_data, select = -c(Avg_Open_To_Buy))
 
 #Partial correlations (Takes time)
 correlation(bank_data,partial = TRUE)
@@ -159,13 +160,13 @@ skewness(bank_data$Income_Category)
 skewness(bank_data$Total_Ct_Chng_Q4_Q1)
 skewness(bank_data$Total_Trans_Amt)
 skewness(bank_data$Total_Amt_Chng_Q4_Q1)
-skewness(bank_data$Avg_Open_To_Buy)
+skewness(bank_data$Credit_Limit)
 
 #they are normally dist now
 skewness(log1p(bank_data$Total_Ct_Chng_Q4_Q1))
 skewness(log1p(bank_data$Total_Trans_Amt))
 skewness(log1p(bank_data$Total_Amt_Chng_Q4_Q1))
-skewness(log1p(bank_data$Avg_Open_To_Buy))
+skewness(log1p(bank_data$Credit_Limit))
 
 
 bank_data$Total_Ct_Chng_Q4_Q1 <- log1p(bank_data$Total_Ct_Chng_Q4_Q1)
@@ -174,16 +175,12 @@ bank_data$Total_Trans_Amt <- log1p(bank_data$Total_Trans_Amt)
 
 bank_data$Total_Amt_Chng_Q4_Q1 <- log1p(bank_data$Total_Amt_Chng_Q4_Q1)
 
-bank_data$Avg_Open_To_Buy <- log1p(bank_data$Avg_Open_To_Buy)
+bank_data$Credit_Limit <- log1p(bank_data$Credit_Limit)
 
 
-
-
-bank_data_NA <- data.frame(bank_data)
-bank_data_NA[bank_data_NA=='Unknown'] <- NA
 
 #Build a dataset without missing values
-bank_data_withoutNA <- na.omit(bank_data_NA)
+bank_data_withoutNA <- subset(bank_data, Education_Level != 0 & Marital_Status!= 0 & Income_Category != 0  )
 
 
 
@@ -192,14 +189,21 @@ bank_data_withoutNA <- na.omit(bank_data_NA)
 
 set.seed(0987)
 
-sample_1 <- sample.split(bank_data_withoutNA$Attrition_Flag,SplitRatio = 0.75)
-train_1 <- subset(bank_data_withoutNA,sample_1 == TRUE)
-test_1 <- subset(bank_data_withoutNA,sample_1 == FALSE)
+sample_1 <- sample.split(bank_data$Attrition_Flag,SplitRatio = 0.75)
+train_1 <- subset(bank_data,sample_1 == TRUE)
+test_1 <- subset(bank_data,sample_1 == FALSE)
+
+sample_2 <- sample.split(bank_data_withoutNA$Attrition_Flag,SplitRatio = 0.75)
+train_2 <- subset(bank_data_withoutNA,sample_2 == TRUE)
+test_2 <- subset(bank_data_withoutNA,sample_2 == FALSE)
 
 
 #Proportion of Attrited and Existing Customer
 prop.table(table(train_1$Attrition_Flag))
 prop.table(table(test_1$Attrition_Flag))
+
+prop.table(table(train_2$Attrition_Flag))
+prop.table(table(test_2$Attrition_Flag))
 
 
 #Original proportion of Attrited and Existing Customer
@@ -208,14 +212,9 @@ prop.table(table(bank_data$Attrition_Flag))
 #It's an unbalanced dataset.
 #It might be better to consider a resampling of the dataset
 
-# Under-sampling
-train_under <- ovun.sample(Attrition_Flag~.,data = train_1, method = "under")$data
-
-# Over-sampling
-train_over <- ovun.sample(Attrition_Flag~.,data = train_1, method = "over")$data
-
 #Mixed Sampling with 40% of Attrited Customer
-train_mix <- ovun.sample(Attrition_Flag~.,data = train_1, method = "both", p = 0.4, N =5311)$data
+train_mix_1 <- ovun.sample(Attrition_Flag~.,data = train_1, method = "both", p = 0.4, N =7594)$data
+train_mix_2 <- ovun.sample(Attrition_Flag~.,data = train_2, method = "both", p = 0.4, N =5309)$data
 
 
 #Thresholds
@@ -291,7 +290,7 @@ glm_4 <- update(glm_3, . ~ . + Total_Relationship_Count*Total_Trans_Amt + Total_
 summary(glm_4)
 
 
-glm_5 <- update(glm_4, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio + Total_Revolving_Bal*Avg_Open_To_Buy)
+glm_5 <- update(glm_4, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio + Total_Revolving_Bal*Credit_Limit)
 summary(glm_5)
 
 
@@ -303,7 +302,11 @@ glm_7 <- update(glm_6, . ~ . + Dependent_count*Total_Trans_Ct)
 summary(glm_7)
 
 
-pred_glm_f <- predict(glm_7,test_1,type="response")
+glm_8 <- update(glm_7, . ~ . + Credit_Limit*Total_Trans_Amt -Total_Trans_Ct:Avg_Utilization_Ratio)
+summary(glm_8)
+
+
+pred_glm_f <- predict(glm_8,test_1,type="response")
 pred_1_f <- ifelse(pred_glm_f >= Threshold1 , 1,0)
 pred_2_f <- ifelse(pred_glm_f >= Threshold2 , 1,0)
 pred_3_f <- ifelse(pred_glm_f >= Threshold3 , 1,0)
@@ -361,3 +364,4 @@ AUC_f <- auc(roc_f)
 
 plot(roc_i, col = "black",print.auc = TRUE, auc.polygon = TRUE, max.auc.polygon = TRUE, lwd=2,print.auc.x = 0.5,print.auc.y = 0.5)
 plot(roc_f,add = TRUE,col = "blue", print.auc = TRUE, lwd=2, print.auc.x = 0.5,print.auc.y = 0.43)
+
