@@ -12,7 +12,7 @@ library(knitr)
 library(forecast)
 library(ggplot2)
 library(PCAmixdata)
-
+library(purrr)
 
 bank_data_origin <- read.csv('~/GitHub/Stats_23_Project/BankChurners.csv')
 bank_data <- data.frame(bank_data_origin)
@@ -24,6 +24,8 @@ dim(bank_data)
 
 #Shows structure of dataset
 str(bank_data)
+
+map(bank_data, class)
 
 #View the categorical variables
 table(bank_data$Attrition_Flag)
