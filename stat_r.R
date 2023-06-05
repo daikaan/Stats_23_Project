@@ -493,7 +493,10 @@ summary(model)
 pred <- (predict(model, test) >= 0.5)*1
 mean(test$Attrition_Flag == pred)
 
-cdplot(factor(Attrition_Flag)~ log_Total_Ct_Chng_Q4_Q1, data=bank_data_withoutNA_quan)
+cdplot(factor(Attrition_Flag)~ log_Total_Ct_Chng_Q4_Q1, data=cleaned_bank_data_withoutNA_quan)
+cdplot(factor(Attrition_Flag)~ Total_Trans_Ct, data=cleaned_bank_data_withoutNA_quan)
+
+cdplot(factor(Attrition_Flag)~ Total_Revolving_Bal, data=cleaned_bank_data_withoutNA_quan)
 
 log_cleaned_bank_data_withoutNA_quan
 
