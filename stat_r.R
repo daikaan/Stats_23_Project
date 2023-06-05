@@ -95,55 +95,51 @@ cust.age.boxplot
 age.exc.list <- boxplot.stats(cleaned_bank_data_withoutNA_quan$Customer_Age)$out
 
 # Card Category
+
+ggplot(cleaned_bank_data_withoutNA_quan, aes(x=Months_on_book, y= Credit_Limit, shape = as.factor(Card_Category), color= as.factor(Card_Category)))+
+  geom_point() + geom_smooth(method=lm, se=FALSE, fullrange=TRUE)
+
+#Since most of the data is coming from the Blue cards and there is a visible difference on many parameters among categories, we decided to only focus on blue card category
 card.exc.list <- c(2, 3, 4)
 
 cleaned_bank_data_withoutNA_quan <- subset(cleaned_bank_data_withoutNA_quan,!((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
 cleaned_bank_data_withoutNA_quan
 
 
-#Checking if there is any null value in the data set
-colSums(is.na(bank_data)) #no null value
-
-
-#Card Category
-ggplot(bank_data, aes(x=Months_on_book, y= Credit_Limit, shape = Card_Category, color= Card_Category))+
-  geom_point() + geom_smooth(method=lm, se=FALSE, fullrange=TRUE)
-
-
 # Descriptive Graphs
 #histogram
-Cust.age.hist <- hist(bank_data_cleaned$Customer_Age, xlab="age", ylab="freq",
+Cust.age.hist <- hist(cleaned_bank_data_withoutNA_quan$Customer_Age, xlab="age", ylab="freq",
                       main="Customer age distribution", col="orange")
 Cust.age.hist
 #using the histogram, dividing ages into 4 groups seems satisfying
 
 #Creating age groups
-bank_data_cleaned[bank_data_cleaned$Customer_Age <= 34, "age_group"] <- 1
-bank_data_cleaned[bank_data_cleaned$Customer_Age > 34 & bank_data_cleaned$Customer_Age <= 44, "age_group"] <- 2
-bank_data_cleaned[bank_data_cleaned$Customer_Age > 44 & bank_data_cleaned$Customer_Age <= 54, "age_group"] <- 3
-bank_data_cleaned[bank_data_cleaned$Customer_Age > 54, "age_group"] <- 4
+cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age <= 34, "age_group"] <- 1
+cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age > 34 & cleaned_bank_data_withoutNA_quan$Customer_Age <= 44, "age_group"] <- 2
+cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age > 44 & cleaned_bank_data_withoutNA_quan$Customer_Age <= 54, "age_group"] <- 3
+cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age > 54, "age_group"] <- 4
 
 #grouped age histogram
-Grouped.age.hist <- hist(as.numeric(bank_data_cleaned$age_group), xlab="age_group", ylab="freq", breaks=4,
+Grouped.age.hist <- hist(as.numeric(cleaned_bank_data_withoutNA_quan$age_group), xlab="age_group", ylab="freq", breaks=4,
                          main="Customer age group distribution", col="green")
 
 
 # grouped age piechart
 library(RColorBrewer)#for the
 myPalette <- brewer.pal(6, "Set2") 
-cust.age.piechart <- pie(count(bank_data_cleaned, age_group)$n, border="white", col=myPalette)
+cust.age.piechart <- pie(count(cleaned_bank_data_withoutNA_quan, age_group)$n, border="white", col=myPalette)
 
 #Dependent Count
 
-ggplot(bank_data_cleaned, aes(x=Dependent_count)) +
+ggplot(cleaned_bank_data_withoutNA_quan, aes(x=Dependent_count)) +
   geom_bar(width=1)
 
 depcount.labels <- c(0, 1, 2, 3, 4, 5)
-dependent.count.piechart <- pie(count(bank_data_cleaned, Dependent_count)$n, border="white", col=myPalette, labels = depcount.labels)
+dependent.count.piechart <- pie(count(cleaned_bank_data_withoutNA_quan, Dependent_count)$n, border="white", col=myPalette, labels = depcount.labels)
 
 # months on book (how long a customer is using the bank)
 #histogram
-hist(bank_data_cleaned$Months_on_book)
+hist(cleaned_bank_data_withoutNA_quan$Months_on_book)
 
 #boxplot
 months.onbook.boxplot <- boxplot(quantitative$Months_on_book, ylab = "months")
@@ -154,66 +150,66 @@ boxplot.stats(quantitative$Months_on_book)$out
 #Since the outliers in months on books can be identifying on whether the customer is going to churn we decided to keep them in the data set
 
 #Total Relationships Count
-ggplot(bank_data_cleaned, aes(x=Total_Relationship_Count)) +
+ggplot(cleaned_bank_data_withoutNA_quan, aes(x=Total_Relationship_Count)) +
   geom_bar(width=1)
 
 #Months_Inactive_12months
-ggplot(bank_data_cleaned, aes(x=Months_Inactive_12_mon)) +
+ggplot(cleaned_bank_data_withoutNA_quan, aes(x=Months_Inactive_12_mon)) +
   geom_bar(width=1)
 
 #Contacts Count 12 months
-ggplot(bank_data_cleaned, aes(x=Contacts_Count_12_mon)) +
+ggplot(cleaned_bank_data_withoutNA_quan, aes(x=Contacts_Count_12_mon)) +
   geom_bar(width=1)
 
 # Credit Limit
 
 #boxplot
-credit.limit.boxplot <- boxplot(bank_data_cleaned$Credit_Limit, ylab = "Dollars")
+credit.limit.boxplot <- boxplot(cleaned_bank_data_withoutNA_quan$Credit_Limit, ylab = "Dollars")
 
 #histogram
-hist(bank_data_cleaned$Credit_Limit)
+hist(cleaned_bank_data_withoutNA_quan$Credit_Limit)
 
 
 # Total Revolving Balance
 #histogram
-hist(bank_data_cleaned$Total_Revolving_Bal)
+hist(cleaned_bank_data_withoutNA_quan$Total_Revolving_Bal)
 
 #Average Open to Buy
 #histogram
-hist(bank_data_cleaned$Avg_Open_To_Buy)
+hist(cleaned_bank_data_withoutNA_quan$Avg_Open_To_Buy)
 
 #Total Amount Change Between Q1 and Q4
 
 #histogram
-hist(bank_data_cleaned$Total_Amt_Chng_Q4_Q1)
+hist(cleaned_bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1)
 
 #boxplot
-credit.limit.boxplot <- boxplot(bank_data_cleaned$Total_Amt_Chng_Q4_Q1, ylab = "Dollars")
+credit.limit.boxplot <- boxplot(cleaned_bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1, ylab = "Dollars")
 
 #Total Transaction Amount
 
 #histogram
-hist(bank_data_cleaned$Total_Trans_Amt)
+hist(cleaned_bank_data_withoutNA_quan$Total_Trans_Amt)
 
 #Total Count Change Between Q1 and Q4
 
 #histogram
-hist(bank_data_cleaned$Total_Ct_Chng_Q4_Q1)
+hist(cleaned_bank_data_withoutNA_quan$Total_Ct_Chng_Q4_Q1)
 
 #Average Utilization Rate
 
 #histogram
-hist(bank_data_cleaned$Avg_Utilization_Ratio)
+hist(cleaned_bank_data_withoutNA_quan$Avg_Utilization_Ratio)
 
-unique(bank_data_cleaned$Attrition_Flag) #to make sure there are only 2 strings
+unique(cleaned_bank_data_withoutNA_quan$Attrition_Flag) #to make sure there are only 2 strings
 #change 'Existing Customer' to 1 and 'Attrited Customer' to 0 and add new column to quantitative
-data.split <- splitmix(bank_data_cleaned)
+data.split <- splitmix(cleaned_bank_data_withoutNA_quan)
 quantitative <- data.split$X.quanti
 qualitative <- data.split$X.quali
 
 length(quantitative)
 length(qualitative)
-quantitative$attrition_flag_binary <- ifelse(bank_data_cleaned$Attrition_Flag=='Existing Customer', 1, 0)
+quantitative$attrition_flag_binary <- ifelse(cleaned_bank_data_withoutNA_quan$Attrition_Flag=='Existing Customer', 1, 0)
 
 #grouped age histogram
 Grouped.age.hist <- hist(as.numeric(quantitative$age_group), xlab="age_group", ylab="freq", breaks=4,
