@@ -213,8 +213,8 @@ prop.table(table(bank_data$Attrition_Flag))
 #It might be better to consider a resampling of the dataset
 
 #Mixed Sampling with 40% of Attrited Customer
-train_mix_1 <- ovun.sample(Attrition_Flag~.,data = train_1, method = "both", p = 0.4, N =7594)$data
-train_mix_2 <- ovun.sample(Attrition_Flag~.,data = train_2, method = "both", p = 0.4, N =5309)$data
+train_mix_1 <- ovun.sample(Attrition_Flag~.,data = train_1, method = "both", p = 0.5, N =7594)$data
+train_mix_2 <- ovun.sample(Attrition_Flag~.,data = train_2, method = "both", p = 0.5, N =5309)$data
 
 
 #Thresholds
@@ -386,13 +386,13 @@ plot(roc_i, col = "black",print.auc = TRUE, auc.polygon = TRUE, max.auc.polygon 
 plot(roc_f,add = TRUE,col = "blue", print.auc = TRUE, lwd=2, print.auc.x = 0.5,print.auc.y = 0.43)
 
 #Best thresholds and Best Sensitivity and Specificity
-Best_Treshold_i <- coords(roc_i,"best",best.method = "youden")$threshold
+Best_Treshold_i <- coords(roc_i,"best",best.method = "closest.topleft")$threshold
 Best_pred_i <- ifelse(pred_glm_i >= Best_Treshold_i , 1,0)
 Best_c_mat_i <- table(test_1$Attrition_Flag,Best_pred_i)
 Best_Spec_i <- Best_c_mat_i[1,1]/sum(Best_c_mat_i[1,])
 Best_Sens_i <- Best_c_mat_i[2,2]/sum(Best_c_mat_i[2,])
 
-Best_Treshold_f <- coords(roc_f,"best",best.method = "youden")$threshold
+Best_Treshold_f <- coords(roc_f,"best",best.method = "closest.topleft")$threshold
 Best_pred_f <- ifelse(pred_glm_f >= Best_Treshold_f , 1,0)
 Best_c_mat_f <- table(test_1$Attrition_Flag,Best_pred_f)
 Best_Spec_f <- Best_c_mat_f[1,1]/sum(Best_c_mat_f[1,])
@@ -635,9 +635,9 @@ show(Tab)
 
 
 #Thresholds
-Threshold1 <- 0.4
-Threshold2 <- 0.5
-Threshold3 <- 0.6
+Threshold1 <- 0.6
+Threshold2 <- 0.7
+Threshold3 <- 0.8
 
 glm_1 <- glm(data = train_mix_1,Attrition_Flag~ .,family = "binomial")
 summary(glm_1)
@@ -705,35 +705,38 @@ vif(glm_1)
 
 #Update Checking p-values and AIC
 
-glm_2 <- update(glm_1, . ~ . - Months_on_book - Education_Level)
+glm_2 <- update(glm_1, . ~ . - Education_Level - Credit_Limit)
 summary(glm_2)
 
 
-glm_3 <- update(glm_2, . ~ .  + Total_Trans_Ct*Is_Female + Total_Trans_Ct*Marital_Status)
+glm_3 <- update(glm_2, . ~ .  + Total_Trans_Ct*Total_Trans_Amt + Total_Trans_Ct*Total_Revolving_Bal + Total_Trans_Ct*Is_Female
+                              + Total_Trans_Ct*Total_Amt_Chng_Q4_Q1 + Total_Trans_Ct*Avg_Utilization_Ratio + Total_Trans_Ct*Marital_Status
+                              + Total_Trans_Ct*Dependent_count + Total_Trans_Ct*Months_Inactive_12_mon )
 summary(glm_3)
 
 
-glm_4 <- update(glm_3, . ~ . + Total_Relationship_Count*Total_Trans_Amt - Credit_Limit)
+glm_4 <- update(glm_3, . ~ . + Total_Relationship_Count*Total_Trans_Amt)
 summary(glm_4)
 
 
-glm_5 <- update(glm_4, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio + Total_Revolving_Bal*Credit_Limit)
+glm_5 <- update(glm_4, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio + Total_Revolving_Bal*Credit_Limit - Total_Trans_Ct:Total_Trans_Amt)
 summary(glm_5)
 
 
-glm_6 <- update(glm_5, . ~ . + Is_Female*Credit_Limit + Income_Category*Credit_Limit)
+glm_6 <- update(glm_5, . ~ . + Is_Female*Income_Category + Is_Female*Credit_Limit - Total_Revolving_Bal:Credit_Limit - Credit_Limit)
 summary(glm_6)
 
 
-glm_7 <- update(glm_6, . ~ . + Dependent_count*Total_Trans_Ct + Customer_Age*Months_on_book )
+glm_7 <- update(glm_6, . ~ . + Dependent_count*Total_Amt_Chng_Q4_Q1 + Dependent_count*Contacts_Count_12_mon)
 summary(glm_7)
 
 
-glm_8 <- update(glm_7, . ~ . + Credit_Limit*Total_Trans_Amt - Total_Revolving_Bal:Credit_Limit)
+glm_8 <- update(glm_7, . ~ . + Total_Ct_Chng_Q4_Q1*Total_Amt_Chng_Q4_Q1 + Total_Ct_Chng_Q4_Q1*Total_Trans_Amt - Total_Trans_Amt - Total_Amt_Chng_Q4_Q1
+                              + Total_Trans_Ct:Total_Trans_Amt - Dependent_count:Total_Trans_Ct)
 summary(glm_8)
 
 
-glm_9 <- update(glm_8, . ~ . + Avg_Utilization_Ratio*Credit_Limit + Avg_Utilization_Ratio*Total_Trans_Amt - Avg_Utilization_Ratio )
+glm_9 <- update(glm_8, . ~ . + Avg_Utilization_Ratio*Credit_Limit + Credit_Limit*Income_Category - Credit_Limit)
 summary(glm_9)
 
 
@@ -807,13 +810,13 @@ plot(roc_i, col = "black",print.auc = TRUE, auc.polygon = TRUE, max.auc.polygon 
 plot(roc_f,add = TRUE,col = "blue", print.auc = TRUE, lwd=2, print.auc.x = 0.5,print.auc.y = 0.43)
 
 #Best thresholds and Best Sensitivity and Specificity
-Best_Treshold_i <- coords(roc_i,"best",best.method = "youden")$threshold
+Best_Treshold_i <- coords(roc_i,"best",best.method = "closest.topleft")$threshold
 Best_pred_i <- ifelse(pred_glm_i >= Best_Treshold_i , 1,0)
 Best_c_mat_i <- table(test_1$Attrition_Flag,Best_pred_i)
 Best_Spec_i <- Best_c_mat_i[1,1]/sum(Best_c_mat_i[1,])
 Best_Sens_i <- Best_c_mat_i[2,2]/sum(Best_c_mat_i[2,])
 
-Best_Treshold_f <- coords(roc_f,"best",best.method = "youden")$threshold
+Best_Treshold_f <- coords(roc_f,"best",best.method = "closest.topleft")$threshold
 Best_pred_f <- ifelse(pred_glm_f >= Best_Treshold_f , 1,0)
 Best_c_mat_f <- table(test_1$Attrition_Flag,Best_pred_f)
 Best_Spec_f <- Best_c_mat_f[1,1]/sum(Best_c_mat_f[1,])
@@ -844,9 +847,14 @@ show(Tab)
 
 
 
-#Model without Unknown
+#Balanced Model without Unknowns
 
-glm_1 <- glm(data = train_2,Attrition_Flag~ .,family = "binomial")
+#Thresholds
+Threshold1 <- 0.6
+Threshold2 <- 0.7
+Threshold3 <- 0.8
+
+glm_1 <- glm(data = train_mix_2,Attrition_Flag~ .,family = "binomial")
 summary(glm_1)
 
 pred_glm_i <- predict(glm_1,test_2,type="response")
@@ -912,35 +920,41 @@ vif(glm_1)
 
 #Update Checking p-values and AIC
 
-glm_2 <- update(glm_1, . ~ . - Education_Level - Customer_Age - Months_on_book - Credit_Limit - Avg_Utilization_Ratio)
+glm_2 <- update(glm_1, . ~ . - Customer_Age - Education_Level - Marital_Status)
 summary(glm_2)
 
 
-glm_3 <- update(glm_2, . ~ . + Total_Trans_Ct*Total_Trans_Amt + Total_Trans_Ct*Total_Revolving_Bal + Total_Trans_Ct*Is_Female + Total_Trans_Ct*Avg_Utilization_Ratio + Total_Trans_Ct*Marital_Status)
+glm_3 <- update(glm_2, . ~ . + Total_Trans_Ct*Total_Revolving_Bal + Total_Trans_Ct*Is_Female
+                + Total_Trans_Ct*Total_Amt_Chng_Q4_Q1 + Total_Trans_Ct*Avg_Utilization_Ratio + Total_Trans_Ct*Marital_Status
+                + Total_Trans_Ct*Dependent_count + Total_Trans_Ct*Months_Inactive_12_mon )
 summary(glm_3)
 
 
-glm_4 <- update(glm_3, . ~ . + Total_Relationship_Count*Total_Trans_Amt )
+glm_4 <- update(glm_3, . ~ . + Total_Relationship_Count*Total_Trans_Amt + Total_Relationship_Count*Total_Amt_Chng_Q4_Q1)
 summary(glm_4)
 
 
-glm_5 <- update(glm_4, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio + Total_Revolving_Bal*Credit_Limit - Total_Trans_Amt:Total_Trans_Ct)
+glm_5 <- update(glm_4, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio + Total_Revolving_Bal*Credit_Limit)
 summary(glm_5)
 
 
-glm_6 <- update(glm_5, . ~ . + Is_Female*Avg_Utilization_Ratio)
+glm_6 <- update(glm_5, . ~ . + Is_Female*Dependent_count)
 summary(glm_6)
 
 
-glm_7 <- update(glm_6, . ~ . + Dependent_count*Total_Trans_Ct)
+glm_7 <- update(glm_6, . ~ . + Dependent_count*Contacts_Count_12_mon)
 summary(glm_7)
 
 
-glm_8 <- update(glm_7, . ~ . + Credit_Limit*Total_Trans_Amt -Total_Trans_Ct:Avg_Utilization_Ratio - Is_Female:Total_Trans_Ct + Total_Trans_Amt*Total_Trans_Ct)
+glm_8 <- update(glm_7, . ~ . + Total_Ct_Chng_Q4_Q1*Total_Amt_Chng_Q4_Q1 + Total_Ct_Chng_Q4_Q1*Total_Trans_Amt - Total_Trans_Amt - Total_Amt_Chng_Q4_Q1)
 summary(glm_8)
 
 
-pred_glm_f <- predict(glm_8,test_2,type="response")
+glm_9 <- update(glm_8, . ~ . + Avg_Utilization_Ratio*Credit_Limit + Contacts_Count_12_mon*Months_on_book - Contacts_Count_12_mon)
+summary(glm_9)
+
+
+pred_glm_f <- predict(glm_9,test_2,type="response")
 pred_1_f <- ifelse(pred_glm_f >= Threshold1 , 1,0)
 pred_2_f <- ifelse(pred_glm_f >= Threshold2 , 1,0)
 pred_3_f <- ifelse(pred_glm_f >= Threshold3 , 1,0)
@@ -1010,13 +1024,13 @@ plot(roc_i, col = "black",print.auc = TRUE, auc.polygon = TRUE, max.auc.polygon 
 plot(roc_f,add = TRUE,col = "blue", print.auc = TRUE, lwd=2, print.auc.x = 0.5,print.auc.y = 0.43)
 
 #Best thresholds and Best Sensitivity and Specificity
-Best_Treshold_i <- coords(roc_i,"best",best.method = "youden")$threshold
+Best_Treshold_i <- coords(roc_i,"best",best.method = "closest.topleft")$threshold
 Best_pred_i <- ifelse(pred_glm_i >= Best_Treshold_i , 1,0)
 Best_c_mat_i <- table(test_2$Attrition_Flag,Best_pred_i)
 Best_Spec_i <- Best_c_mat_i[1,1]/sum(Best_c_mat_i[1,])
 Best_Sens_i <- Best_c_mat_i[2,2]/sum(Best_c_mat_i[2,])
 
-Best_Treshold_f <- coords(roc_f,"best",best.method = "youden")$threshold
+Best_Treshold_f <- coords(roc_f,"best",best.method = "closest.topleft")$threshold
 Best_pred_f <- ifelse(pred_glm_f >= Best_Treshold_f , 1,0)
 Best_c_mat_f <- table(test_2$Attrition_Flag,Best_pred_f)
 Best_Spec_f <- Best_c_mat_f[1,1]/sum(Best_c_mat_f[1,])
@@ -1028,4 +1042,3 @@ colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
 rownames(Table_mat) <- c("Initial model","Final model")
 Tab <- as.table(Table_mat)
 show(Tab)
-
