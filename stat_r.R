@@ -15,6 +15,7 @@ library(ggplot2)
 library(PCAmixdata)
 library(dplyr)
 
+
 #FEATURES: (I copied them from another project)
 # No NA
 # Clientum: represents the unique IDs of customers. It is formed by a unique sequence of 9 digits. There is a total of 10,127 unique customers in the datasets.
