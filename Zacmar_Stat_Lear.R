@@ -292,7 +292,7 @@ glm_2 <- update(glm_1, . ~ . - Education_Level - Customer_Age - Months_on_book)
 summary(glm_2)
 
 
-glm_3 <- update(glm_2, . ~ . + Total_Trans_Ct*Total_Trans_Amt + Total_Trans_Ct*Total_Revolving_Bal + Total_Trans_Ct*Is_Female + Total_Trans_Ct*Avg_Utilization_Ratio + Total_Trans_Ct*Marital_Status)
+glm_3 <- update(glm_2, . ~ . + Total_Trans_Ct*Total_Trans_Amt + Total_Trans_Ct*Total_Revolving_Bal + Total_Trans_Ct*Is_Female + Total_Trans_Ct*Marital_Status)
 summary(glm_3)
 
 
@@ -312,7 +312,7 @@ glm_7 <- update(glm_6, . ~ . + Dependent_count*Total_Trans_Ct)
 summary(glm_7)
 
 
-glm_8 <- update(glm_7, . ~ . + Credit_Limit*Total_Trans_Amt -Total_Trans_Ct:Avg_Utilization_Ratio)
+glm_8 <- update(glm_7, . ~ . + Credit_Limit*Total_Trans_Amt)
 summary(glm_8)
 
 
@@ -498,7 +498,7 @@ glm_2 <- update(glm_1, . ~ . - Education_Level - Customer_Age - Months_on_book -
 summary(glm_2)
 
 
-glm_3 <- update(glm_2, . ~ . + Total_Trans_Ct*Total_Trans_Amt + Total_Trans_Ct*Total_Revolving_Bal + Total_Trans_Ct*Is_Female + Total_Trans_Ct*Avg_Utilization_Ratio + Total_Trans_Ct*Marital_Status)
+glm_3 <- update(glm_2, . ~ . + Total_Trans_Ct*Total_Revolving_Bal + Total_Trans_Ct*Marital_Status)
 summary(glm_3)
 
 
@@ -506,7 +506,7 @@ glm_4 <- update(glm_3, . ~ . + Total_Relationship_Count*Total_Trans_Amt )
 summary(glm_4)
 
 
-glm_5 <- update(glm_4, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio + Total_Revolving_Bal*Credit_Limit - Total_Trans_Amt:Total_Trans_Ct)
+glm_5 <- update(glm_4, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio + Total_Revolving_Bal*Credit_Limit )
 summary(glm_5)
 
 
@@ -518,7 +518,7 @@ glm_7 <- update(glm_6, . ~ . + Dependent_count*Total_Trans_Ct)
 summary(glm_7)
 
 
-glm_8 <- update(glm_7, . ~ . + Credit_Limit*Total_Trans_Amt -Total_Trans_Ct:Avg_Utilization_Ratio - Is_Female:Total_Trans_Ct + Total_Trans_Amt*Total_Trans_Ct)
+glm_8 <- update(glm_7, . ~ . + Credit_Limit*Total_Trans_Amt + Total_Trans_Ct*Total_Trans_Amt )
 summary(glm_8)
 
 
@@ -709,9 +709,9 @@ glm_2 <- update(glm_1, . ~ . - Education_Level - Credit_Limit)
 summary(glm_2)
 
 
-glm_3 <- update(glm_2, . ~ .  + Total_Trans_Ct*Total_Trans_Amt + Total_Trans_Ct*Total_Revolving_Bal + Total_Trans_Ct*Is_Female
+glm_3 <- update(glm_2, . ~ .  + Total_Trans_Ct*Total_Revolving_Bal + Total_Trans_Ct*Is_Female
                               + Total_Trans_Ct*Total_Amt_Chng_Q4_Q1 + Total_Trans_Ct*Avg_Utilization_Ratio + Total_Trans_Ct*Marital_Status
-                              + Total_Trans_Ct*Dependent_count + Total_Trans_Ct*Months_Inactive_12_mon )
+                              + Total_Trans_Ct*Months_Inactive_12_mon )
 summary(glm_3)
 
 
@@ -719,11 +719,11 @@ glm_4 <- update(glm_3, . ~ . + Total_Relationship_Count*Total_Trans_Amt)
 summary(glm_4)
 
 
-glm_5 <- update(glm_4, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio + Total_Revolving_Bal*Credit_Limit - Total_Trans_Ct:Total_Trans_Amt)
+glm_5 <- update(glm_4, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio)
 summary(glm_5)
 
 
-glm_6 <- update(glm_5, . ~ . + Is_Female*Income_Category + Is_Female*Credit_Limit - Total_Revolving_Bal:Credit_Limit - Credit_Limit)
+glm_6 <- update(glm_5, . ~ . + Is_Female*Income_Category + Is_Female:Credit_Limit)
 summary(glm_6)
 
 
@@ -732,11 +732,11 @@ summary(glm_7)
 
 
 glm_8 <- update(glm_7, . ~ . + Total_Ct_Chng_Q4_Q1*Total_Amt_Chng_Q4_Q1 + Total_Ct_Chng_Q4_Q1*Total_Trans_Amt - Total_Trans_Amt - Total_Amt_Chng_Q4_Q1
-                              + Total_Trans_Ct:Total_Trans_Amt - Dependent_count:Total_Trans_Ct)
+                              + Total_Trans_Ct:Total_Trans_Amt)
 summary(glm_8)
 
 
-glm_9 <- update(glm_8, . ~ . + Avg_Utilization_Ratio*Credit_Limit + Credit_Limit*Income_Category - Credit_Limit)
+glm_9 <- update(glm_8, . ~ . + Avg_Utilization_Ratio:Credit_Limit + Credit_Limit:Income_Category)
 summary(glm_9)
 
 
@@ -1042,3 +1042,95 @@ colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
 rownames(Table_mat) <- c("Initial model","Final model")
 Tab <- as.table(Table_mat)
 show(Tab)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#LDA
+
+
+#We can see that the predictor variables don't follow a normal distribution on the two classes
+apply(train_2[train_2$Attrition_Flag == 1,][2:18],2,shapiro.test )
+apply(train_2[train_2$Attrition_Flag == 0,][2:18],2,shapiro.test )
+
+
+#We still try the LDA model
+lda_1 <- lda(Attrition_Flag ~ Is_Female + Dependent_count + Marital_Status + Income_Category + Total_Relationship_Count
+              + Months_Inactive_12_mon + Contacts_Count_12_mon + Credit_Limit + Total_Revolving_Bal + Total_Amt_Chng_Q4_Q1 
+              + Total_Trans_Amt + Total_Trans_Ct + Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio + Total_Trans_Amt:Total_Trans_Ct
+              + Total_Revolving_Bal:Total_Trans_Ct + Is_Female:Total_Trans_Ct + Marital_Status:Total_Trans_Ct + Total_Relationship_Count:Total_Trans_Amt 
+              + Total_Relationship_Count:Contacts_Count_12_mon + Total_Revolving_Bal:Avg_Utilization_Ratio + Credit_Limit:Total_Revolving_Bal + Is_Female:Income_Category 
+              + Is_Female:Avg_Utilization_Ratio + Dependent_count:Total_Trans_Ct + Credit_Limit:Total_Trans_Amt, data = train_1, family = "binomial")
+
+lda_1
+
+lda_predict_0.5 <- predict(lda_1,test_1,type = "response")
+lda_predict_1 <- lda_predict_0.5$posterior
+pred_1_f <- ifelse(lda_predict_1[,2] >= Threshold1 , 1,0)
+pred_2_f <- ifelse(lda_predict_1[,2] >= Threshold2 , 1,0)
+pred_3_f <- ifelse(lda_predict_1[,2] >= Threshold3 , 1,0)
+
+#Confusion matrix
+
+c_mat_1_f <- table(test_1$Attrition_Flag,pred_1_f)
+c_mat_2_f <- table(test_1$Attrition_Flag,pred_2_f)
+c_mat_3_f <- table(test_1$Attrition_Flag,pred_3_f)
+c_mat_1_f
+c_mat_2_f
+c_mat_3_f
+
+#Accuracy
+
+mean(pred_1_f==test_1$Attrition_Flag)*100
+mean(pred_2_f==test_1$Attrition_Flag)*100
+mean(pred_3_f==test_1$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_1_f <- c_mat_1_f[1,1]/sum(c_mat_1_f[1,])
+Spec_2_f <- c_mat_2_f[1,1]/sum(c_mat_2_f[1,])
+Spec_3_f <- c_mat_3_f[1,1]/sum(c_mat_3_f[1,])
+Spec_1_f
+Spec_2_f
+Spec_3_f
+
+
+#Precision / Positive Predicted Value
+
+Prec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[,2])
+Prec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[,2])
+Prec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[,2])
+Prec_1_f
+Prec_2_f
+Prec_3_f
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[2,])
+Rec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[2,])
+Rec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[2,])
+Rec_1_f
+Rec_2_f
+Rec_3_f
+
+#F1 Score
+
+F1_1_f <- 2 * (Prec_1_f * Rec_1_f)/(Prec_1_f + Rec_1_f)
+F1_2_f <- 2 * (Prec_2_f * Rec_2_f)/(Prec_2_f + Rec_2_f)
+F1_3_f <- 2 * (Prec_3_f * Rec_3_f)/(Prec_3_f + Rec_3_f)
+F1_1_f
+F1_2_f
+F1_3_f
+
