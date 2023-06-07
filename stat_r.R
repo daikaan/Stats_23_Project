@@ -20,6 +20,9 @@ library("car")
 library("e1071")
 library("ppcor")
 library("pROC")
+library("interactions")
+
+
 
 # DATA PREPERATION
 
@@ -147,10 +150,10 @@ dependent.count.piechart <- pie(count(cleaned_bank_data_withoutNA_quan, Dependen
 hist(cleaned_bank_data_withoutNA_quan$Months_on_book)
 
 #boxplot
-months.onbook.boxplot <- boxplot(quantitative$Months_on_book, ylab = "months")
+#months.onbook.boxplot <- boxplot(quantitative$Months_on_book, ylab = "months")
 
 #using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, outliers
-boxplot.stats(quantitative$Months_on_book)$out
+#boxplot.stats(quantitative$Months_on_book)$out
 
 #Since the outliers in months on books can be identifying on whether the customer is going to churn we decided to keep them in the data set
 
@@ -424,31 +427,52 @@ summary(glm_2)
 
 vif(glm_2)
 
-glm_3 <- update(glm_2, . ~ . - Avg_Utilization_Ratio - Months_on_book)
+glm_3 <- update(glm_2, . ~ . - Months_on_book)
 summary(glm_3)
 
 
-glm_4 <- update(glm_3, . ~ . + Total_Trans_Ct*Is_Female + Total_Trans_Ct*log_Total_Amt_Chng_Q4_Q1 - Education_Level)
+glm_4 <- update(glm_3, . ~ . + Total_Trans_Ct*log_Total_Amt_Chng_Q4_Q1)
 summary(glm_4)
 
+#Show that there is interaction
+interact_plot(glm_4,pred = log_Total_Amt_Chng_Q4_Q1,modx = Total_Trans_Ct)
 
-glm_5 <- update(glm_4, . ~ . + log_Total_Trans_Amt*Total_Relationship_Count + log_Total_Trans_Amt*log_Total_Amt_Chng_Q4_Q1 )
+
+glm_5 <- update(glm_4, . ~ . + log_Total_Amt_Chng_Q4_Q1*log_Total_Trans_Amt)
 summary(glm_5)
 
+#Interaction
+interact_plot(glm_5,pred = log_Total_Amt_Chng_Q4_Q1,modx = log_Total_Trans_Amt)
 
-glm_6 <- update(glm_5, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio + Total_Revolving_Bal*log_Avg_Open_To_Buy)
+
+glm_6 <- update(glm_5, . ~ . + Total_Revolving_Bal*log_Avg_Open_To_Buy)
 summary(glm_6)
 
+#Show that there is interaction
+interact_plot(glm_6,pred = Total_Revolving_Bal,modx = log_Avg_Open_To_Buy)
 
-glm_7 <- update(glm_6, . ~ . + log_Avg_Open_To_Buy*Avg_Utilization_Ratio)
+
+glm_7 <- update(glm_6, . ~ . +  Avg_Utilization_Ratio*log_Credit_Limit - Education_Level)
 summary(glm_7)
 
+#Interaction
+interact_plot(glm_7,pred = Avg_Utilization_Ratio,modx = log_Credit_Limit)
 
-glm_8 <- update(glm_7, . ~ . + Dependent_count*log_Total_Amt_Chng_Q4_Q1 )
+
+glm_8 <- update(glm_7, . ~ . + Dependent_count*log_Total_Amt_Chng_Q4_Q1)
 summary(glm_8)
 
+#Interaction
+interact_plot(glm_8,pred = log_Total_Amt_Chng_Q4_Q1,modx = log_Total_Trans_Amt)
 
-pred_glm_f <- predict(glm_8,test,type="response")
+glm_9 <- update(glm_8, . ~ . + Avg_Utilization_Ratio*Total_Revolving_Bal)
+summary(glm_9)
+
+#Interaction
+interact_plot(glm_9,pred = Total_Revolving_Bal,modx = Avg_Utilization_Ratio)
+
+
+pred_glm_f <- predict(glm_9,test,type="response")
 pred_1_f <- ifelse(pred_glm_f >= Threshold1 , 1,0)
 pred_2_f <- ifelse(pred_glm_f >= Threshold2 , 1,0)
 pred_3_f <- ifelse(pred_glm_f >= Threshold3 , 1,0)
@@ -540,26 +564,8 @@ show(Tab)
 
 
 
-train_bal$Attrition_Flag <- as.numeric(train_bal$Attrition_Flag)
 
-#Correlation matrix
-cor_mat <- cor(train_bal)
-corrplot(cor_mat,method = "number",type = "upper",number.cex = 0.6, tl.pos = "td",tl.cex=0.5, tl.col = "black" ,diag = FALSE)
-
-#Correlation with Attrition_Flag
-corrplot(cor_mat[1,,drop=FALSE],method = "number",number.cex = 0.6, cl.pos = "n",tl.col = "black" ,tl.cex=0.5,diag = FALSE)
-
-
-#Partial correlations (Takes time)
-correlation(train,partial = TRUE)
-
-#Partial Correlation matrix 
-part_cor_mat <- pcor(train_bal)$estimate
-corrplot(part_cor_mat, method = "number",type = "upper",number.cex = 0.6, tl.pos = "td",tl.cex=0.5, tl.col = "black" ,diag = FALSE)
-
-train_bal$Attrition_Flag <- as.factor(train_bal$Attrition_Flag)
-
-#Model without Unknown
+#Model with balanced train set
 
 glm_1_bal <- glm(data = train_bal,Attrition_Flag~ .,family = "binomial")
 summary(glm_1_bal)
@@ -641,27 +647,47 @@ glm_3_bal <- update(glm_2_bal, . ~ . - Months_on_book)
 summary(glm_3_bal)
 
 
-glm_4_bal <- update(glm_3_bal, . ~ . + Total_Trans_Ct*Is_Female + Total_Trans_Ct*log_Total_Amt_Chng_Q4_Q1 - Education_Level)
+glm_4_bal <- update(glm_3_bal, . ~ . )
 summary(glm_4_bal)
 
+#Show that there is interaction
+interact_plot(glm_4_bal,pred = log_Total_Amt_Chng_Q4_Q1,modx = Total_Trans_Ct)
 
-glm_5_bal <- update(glm_4_bal, . ~ . + log_Total_Trans_Amt*Total_Relationship_Count + log_Total_Trans_Amt*log_Total_Amt_Chng_Q4_Q1 )
+
+glm_5_bal <- update(glm_4_bal, . ~ . + log_Total_Amt_Chng_Q4_Q1*log_Total_Trans_Amt)
 summary(glm_5_bal)
 
+#Interaction
+interact_plot(glm_5_bal,pred = log_Total_Amt_Chng_Q4_Q1,modx = log_Total_Trans_Amt)
 
-glm_6_bal <- update(glm_5_bal, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio + Total_Revolving_Bal*log_Avg_Open_To_Buy)
+
+glm_6_bal <- update(glm_5_bal, . ~ . + Total_Revolving_Bal*log_Avg_Open_To_Buy)
 summary(glm_6_bal)
 
+#Show that there is interaction
+interact_plot(glm_6_bal,pred = Total_Revolving_Bal,modx = log_Avg_Open_To_Buy)
 
-glm_7_bal <- update(glm_6_bal, . ~ . + log_Avg_Open_To_Buy*Avg_Utilization_Ratio)
+
+glm_7_bal <- update(glm_6_bal, . ~ . + Avg_Utilization_Ratio*log_Credit_Limit)
 summary(glm_7_bal)
 
+#Interaction
+interact_plot(glm_7_bal,pred = Avg_Utilization_Ratio,modx = log_Credit_Limit)
 
-glm_8_bal <- update(glm_7_bal, . ~ . + Dependent_count*log_Total_Amt_Chng_Q4_Q1 )
+
+glm_8_bal <- update(glm_7_bal, . ~ . + Dependent_count*log_Total_Amt_Chng_Q4_Q1)
 summary(glm_8_bal)
 
+#Interaction
+interact_plot(glm_8_bal,pred = log_Total_Amt_Chng_Q4_Q1,modx = log_Total_Trans_Amt)
 
-pred_glm_bal_f <- predict(glm_8_bal,test,type="response")
+glm_9_bal <- update(glm_8_bal, . ~ . + Avg_Utilization_Ratio*Total_Revolving_Bal)
+summary(glm_9_bal)
+
+#Interaction
+interact_plot(glm_9_bal,pred = Avg_Utilization_Ratio,modx = Total_Revolving_Bal)
+
+pred_glm_bal_f <- predict(glm_9_bal,test,type="response")
 pred_1_f <- ifelse(pred_glm_bal_f >= Threshold1 , 1,0)
 pred_2_f <- ifelse(pred_glm_bal_f >= Threshold2 , 1,0)
 pred_3_f <- ifelse(pred_glm_bal_f >= Threshold3 , 1,0)
@@ -747,6 +773,422 @@ Best_Sens_bal_f <- Best_c_mat_f[2,2]/sum(Best_c_mat_f[2,])
 Table_mat <-  matrix(c(Best_Treshold_bal_i,Best_Spec_bal_i,Best_Sens_bal_i,Best_Treshold_bal_f,Best_Spec_bal_f,Best_Sens_bal_f), ncol=3, byrow=TRUE)
 colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
 rownames(Table_mat) <- c("Initial model","Final model")
+Tab <- as.table(Table_mat)
+show(Tab)
+
+
+
+
+
+
+
+
+
+
+
+#LDA
+
+
+#We can see that the predictor variables don't follow a normal distribution on at least one class
+apply(train[train$Attrition_Flag == 1,][2:18],2,shapiro.test )
+
+
+#We still try the LDA and QDA models
+
+#Thresholds
+Threshold1 <- 0.4
+Threshold2 <- 0.5
+Threshold3 <- 0.6
+
+lda_1 <- lda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count
+              + Marital_Status + Income_Category + Total_Relationship_Count + Months_Inactive_12_mon + Contacts_Count_12_mon + Total_Revolving_Bal + log_Avg_Open_To_Buy
+              + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio + log_Credit_Limit 
+              + log_Total_Amt_Chng_Q4_Q1:Total_Trans_Ct + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + Total_Revolving_Bal:log_Avg_Open_To_Buy
+              + Avg_Utilization_Ratio:log_Credit_Limit + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + Total_Revolving_Bal:Avg_Utilization_Ratio, data = train, family = "binomial")
+
+lda_1
+
+
+
+lda_1_predict <- predict(lda_1,test,type = "response")
+lda_predict_1 <- lda_1_predict$posterior
+pred_1_f <- ifelse(lda_predict_1[,2] >= Threshold1 , 1,0)
+pred_2_f <- ifelse(lda_predict_1[,2] >= Threshold2 , 1,0)
+pred_3_f <- ifelse(lda_predict_1[,2] >= Threshold3 , 1,0)
+
+#Confusion matrix
+
+c_mat_1_f <- table(test$Attrition_Flag,pred_1_f)
+c_mat_2_f <- table(test$Attrition_Flag,pred_2_f)
+c_mat_3_f <- table(test$Attrition_Flag,pred_3_f)
+c_mat_1_f
+c_mat_2_f
+c_mat_3_f
+
+#Accuracy
+
+mean(pred_1_f==test$Attrition_Flag)*100
+mean(pred_2_f==test$Attrition_Flag)*100
+mean(pred_3_f==test$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_1_f <- c_mat_1_f[1,1]/sum(c_mat_1_f[1,])
+Spec_2_f <- c_mat_2_f[1,1]/sum(c_mat_2_f[1,])
+Spec_3_f <- c_mat_3_f[1,1]/sum(c_mat_3_f[1,])
+Spec_1_f
+Spec_2_f
+Spec_3_f
+
+
+#Precision / Positive Predicted Value
+
+Prec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[,2])
+Prec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[,2])
+Prec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[,2])
+Prec_1_f
+Prec_2_f
+Prec_3_f
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[2,])
+Rec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[2,])
+Rec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[2,])
+Rec_1_f
+Rec_2_f
+Rec_3_f
+
+#F1 Score
+
+F1_1_f <- 2 * (Prec_1_f * Rec_1_f)/(Prec_1_f + Rec_1_f)
+F1_2_f <- 2 * (Prec_2_f * Rec_2_f)/(Prec_2_f + Rec_2_f)
+F1_3_f <- 2 * (Prec_3_f * Rec_3_f)/(Prec_3_f + Rec_3_f)
+F1_1_f
+F1_2_f
+F1_3_f
+
+
+
+
+
+
+
+
+
+
+
+#LDA Balanced
+
+#Thresholds
+Threshold1 <- 0.6
+Threshold2 <- 0.7
+Threshold3 <- 0.8
+
+
+#We still try the LDA model
+lda_2 <- lda(Attrition_Flag ~  Customer_Age + Is_Female + Dependent_count + Education_Level
+              + Marital_Status + Income_Category + Total_Relationship_Count + Months_Inactive_12_mon + Contacts_Count_12_mon + Total_Revolving_Bal + log_Avg_Open_To_Buy
+              + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio + log_Credit_Limit 
+              + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + Total_Revolving_Bal:log_Avg_Open_To_Buy
+              + Avg_Utilization_Ratio:log_Credit_Limit + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + Total_Revolving_Bal:Avg_Utilization_Ratio, data = train_bal, family = "binomial")
+
+lda_2
+
+
+
+lda_2_predict <- predict(lda_2,test,type = "response")
+lda_predict_2 <- lda_2_predict$posterior
+pred_1_f <- ifelse(lda_predict_2[,2] >= Threshold1 , 1,0)
+pred_2_f <- ifelse(lda_predict_2[,2] >= Threshold2 , 1,0)
+pred_3_f <- ifelse(lda_predict_2[,2] >= Threshold3 , 1,0)
+
+#Confusion matrix
+
+c_mat_1_f <- table(test$Attrition_Flag,pred_1_f)
+c_mat_2_f <- table(test$Attrition_Flag,pred_2_f)
+c_mat_3_f <- table(test$Attrition_Flag,pred_3_f)
+c_mat_1_f
+c_mat_2_f
+c_mat_3_f
+
+#Accuracy
+
+mean(pred_1_f==test$Attrition_Flag)*100
+mean(pred_2_f==test$Attrition_Flag)*100
+mean(pred_3_f==test$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_1_f <- c_mat_1_f[1,1]/sum(c_mat_1_f[1,])
+Spec_2_f <- c_mat_2_f[1,1]/sum(c_mat_2_f[1,])
+Spec_3_f <- c_mat_3_f[1,1]/sum(c_mat_3_f[1,])
+Spec_1_f
+Spec_2_f
+Spec_3_f
+
+
+#Precision / Positive Predicted Value
+
+Prec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[,2])
+Prec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[,2])
+Prec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[,2])
+Prec_1_f
+Prec_2_f
+Prec_3_f
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[2,])
+Rec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[2,])
+Rec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[2,])
+Rec_1_f
+Rec_2_f
+Rec_3_f
+
+#F1 Score
+
+F1_1_f <- 2 * (Prec_1_f * Rec_1_f)/(Prec_1_f + Rec_1_f)
+F1_2_f <- 2 * (Prec_2_f * Rec_2_f)/(Prec_2_f + Rec_2_f)
+F1_3_f <- 2 * (Prec_3_f * Rec_3_f)/(Prec_3_f + Rec_3_f)
+F1_1_f
+F1_2_f
+F1_3_f
+
+
+
+
+#ROC curves
+roc_lda <- roc(test$Attrition_Flag ~ lda_predict_1[,2])
+roc_lda_bal <- roc(test$Attrition_Flag ~ lda_predict_2[,2])
+
+AUC_lda <- auc(roc_lda)
+AUC_lda_bal <- auc(roc_lda_bal)
+
+
+plot(roc_lda, col = "black",print.auc = TRUE, auc.polygon = TRUE, max.auc.polygon = TRUE, lwd=2,print.auc.x = 0.5,print.auc.y = 0.5)
+plot(roc_lda_bal,add = TRUE,col = "blue", print.auc = TRUE, lwd=2, print.auc.x = 0.5,print.auc.y = 0.43)
+
+#Best thresholds and Best Sensitivity and Specificity
+Best_Treshold_lda <- coords(roc_lda,"best",best.method = "closest.topleft")$threshold
+Best_pred_lda <- ifelse(lda_predict_1[,2] >= Best_Treshold_lda , 1,0)
+Best_c_mat <- table(test$Attrition_Flag,Best_pred_lda)
+Best_Spec_lda <- Best_c_mat[1,1]/sum(Best_c_mat[1,])
+Best_Sens_lda <- Best_c_mat[2,2]/sum(Best_c_mat[2,])
+
+Best_Treshold_lda_bal <- coords(roc_lda_bal,"best",best.method = "closest.topleft")$threshold
+Best_pred_lda_bal <- ifelse(lda_predict_2[,2] >= Best_Treshold_lda_bal , 1,0)
+Best_c_mat <- table(test$Attrition_Flag,Best_pred_lda_bal)
+Best_Spec_lda_bal <- Best_c_mat[1,1]/sum(Best_c_mat[1,])
+Best_Sens_lda_bal <- Best_c_mat[2,2]/sum(Best_c_mat[2,])
+
+#Table to showing them
+Table_mat <-  matrix(c(Best_Treshold_lda,Best_Spec_lda,Best_Sens_lda,Best_Treshold_lda_bal,Best_Spec_lda_bal,Best_Sens_lda_bal), ncol=3, byrow=TRUE)
+colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
+rownames(Table_mat) <- c("Unbalanced","Balanced")
+Tab <- as.table(Table_mat)
+show(Tab)
+
+
+
+
+
+
+
+#QDA
+
+
+#Thresholds
+Threshold1 <- 0.3
+Threshold2 <- 0.4
+Threshold3 <- 0.5
+
+qda_1 <- qda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count
+             + Marital_Status + Income_Category + Total_Relationship_Count + Months_Inactive_12_mon + Contacts_Count_12_mon + Total_Revolving_Bal + log_Avg_Open_To_Buy
+             + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio + log_Credit_Limit 
+             + log_Total_Amt_Chng_Q4_Q1:Total_Trans_Ct + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + Total_Revolving_Bal:log_Avg_Open_To_Buy
+             + Avg_Utilization_Ratio:log_Credit_Limit + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + Total_Revolving_Bal:Avg_Utilization_Ratio, data = train, family = "binomial")
+
+qda_1
+
+
+
+qda_1_predict <- predict(qda_1,test,type = "response")
+qda_predict_1 <- qda_1_predict$posterior
+pred_1_f <- ifelse(qda_predict_1[,2] >= Threshold1 , 1,0)
+pred_2_f <- ifelse(qda_predict_1[,2] >= Threshold2 , 1,0)
+pred_3_f <- ifelse(qda_predict_1[,2] >= Threshold3 , 1,0)
+
+#Confusion matrix
+
+c_mat_1_f <- table(test$Attrition_Flag,pred_1_f)
+c_mat_2_f <- table(test$Attrition_Flag,pred_2_f)
+c_mat_3_f <- table(test$Attrition_Flag,pred_3_f)
+c_mat_1_f
+c_mat_2_f
+c_mat_3_f
+
+#Accuracy
+
+mean(pred_1_f==test$Attrition_Flag)*100
+mean(pred_2_f==test$Attrition_Flag)*100
+mean(pred_3_f==test$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_1_f <- c_mat_1_f[1,1]/sum(c_mat_1_f[1,])
+Spec_2_f <- c_mat_2_f[1,1]/sum(c_mat_2_f[1,])
+Spec_3_f <- c_mat_3_f[1,1]/sum(c_mat_3_f[1,])
+Spec_1_f
+Spec_2_f
+Spec_3_f
+
+
+#Precision / Positive Predicted Value
+
+Prec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[,2])
+Prec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[,2])
+Prec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[,2])
+Prec_1_f
+Prec_2_f
+Prec_3_f
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[2,])
+Rec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[2,])
+Rec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[2,])
+Rec_1_f
+Rec_2_f
+Rec_3_f
+
+#F1 Score
+
+F1_1_f <- 2 * (Prec_1_f * Rec_1_f)/(Prec_1_f + Rec_1_f)
+F1_2_f <- 2 * (Prec_2_f * Rec_2_f)/(Prec_2_f + Rec_2_f)
+F1_3_f <- 2 * (Prec_3_f * Rec_3_f)/(Prec_3_f + Rec_3_f)
+F1_1_f
+F1_2_f
+F1_3_f
+
+
+
+
+
+
+
+
+
+
+
+#QDA Balanced
+
+#Thresholds
+Threshold1 <- 0.7
+Threshold2 <- 0.8
+Threshold3 <- 0.9
+
+
+#We still try the QDA model
+qda_2 <- qda(Attrition_Flag ~  Customer_Age + Is_Female + Dependent_count + Education_Level
+             + Marital_Status + Income_Category + Total_Relationship_Count + Months_Inactive_12_mon + Contacts_Count_12_mon + Total_Revolving_Bal + log_Avg_Open_To_Buy
+             + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio + log_Credit_Limit 
+             + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + Total_Revolving_Bal:log_Avg_Open_To_Buy
+             + Avg_Utilization_Ratio:log_Credit_Limit + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + Total_Revolving_Bal:Avg_Utilization_Ratio, data = train_bal, family = "binomial")
+
+qda_2
+
+
+
+qda_2_predict <- predict(qda_2,test,type = "response")
+qda_predict_2 <- qda_2_predict$posterior
+pred_1_f <- ifelse(qda_predict_2[,2] >= Threshold1 , 1,0)
+pred_2_f <- ifelse(qda_predict_2[,2] >= Threshold2 , 1,0)
+pred_3_f <- ifelse(qda_predict_2[,2] >= Threshold3 , 1,0)
+
+#Confusion matrix
+
+c_mat_1_f <- table(test$Attrition_Flag,pred_1_f)
+c_mat_2_f <- table(test$Attrition_Flag,pred_2_f)
+c_mat_3_f <- table(test$Attrition_Flag,pred_3_f)
+c_mat_1_f
+c_mat_2_f
+c_mat_3_f
+
+#Accuracy
+
+mean(pred_1_f==test$Attrition_Flag)*100
+mean(pred_2_f==test$Attrition_Flag)*100
+mean(pred_3_f==test$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_1_f <- c_mat_1_f[1,1]/sum(c_mat_1_f[1,])
+Spec_2_f <- c_mat_2_f[1,1]/sum(c_mat_2_f[1,])
+Spec_3_f <- c_mat_3_f[1,1]/sum(c_mat_3_f[1,])
+Spec_1_f
+Spec_2_f
+Spec_3_f
+
+
+#Precision / Positive Predicted Value
+
+Prec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[,2])
+Prec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[,2])
+Prec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[,2])
+Prec_1_f
+Prec_2_f
+Prec_3_f
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[2,])
+Rec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[2,])
+Rec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[2,])
+Rec_1_f
+Rec_2_f
+Rec_3_f
+
+#F1 Score
+
+F1_1_f <- 2 * (Prec_1_f * Rec_1_f)/(Prec_1_f + Rec_1_f)
+F1_2_f <- 2 * (Prec_2_f * Rec_2_f)/(Prec_2_f + Rec_2_f)
+F1_3_f <- 2 * (Prec_3_f * Rec_3_f)/(Prec_3_f + Rec_3_f)
+F1_1_f
+F1_2_f
+F1_3_f
+
+
+
+
+#ROC curves
+roc_qda <- roc(test$Attrition_Flag ~ qda_predict_1[,2])
+roc_qda_bal <- roc(test$Attrition_Flag ~ qda_predict_2[,2])
+
+AUC_qda <- auc(roc_qda)
+AUC_qda_bal <- auc(roc_qda_bal)
+
+
+plot(roc_qda, col = "black",print.auc = TRUE, auc.polygon = TRUE, max.auc.polygon = TRUE, lwd=2,print.auc.x = 0.5,print.auc.y = 0.5)
+plot(roc_qda_bal,add = TRUE,col = "blue", print.auc = TRUE, lwd=2, print.auc.x = 0.5,print.auc.y = 0.43)
+
+#Best thresholds and Best Sensitivity and Specificity
+Best_Treshold_qda <- coords(roc_qda,"best",best.method = "closest.topleft")$threshold
+Best_pred_qda <- ifelse(qda_predict_1[,2] >= Best_Treshold_qda , 1,0)
+Best_c_mat <- table(test$Attrition_Flag,Best_pred_qda)
+Best_Spec_qda <- Best_c_mat[1,1]/sum(Best_c_mat[1,])
+Best_Sens_qda <- Best_c_mat[2,2]/sum(Best_c_mat[2,])
+
+Best_Treshold_qda_bal <- coords(roc_qda_bal,"best",best.method = "closest.topleft")$threshold
+Best_pred_qda_bal <- ifelse(qda_predict_2[,2] >= Best_Treshold_qda_bal , 1,0)
+Best_c_mat <- table(test$Attrition_Flag,Best_pred_qda_bal)
+Best_Spec_qda_bal <- Best_c_mat[1,1]/sum(Best_c_mat[1,])
+Best_Sens_qda_bal <- Best_c_mat[2,2]/sum(Best_c_mat[2,])
+
+#Table to showing them
+Table_mat <-  matrix(c(Best_Treshold_qda,Best_Spec_qda,Best_Sens_qda,Best_Treshold_qda_bal,Best_Spec_qda_bal,Best_Sens_qda_bal), ncol=3, byrow=TRUE)
+colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
+rownames(Table_mat) <- c("Unbalanced","Balanced")
 Tab <- as.table(Table_mat)
 show(Tab)
 
