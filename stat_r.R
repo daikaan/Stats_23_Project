@@ -7,14 +7,19 @@ library("caTools")
 library("ggpubr")
 library("ROSE")
 library("correlation")
-library(moments) #to calculate skewness
-library(olsrr) #to use ols_step_backward_p
-library(MASS)
-library(knitr)
-library(forecast)
-library(ggplot2)
-library(PCAmixdata)
-library(purrr)
+library("moments") #to calculate skewness
+library("olsrr") #to use ols_step_backward_p
+library("MASS")
+library("knitr")
+library("forecast")
+library("ggplot2")
+library("PCAmixdata")
+library("purrr")
+library("corpcor")
+library("car")
+library("e1071")
+library("ppcor")
+library("pROC")
 
 # DATA PREPERATION
 
@@ -293,281 +298,232 @@ colnames(log_cleaned_bank_data_withoutNA_quan)[16] <- "log_Avg_Open_To_Buy"
 log_cleaned_bank_data_withoutNA_quan$Credit_Limit <- log1p(log_cleaned_bank_data_withoutNA_quan$Credit_Limit)
 colnames(log_cleaned_bank_data_withoutNA_quan)[14] <- "log_Credit_Limit"
 
-#since we have only one card category we can remove it
-
-log_cleaned_bank_data_withoutNA_quan <- subset(log_cleaned_bank_data_withoutNA_quan, select = -c(Card_Category))
-
-cleaned_bank_data_withoutNA_quan <- subset(cleaned_bank_data_withoutNA_quan, select = -c(Card_Category))
-
-#Thresholds for classification:
-threshold1 <- 0.4
-threshold2 <- 0.5
-threshold3 <- 0.6
 
 
 set.seed(0987)
 
 sample <- sample.split(log_cleaned_bank_data_withoutNA_quan$Attrition_Flag,SplitRatio = 0.75)
-train <- subset(log_cleaned_bank_data_withoutNA_quan[2:20],sample == TRUE)
-test <- subset(log_cleaned_bank_data_withoutNA_quan[2:20],sample == FALSE)
+train <- subset(log_cleaned_bank_data_withoutNA_quan,sample == TRUE)
+test <- subset(log_cleaned_bank_data_withoutNA_quan,sample == FALSE)
 
-# Under-sampling
-train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
 
-# Over-sampling
-train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+#Proportion of Attrited and Existing Customer
+prop.table(table(train$Attrition_Flag))
+prop.table(table(test$Attrition_Flag))
 
-#Mixed Sampling with 40% of Attrited Customer
 
-train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N = nrow(log_cleaned_bank_data_withoutNA_quan))$data
+#Original proportion of Attrited and Existing Customer
+prop.table(table(log_cleaned_bank_data_withoutNA_quan$Attrition_Flag))
 
+#It's an unbalanced dataset.
+#It might be better to consider a resampling of the dataset
 
-model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
-summary(model)$coeff
+#Mixed Sampling with 50% of Attrited Customer
+train_bal <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.5, N =5309)$data
 
-summary(model)
 
-pred <- (predict(model, test) >= 0.5)*1
+train$Attrition_Flag <- as.numeric(train$Attrition_Flag)
 
-mean(test$Attrition_Flag == pred)
+#Correlation matrix
+cor_mat <- cor(train)
+corrplot(cor_mat,method = "number",type = "upper",number.cex = 0.6, tl.pos = "td",tl.cex=0.5, tl.col = "black" ,diag = FALSE)
 
+#Correlation with Attrition_Flag
+corrplot(cor_mat[1,,drop=FALSE],method = "number",number.cex = 0.6, cl.pos = "n",tl.col = "black" ,tl.cex=0.5,diag = FALSE)
 
-log_cleaned_bank_data_withoutNA_quan1 <- subset(log_cleaned_bank_data_withoutNA_quan, select = -c(Months_on_book))
+#Since Credit_Limit and Avg_Open_To_Buy have correlation 1 we can remove Avg_Open_To_Buy
+train <- subset(train, select = -c(Avg_Open_To_Buy))
 
-set.seed(0987)
+#Partial correlations (Takes time)
+correlation(train,partial = TRUE)
 
-sample <- sample.split(log_cleaned_bank_data_withoutNA_quan1$Attrition_Flag,SplitRatio = 0.75)
-train <- subset(log_cleaned_bank_data_withoutNA_quan1[2:19],sample == TRUE)
-test <- subset(log_cleaned_bank_data_withoutNA_quan1[2:19],sample == FALSE)
+#Partial Correlation matrix 
+part_cor_mat <- pcor(train)$estimate
+corrplot(part_cor_mat, method = "number",type = "upper",number.cex = 0.6, tl.pos = "td",tl.cex=0.5, tl.col = "black" ,diag = FALSE)
 
-# Under-sampling
-train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
 
-# Over-sampling
-train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
 
-#Mixed Sampling with 40% of Attrited Customer
+#Model without Unknown
 
-train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N = nrow(log_cleaned_bank_data_withoutNA_quan))$data
+glm_1 <- glm(data = train,Attrition_Flag~ .,family = "binomial")
+summary(glm_1)
 
+pred_glm_i <- predict(glm_1,test,type="response")
+pred_1_i <- ifelse(pred_glm_i >= Threshold1 , 1,0)
+pred_2_i <- ifelse(pred_glm_i >= Threshold2 , 1,0)
+pred_3_i <- ifelse(pred_glm_i >= Threshold3 , 1,0)
 
-model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
-summary(model)$coeff
+#Confusion matrix
 
-summary(model)
+c_mat_1_i <- table(test$Attrition_Flag,pred_1_i)
+c_mat_2_i <- table(test$Attrition_Flag,pred_2_i)
+c_mat_3_i <- table(test$Attrition_Flag,pred_3_i)
+c_mat_1_i
+c_mat_2_i
+c_mat_3_i
 
-pred <- (predict(model, test) >= 0.5)*1
+#Accuracy
 
-mean(test$Attrition_Flag == pred)
+mean(pred_1_i==test$Attrition_Flag)*100
+mean(pred_2_i==test$Attrition_Flag)*100
+mean(pred_3_i==test$Attrition_Flag)*100
 
+#True Negative Rate / Specificity
 
+Spec_1_i <- c_mat_1_i[1,1]/sum(c_mat_1_i[1,])
+Spec_2_i <- c_mat_2_i[1,1]/sum(c_mat_2_i[1,])
+Spec_3_i <- c_mat_3_i[1,1]/sum(c_mat_3_i[1,])
+Spec_1_i
+Spec_2_i
+Spec_3_i
 
-log_cleaned_bank_data_withoutNA_quan2 <- subset(log_cleaned_bank_data_withoutNA_quan1, select = -c(Education_Level))
 
-sample <- sample.split(log_cleaned_bank_data_withoutNA_quan2$Attrition_Flag,SplitRatio = 0.75)
-train <- subset(log_cleaned_bank_data_withoutNA_quan2[2:18],sample == TRUE)
-test <- subset(log_cleaned_bank_data_withoutNA_quan2[2:18],sample == FALSE)
+#Precision / Positive Predicted Value
 
-# Under-sampling
-train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+Prec_1_i <- c_mat_1_i[2,2]/sum(c_mat_1_i[,2])
+Prec_2_i <- c_mat_2_i[2,2]/sum(c_mat_2_i[,2])
+Prec_3_i <- c_mat_3_i[2,2]/sum(c_mat_3_i[,2])
+Prec_1_i
+Prec_2_i
+Prec_3_i
 
-# Over-sampling
-train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+#Recall / True Positive Rate / Sensitivity
 
-#Mixed Sampling with 40% of Attrited Customer
+Rec_1_i <- c_mat_1_i[2,2]/sum(c_mat_1_i[2,])
+Rec_2_i <- c_mat_2_i[2,2]/sum(c_mat_2_i[2,])
+Rec_3_i <- c_mat_3_i[2,2]/sum(c_mat_3_i[2,])
+Rec_1_i
+Rec_2_i
+Rec_3_i
 
-train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N =7595)$data
+#F1 Score
 
+F1_1_i <- 2 * (Prec_1_i * Rec_1_i)/(Prec_1_i + Rec_1_i)
+F1_2_i <- 2 * (Prec_2_i * Rec_2_i)/(Prec_2_i + Rec_2_i)
+F1_3_i <- 2 * (Prec_3_i * Rec_3_i)/(Prec_3_i + Rec_3_i)
+F1_1_i
+F1_2_i
+F1_3_i
 
-model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
-summary(model)$coeff
+#VIF
 
-summary(model)
+vif(glm_1)
 
-pred <- (predict(model, test) >= 0.5)*1
+#Update Checking p-values and AIC
 
-mean(test$Attrition_Flag == pred)
+glm_2 <- update(glm_1, . ~ . - Education_Level - Customer_Age - Months_on_book - Credit_Limit - Avg_Utilization_Ratio)
+summary(glm_2)
 
 
-log_cleaned_bank_data_withoutNA_quan3 <- subset(log_cleaned_bank_data_withoutNA_quan2, select = -c(Dependent_count))
+glm_3 <- update(glm_2, . ~ . + Total_Trans_Ct*Total_Revolving_Bal + Total_Trans_Ct*Marital_Status)
+summary(glm_3)
 
-sample <- sample.split(log_cleaned_bank_data_withoutNA_quan3$Attrition_Flag,SplitRatio = 0.75)
-train <- subset(log_cleaned_bank_data_withoutNA_quan3[2:17],sample == TRUE)
-test <- subset(log_cleaned_bank_data_withoutNA_quan3[2:17],sample == FALSE)
 
-# Under-sampling
-train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+glm_4 <- update(glm_3, . ~ . + Total_Relationship_Count*Total_Trans_Amt )
+summary(glm_4)
 
-# Over-sampling
-train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
 
-#Mixed Sampling with 40% of Attrited Customer
+glm_5 <- update(glm_4, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio + Total_Revolving_Bal*Credit_Limit )
+summary(glm_5)
 
-train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N =7595)$data
 
+glm_6 <- update(glm_5, . ~ . + Is_Female*Avg_Utilization_Ratio)
+summary(glm_6)
 
-model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
-summary(model)$coeff
 
-summary(model)
+glm_7 <- update(glm_6, . ~ . + Dependent_count*Total_Trans_Ct)
+summary(glm_7)
 
-pred <- (predict(model, test) >= 0.5)*1
 
-mean(test$Attrition_Flag == pred)
+glm_8 <- update(glm_7, . ~ . + Credit_Limit*Total_Trans_Amt + Total_Trans_Ct*Total_Trans_Amt )
+summary(glm_8)
 
 
+pred_glm_f <- predict(glm_8,test,type="response")
+pred_1_f <- ifelse(pred_glm_f >= Threshold1 , 1,0)
+pred_2_f <- ifelse(pred_glm_f >= Threshold2 , 1,0)
+pred_3_f <- ifelse(pred_glm_f >= Threshold3 , 1,0)
 
-#accuracy for not remove anything case
-bank_data_withoutNA_quan
+#Confusion matrix
 
+c_mat_1_f <- table(test$Attrition_Flag,pred_1_f)
+c_mat_2_f <- table(test$Attrition_Flag,pred_2_f)
+c_mat_3_f <- table(test$Attrition_Flag,pred_3_f)
+c_mat_1_f
+c_mat_2_f
+c_mat_3_f
 
-bank_data_withoutNA_quan$Total_Ct_Chng_Q4_Q1 <- log1p(bank_data_withoutNA_quan$Total_Ct_Chng_Q4_Q1)
-colnames(bank_data_withoutNA_quan)[20] <- "log_Total_Ct_Chng_Q4_Q1"
+#Accuracy
 
-bank_data_withoutNA_quan$Total_Trans_Amt <- log1p(bank_data_withoutNA_quan$Total_Trans_Amt)
-colnames(bank_data_withoutNA_quan)[18] <- "log_Total_Trans_Amt"
+mean(pred_1_f==test$Attrition_Flag)*100
+mean(pred_2_f==test$Attrition_Flag)*100
+mean(pred_3_f==test$Attrition_Flag)*100
 
-bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1 <- log1p(bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1)
-colnames(bank_data_withoutNA_quan)[17] <- "log_Total_Amt_Chng_Q4_Q1"
+#True Negative Rate / Specificity
 
-bank_data_withoutNA_quan$Avg_Open_To_Buy <- log1p(bank_data_withoutNA_quan$Avg_Open_To_Buy)
-colnames(bank_data_withoutNA_quan)[16] <- "log_Avg_Open_To_Buy"
+Spec_1_f <- c_mat_1_f[1,1]/sum(c_mat_1_f[1,])
+Spec_2_f <- c_mat_2_f[1,1]/sum(c_mat_2_f[1,])
+Spec_3_f <- c_mat_3_f[1,1]/sum(c_mat_3_f[1,])
+Spec_1_f
+Spec_2_f
+Spec_3_f
 
-bank_data_withoutNA_quan$Credit_Limit <- log1p(bank_data_withoutNA_quan$Credit_Limit)
-colnames(bank_data_withoutNA_quan)[14] <- "log_Credit_Limit"
 
+#Precision / Positive Predicted Value
 
-set.seed(0987)
+Prec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[,2])
+Prec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[,2])
+Prec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[,2])
+Prec_1_f
+Prec_2_f
+Prec_3_f
 
-sample <- sample.split(bank_data_withoutNA_quan$Attrition_Flag,SplitRatio = 0.75)
-train <- subset(bank_data_withoutNA_quan[2:21],sample == TRUE)
-test <- subset(bank_data_withoutNA_quan[2:21],sample == FALSE)
+#Recall / True Positive Rate / Sensitivity
 
-# Under-sampling
-train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
+Rec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[2,])
+Rec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[2,])
+Rec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[2,])
+Rec_1_f
+Rec_2_f
+Rec_3_f
 
-# Over-sampling
-train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
+#F1 Score
 
-#Mixed Sampling with 40% of Attrited Customer
+F1_1_f <- 2 * (Prec_1_f * Rec_1_f)/(Prec_1_f + Rec_1_f)
+F1_2_f <- 2 * (Prec_2_f * Rec_2_f)/(Prec_2_f + Rec_2_f)
+F1_3_f <- 2 * (Prec_3_f * Rec_3_f)/(Prec_3_f + Rec_3_f)
+F1_1_f
+F1_2_f
+F1_3_f
 
-train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N = nrow(bank_data_withoutNA_quan))$data
 
+#ROC curves
+roc_i <- roc(test$Attrition_Flag ~ pred_glm_i)
+roc_f <- roc(test$Attrition_Flag ~ pred_glm_f)
 
-model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
-summary(model)$coeff
+AUC_i <- auc(roc_i)
+AUC_f <- auc(roc_f)
 
-summary(model)
 
-pred <- (predict(model, train_mix) >= 0.5)*1
+plot(roc_i, col = "black",print.auc = TRUE, auc.polygon = TRUE, max.auc.polygon = TRUE, lwd=2,print.auc.x = 0.5,print.auc.y = 0.5)
+plot(roc_f,add = TRUE,col = "blue", print.auc = TRUE, lwd=2, print.auc.x = 0.5,print.auc.y = 0.43)
 
-mean(train_mix$Attrition_Flag == pred)
+#Best thresholds and Best Sensitivity and Specificity
+Best_Treshold_i <- coords(roc_i,"best",best.method = "closest.topleft")$threshold
+Best_pred_i <- ifelse(pred_glm_i >= Best_Treshold_i , 1,0)
+Best_c_mat_i <- table(test$Attrition_Flag,Best_pred_i)
+Best_Spec_i <- Best_c_mat_i[1,1]/sum(Best_c_mat_i[1,])
+Best_Sens_i <- Best_c_mat_i[2,2]/sum(Best_c_mat_i[2,])
 
+Best_Treshold_f <- coords(roc_f,"best",best.method = "closest.topleft")$threshold
+Best_pred_f <- ifelse(pred_glm_f >= Best_Treshold_f , 1,0)
+Best_c_mat_f <- table(test$Attrition_Flag,Best_pred_f)
+Best_Spec_f <- Best_c_mat_f[1,1]/sum(Best_c_mat_f[1,])
+Best_Sens_f <- Best_c_mat_f[2,2]/sum(Best_c_mat_f[2,])
 
-
-
-
-#try to find accuracy with not normalized columns
-set.seed(0987)
-
-sample <- sample.split(cleaned_bank_data_withoutNA_quan$Attrition_Flag,SplitRatio = 0.75)
-train <- subset(cleaned_bank_data_withoutNA_quan[2:20],sample == TRUE)
-test <- subset(cleaned_bank_data_withoutNA_quan[2:20],sample == FALSE)
-
-# Under-sampling
-train_under <- ovun.sample(Attrition_Flag~.,data = train, method = "under")$data
-
-# Over-sampling
-train_over <- ovun.sample(Attrition_Flag~.,data = train, method = "over")$data
-
-#Mixed Sampling with 40% of Attrited Customer
-
-train_mix <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.4, N = nrow(cleaned_bank_data_withoutNA_quan))$data
-
-
-model <- glm(Attrition_Flag ~ ., data = train_mix, family = 'binomial')
-summary(model)$coeff
-
-summary(model)
-
-pred <- (predict(model, test) >= 0.5)*1
-mean(test$Attrition_Flag == pred)
-
-cdplot(factor(Attrition_Flag)~ log_Total_Ct_Chng_Q4_Q1, data=cleaned_bank_data_withoutNA_quan)
-cdplot(factor(Attrition_Flag)~ Total_Trans_Ct, data=cleaned_bank_data_withoutNA_quan)
-
-cdplot(factor(Attrition_Flag)~ Total_Revolving_Bal, data=cleaned_bank_data_withoutNA_quan)
-
-log_cleaned_bank_data_withoutNA_quan
-
-colnames(log_cleaned_bank_data_withoutNA_quan)[3:20]
-x <- log_cleaned_bank_data_withoutNA_quan$Attrition_Flag
-predictors <- data.matrix(log_cleaned_bank_data_withoutNA_quan[, c('Customer_Age', 'Is_Female', 'Dependent_count',
-                                                                   'Education_Level', 'Marital_Status', 'Income_Category',
-                                                                   'Months_on_book', 'Total_Relationship_Count', 'Months_Inactive_12_mon',
-                                                                   'Contacts_Count_12_mon', 'log_Credit_Limit', 'Total_Revolving_Bal',
-                                                                   'log_Avg_Open_To_Buy', 'log_Total_Amt_Chng_Q4_Q1', 'log_Total_Trans_Amt',
-                                                                   'Total_Trans_Ct', 'log_Total_Ct_Chng_Q4_Q1', 'Avg_Utilization_Ratio')]) 
-
-set.seed(222)
-
-ind <- sample(2, nrow(log_cleaned_bank_data_withoutNA_quan), replace = TRUE, prob = c(0.7, 0.3))
-
-train <- log_cleaned_bank_data_withoutNA_quan[ind==1,]
-
-head(log_cleaned_bank_data_withoutNA_quan)
-
-test <- log_cleaned_bank_data_withoutNA_quan[ind==2,]
-
-custom <- trainControl(method = "repeatedcv",
-                       
-                       number = 10,
-                       
-                       repeats = 5,
-                       
-                       verboseIter = TRUE)
-
-set.seed(1234)
-
-log_cleaned_bank_data_withoutNA_quan = data.frame(log_cleaned_bank_data_withoutNA_quan)
-
-model <- train(
-  Attrition_Flag ~ .,
-  data = log_cleaned_bank_data_withoutNA_quan,
-  method = 'lasso'
-)
-model
-
-log_cleaned_bank_data_withoutNA_quan$Attrition_Flag = as.factor(log_cleaned_bank_data_withoutNA_quan$Attrition_Flag)
-
-plot(model)
-
-plot(varImp(model))
-
-set.seed(1)
-
-inTraining <- createDataPartition(log_cleaned_bank_data_withoutNA_quan$Attrition_Flag, p = .80, list = FALSE)
-training <- log_cleaned_bank_data_withoutNA_quan[inTraining,]
-testing  <- log_cleaned_bank_data_withoutNA_quan[-inTraining,]
-
-training = data.frame(training)
-
-set.seed(1)
-model <- train(
-  Attrition_Flag ~ .,
-  data = training,
-  method = 'lasso',
-  preProcess = c("center", "scale")
-)
-model1
-
-test.features = subset(testing, select=-c(Attrition_Flag))
-test.target = subset(testing, select=Attrition_Flag)[,1]
-
-predictions = predict(model3, newdata = test.features)
-
-# RMSE
-sqrt(mean((test.target - predictions)^2))
-
-#R2
-cor(test.target, predictions) ^ 2
+#Table to showing them
+Table_mat <-  matrix(c(Best_Treshold_i,Best_Spec_i,Best_Sens_i,Best_Treshold_f,Best_Spec_f,Best_Sens_f), ncol=3, byrow=TRUE)
+colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
+rownames(Table_mat) <- c("Initial model","Final model")
+Tab <- as.table(Table_mat)
+show(Tab)
