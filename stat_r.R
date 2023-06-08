@@ -422,7 +422,7 @@ vif(glm_1)
 
 #Update Checking p-values and AIC
 
-glm_2 <- update(glm_1, . ~ . - log_Credit_Limit)
+glm_2 <- update(glm_1, . ~ . - log_Avg_Open_To_Buy)
 summary(glm_2)
 
 vif(glm_2)
@@ -445,32 +445,28 @@ summary(glm_5)
 interact_plot(glm_5,pred = log_Total_Amt_Chng_Q4_Q1,modx = log_Total_Trans_Amt)
 
 
-glm_6 <- update(glm_5, . ~ . + Total_Revolving_Bal*log_Avg_Open_To_Buy)
+glm_6 <- update(glm_5, . ~ . + Total_Revolving_Bal*log_Credit_Limit)
 summary(glm_6)
 
 #Show that there is interaction
-interact_plot(glm_6,pred = Total_Revolving_Bal,modx = log_Avg_Open_To_Buy)
+interact_plot(glm_6,pred = Total_Revolving_Bal,modx = log_Credit_Limit)
 
 
-glm_7 <- update(glm_6, . ~ . +  Avg_Utilization_Ratio*log_Credit_Limit - Education_Level)
+glm_7 <- update(glm_6, . ~ . + Dependent_count*log_Total_Amt_Chng_Q4_Q1)
 summary(glm_7)
 
 #Interaction
-interact_plot(glm_7,pred = Avg_Utilization_Ratio,modx = log_Credit_Limit)
+interact_plot(glm_7,pred = log_Total_Amt_Chng_Q4_Q1,modx = log_Total_Trans_Amt)
 
-
-glm_8 <- update(glm_7, . ~ . + Dependent_count*log_Total_Amt_Chng_Q4_Q1)
+glm_8 <- update(glm_7, . ~ . + Avg_Utilization_Ratio*Total_Revolving_Bal)
 summary(glm_8)
 
 #Interaction
-interact_plot(glm_8,pred = log_Total_Amt_Chng_Q4_Q1,modx = log_Total_Trans_Amt)
+interact_plot(glm_8,pred = Total_Revolving_Bal,modx = Avg_Utilization_Ratio)
 
-glm_9 <- update(glm_8, . ~ . + Avg_Utilization_Ratio*Total_Revolving_Bal)
+
+glm_9 <- update(glm_8, . ~ . - Education_Level)
 summary(glm_9)
-
-#Interaction
-interact_plot(glm_9,pred = Total_Revolving_Bal,modx = Avg_Utilization_Ratio)
-
 
 pred_glm_f <- predict(glm_9,test,type="response")
 pred_1_f <- ifelse(pred_glm_f >= Threshold1 , 1,0)
@@ -647,7 +643,7 @@ glm_3_bal <- update(glm_2_bal, . ~ . - Months_on_book)
 summary(glm_3_bal)
 
 
-glm_4_bal <- update(glm_3_bal, . ~ . )
+glm_4_bal <- update(glm_3_bal, . ~ . + log_Total_Amt_Chng_Q4_Q1*Total_Trans_Ct)
 summary(glm_4_bal)
 
 #Show that there is interaction
@@ -668,26 +664,16 @@ summary(glm_6_bal)
 interact_plot(glm_6_bal,pred = Total_Revolving_Bal,modx = log_Avg_Open_To_Buy)
 
 
-glm_7_bal <- update(glm_6_bal, . ~ . + Avg_Utilization_Ratio*log_Credit_Limit)
+glm_7_bal <- update(glm_6_bal, . ~ . + Dependent_count*log_Total_Amt_Chng_Q4_Q1)
 summary(glm_7_bal)
 
 #Interaction
-interact_plot(glm_7_bal,pred = Avg_Utilization_Ratio,modx = log_Credit_Limit)
+interact_plot(glm_7_bal,pred = log_Total_Amt_Chng_Q4_Q1,modx = log_Total_Trans_Amt)
 
-
-glm_8_bal <- update(glm_7_bal, . ~ . + Dependent_count*log_Total_Amt_Chng_Q4_Q1)
+glm_8_bal <- update(glm_7_bal, . ~ . - log_Total_Amt_Chng_Q4_Q1:Total_Trans_Ct )
 summary(glm_8_bal)
 
-#Interaction
-interact_plot(glm_8_bal,pred = log_Total_Amt_Chng_Q4_Q1,modx = log_Total_Trans_Amt)
-
-glm_9_bal <- update(glm_8_bal, . ~ . + Avg_Utilization_Ratio*Total_Revolving_Bal)
-summary(glm_9_bal)
-
-#Interaction
-interact_plot(glm_9_bal,pred = Avg_Utilization_Ratio,modx = Total_Revolving_Bal)
-
-pred_glm_bal_f <- predict(glm_9_bal,test,type="response")
+pred_glm_bal_f <- predict(glm_8_bal,test,type="response")
 pred_1_f <- ifelse(pred_glm_bal_f >= Threshold1 , 1,0)
 pred_2_f <- ifelse(pred_glm_bal_f >= Threshold2 , 1,0)
 pred_3_f <- ifelse(pred_glm_bal_f >= Threshold3 , 1,0)
@@ -791,6 +777,7 @@ show(Tab)
 
 #We can see that the predictor variables don't follow a normal distribution on at least one class
 apply(train[train$Attrition_Flag == 1,][2:18],2,shapiro.test )
+apply(train[train$Attrition_Flag == 0,][2:18],2,shapiro.test )
 
 
 #We still try the LDA and QDA models
@@ -801,10 +788,10 @@ Threshold2 <- 0.5
 Threshold3 <- 0.6
 
 lda_1 <- lda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count
-              + Marital_Status + Income_Category + Total_Relationship_Count + Months_Inactive_12_mon + Contacts_Count_12_mon + Total_Revolving_Bal + log_Avg_Open_To_Buy
-              + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio + log_Credit_Limit 
-              + log_Total_Amt_Chng_Q4_Q1:Total_Trans_Ct + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + Total_Revolving_Bal:log_Avg_Open_To_Buy
-              + Avg_Utilization_Ratio:log_Credit_Limit + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + Total_Revolving_Bal:Avg_Utilization_Ratio, data = train, family = "binomial")
+              + Marital_Status + Income_Category + Total_Relationship_Count + Months_Inactive_12_mon + Contacts_Count_12_mon + log_Credit_Limit 
+              + Total_Revolving_Bal + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio
+              + log_Total_Amt_Chng_Q4_Q1:Total_Trans_Ct + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + log_Credit_Limit:Total_Revolving_Bal
+              + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + Total_Revolving_Bal:Avg_Utilization_Ratio, data = train, family = "binomial")
 
 lda_1
 
@@ -889,9 +876,8 @@ Threshold3 <- 0.8
 #We still try the LDA model
 lda_2 <- lda(Attrition_Flag ~  Customer_Age + Is_Female + Dependent_count + Education_Level
               + Marital_Status + Income_Category + Total_Relationship_Count + Months_Inactive_12_mon + Contacts_Count_12_mon + Total_Revolving_Bal + log_Avg_Open_To_Buy
-              + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio + log_Credit_Limit 
-              + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + Total_Revolving_Bal:log_Avg_Open_To_Buy
-              + Avg_Utilization_Ratio:log_Credit_Limit + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + Total_Revolving_Bal:Avg_Utilization_Ratio, data = train_bal, family = "binomial")
+              + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio 
+              + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + Total_Revolving_Bal:log_Avg_Open_To_Buy + Dependent_count:log_Total_Amt_Chng_Q4_Q1 , data = train_bal, family = "binomial")
 
 lda_2
 
@@ -1004,10 +990,10 @@ Threshold2 <- 0.4
 Threshold3 <- 0.5
 
 qda_1 <- qda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count
-             + Marital_Status + Income_Category + Total_Relationship_Count + Months_Inactive_12_mon + Contacts_Count_12_mon + Total_Revolving_Bal + log_Avg_Open_To_Buy
-             + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio + log_Credit_Limit 
-             + log_Total_Amt_Chng_Q4_Q1:Total_Trans_Ct + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + Total_Revolving_Bal:log_Avg_Open_To_Buy
-             + Avg_Utilization_Ratio:log_Credit_Limit + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + Total_Revolving_Bal:Avg_Utilization_Ratio, data = train, family = "binomial")
+             + Marital_Status + Income_Category + Total_Relationship_Count + Months_Inactive_12_mon + Contacts_Count_12_mon + log_Credit_Limit 
+             + Total_Revolving_Bal + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio
+             + log_Total_Amt_Chng_Q4_Q1:Total_Trans_Ct + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + log_Credit_Limit:Total_Revolving_Bal
+             + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + Total_Revolving_Bal:Avg_Utilization_Ratio, data = train, family = "binomial")
 
 qda_1
 
@@ -1092,9 +1078,8 @@ Threshold3 <- 0.9
 #We still try the QDA model
 qda_2 <- qda(Attrition_Flag ~  Customer_Age + Is_Female + Dependent_count + Education_Level
              + Marital_Status + Income_Category + Total_Relationship_Count + Months_Inactive_12_mon + Contacts_Count_12_mon + Total_Revolving_Bal + log_Avg_Open_To_Buy
-             + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio + log_Credit_Limit 
-             + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + Total_Revolving_Bal:log_Avg_Open_To_Buy
-             + Avg_Utilization_Ratio:log_Credit_Limit + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + Total_Revolving_Bal:Avg_Utilization_Ratio, data = train_bal, family = "binomial")
+             + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio 
+             + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + Total_Revolving_Bal:log_Avg_Open_To_Buy + Dependent_count:log_Total_Amt_Chng_Q4_Q1, data = train_bal, family = "binomial")
 
 qda_2
 
@@ -1191,4 +1176,5 @@ colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
 rownames(Table_mat) <- c("Unbalanced","Balanced")
 Tab <- as.table(Table_mat)
 show(Tab)
+
 
