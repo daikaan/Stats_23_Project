@@ -331,6 +331,10 @@ prop.table(table(log_cleaned_bank_data_withoutNA_quan$Attrition_Flag))
 train_bal <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.5, N =4948)$data
 
 
+
+attach(train)
+
+
 train$Attrition_Flag <- as.numeric(train$Attrition_Flag)
 
 #Correlation matrix
@@ -671,10 +675,19 @@ summary(glm_7_bal)
 #Interaction
 interact_plot(glm_7_bal,pred = log_Total_Amt_Chng_Q4_Q1,modx = log_Total_Trans_Amt)
 
-glm_8_bal <- update(glm_7_bal, . ~ . - log_Total_Amt_Chng_Q4_Q1:Total_Trans_Ct )
+
+glm_8_bal <- update(glm_7_bal, . ~ . - log_Total_Amt_Chng_Q4_Q1:Total_Trans_Ct)
 summary(glm_8_bal)
 
-pred_glm_bal_f <- predict(glm_8_bal,test,type="response")
+
+glm_9_bal <- update(glm_8_bal, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio)
+summary(glm_9_bal)
+
+#Interaction
+interact_plot(glm_9_bal,pred = Avg_Utilization_Ratio, modx = Total_Revolving_Bal)
+
+
+pred_glm_bal_f <- predict(glm_9_bal,test,type="response")
 pred_1_f <- ifelse(pred_glm_bal_f >= Threshold1 , 1,0)
 pred_2_f <- ifelse(pred_glm_bal_f >= Threshold2 , 1,0)
 pred_3_f <- ifelse(pred_glm_bal_f >= Threshold3 , 1,0)
@@ -877,8 +890,8 @@ Threshold3 <- 0.8
 #We still try the LDA model
 lda_2 <- lda(Attrition_Flag ~  Customer_Age + Is_Female + Dependent_count + Education_Level
               + Marital_Status + Income_Category + Total_Relationship_Count + Months_Inactive_12_mon + Contacts_Count_12_mon + Total_Revolving_Bal + log_Avg_Open_To_Buy
-              + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio 
-              + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + Total_Revolving_Bal:log_Avg_Open_To_Buy + Dependent_count:log_Total_Amt_Chng_Q4_Q1 , data = train_bal, family = "binomial")
+              + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt 
+             + Total_Revolving_Bal:log_Avg_Open_To_Buy + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + Total_Revolving_Bal:Avg_Utilization_Ratio , data = train_bal, family = "binomial")
 
 lda_2
 
@@ -1079,8 +1092,8 @@ Threshold3 <- 0.9
 #We still try the QDA model
 qda_2 <- qda(Attrition_Flag ~  Customer_Age + Is_Female + Dependent_count + Education_Level
              + Marital_Status + Income_Category + Total_Relationship_Count + Months_Inactive_12_mon + Contacts_Count_12_mon + Total_Revolving_Bal + log_Avg_Open_To_Buy
-             + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio 
-             + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + Total_Revolving_Bal:log_Avg_Open_To_Buy + Dependent_count:log_Total_Amt_Chng_Q4_Q1, data = train_bal, family = "binomial")
+             + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt 
+             + Total_Revolving_Bal:log_Avg_Open_To_Buy + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + Total_Revolving_Bal:Avg_Utilization_Ratio, data = train_bal, family = "binomial")
 
 qda_2
 
@@ -1195,12 +1208,30 @@ show(Tab)
 #Ridge
 
 
+#Creation of train and test set with interactions
+train_int <- data.frame(train)
+
+train_int$log_Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- train$log_Total_Amt_Chng_Q4_Q1*train$Total_Trans_Ct 
+train_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- train$log_Total_Amt_Chng_Q4_Q1*train$log_Total_Trans_Amt 
+train_int$log_Credit_Limit_Total_Revolving_Bal <- train$log_Credit_Limit*train$Total_Revolving_Bal
+train_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- train$log_Total_Amt_Chng_Q4_Q1*train$Dependent_count 
+train_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- train$Total_Revolving_Bal*train$Avg_Utilization_Ratio
 
 
 
+test_int <- data.frame(test)
 
-train_mat <- data.matrix(train[,-c(1)])
-test_mat <- data.matrix(test[,-c(1)])
+test_int$log_Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- test$log_Total_Amt_Chng_Q4_Q1*test$Total_Trans_Ct 
+test_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- test$log_Total_Amt_Chng_Q4_Q1*test$log_Total_Trans_Amt 
+test_int$log_Credit_Limit_Total_Revolving_Bal <- test$log_Credit_Limit*test$Total_Revolving_Bal
+test_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- test$log_Total_Amt_Chng_Q4_Q1*test$Dependent_count 
+test_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- test$Total_Revolving_Bal*test$Avg_Utilization_Ratio
+
+
+#We transorm them into matrix withou Attrition_Flag, Education_Level , Months_on_book and log_Avg_Open_To_Buy
+
+train_mat <- data.matrix(train_int[,-c(1,5,8,14)])
+test_mat <- data.matrix(test_int[,-c(1,5,8,14)])
 
 
 
@@ -1317,15 +1348,34 @@ F1_3
 
 
 
-#Ridge
+#Ridge balanced
 
 
 
 
+#Creation of train_bal and test set with interactions
+train_bal_int <- data.frame(train_bal)
 
 
-train_bal_mat <- data.matrix(train_bal[,-c(1)])
-test_mat <- data.matrix(test[,-c(1)])
+train_bal_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- train_bal$log_Total_Amt_Chng_Q4_Q1*train_bal$log_Total_Trans_Amt 
+train_bal_int$log_Avg_Open_To_Buy_Total_Revolving_Bal <- train_bal$log_Avg_Open_To_Buy*train_bal$Total_Revolving_Bal
+train_bal_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- train_bal$log_Total_Amt_Chng_Q4_Q1*train_bal$Dependent_count 
+train_bal_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- train_bal$Total_Revolving_Bal*train_bal$Avg_Utilization_Ratio
+
+
+
+test_bal_int <- data.frame(test)
+
+test_bal_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- test$log_Total_Amt_Chng_Q4_Q1*test$log_Total_Trans_Amt 
+test_bal_int$log_Avg_Open_To_Buy_Total_Revolving_Bal <- test$log_Avg_Open_To_Buy*test$Total_Revolving_Bal
+test_bal_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- test$log_Total_Amt_Chng_Q4_Q1*test$Dependent_count 
+test_bal_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- test$Total_Revolving_Bal*test$Avg_Utilization_Ratio
+
+
+#We transorm them into matrix withou Attrition_Flag, Months_on_book and log_Credit_Limit
+
+train_bal_mat <- data.matrix(train_bal_int[,-c(1,8,12)])
+test_bal_mat <- data.matrix(test_bal_int[,-c(1,8,12)])
 
 
 
@@ -1337,7 +1387,7 @@ plot(ridge_bal)
 opt_lambda_ridge_bal <- ridge_bal$lambda.min
 opt_lambda_ridge_bal
 
-ridge_bal_predict <- predict(ridge_bal,test_mat,type = "class", s = opt_lambda_ridge_bal)
+ridge_bal_predict <- predict(ridge_bal,test_bal_mat,type = "class", s = opt_lambda_ridge_bal)
 
 #Confusion matrix
 
@@ -1376,7 +1426,7 @@ Threshold1 <- 0.6
 Threshold2 <- 0.7
 Threshold3 <- 0.8
 
-ridge_bal_predict_2 <- predict(ridge_bal,test_mat,type = "response", s = opt_lambda_ridge_bal)
+ridge_bal_predict_2 <- predict(ridge_bal,test_bal_mat,type = "response", s = opt_lambda_ridge_bal)
 
 pred_1 <- ifelse(ridge_bal_predict_2 >= Threshold1 , 1,0)
 pred_2 <- ifelse(ridge_bal_predict_2 >= Threshold2 , 1,0)
@@ -1477,8 +1527,30 @@ show(Tab)
 
 
 
-train_mat <- data.matrix(train[,-c(1)])
-test_mat <- data.matrix(test[,-c(1)])
+#Creation of train and test set with interactions
+train_int <- data.frame(train)
+
+train_int$log_Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- train$log_Total_Amt_Chng_Q4_Q1*train$Total_Trans_Ct 
+train_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- train$log_Total_Amt_Chng_Q4_Q1*train$log_Total_Trans_Amt 
+train_int$log_Credit_Limit_Total_Revolving_Bal <- train$log_Credit_Limit*train$Total_Revolving_Bal
+train_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- train$log_Total_Amt_Chng_Q4_Q1*train$Dependent_count 
+train_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- train$Total_Revolving_Bal*train$Avg_Utilization_Ratio
+
+
+
+test_int <- data.frame(test)
+
+test_int$log_Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- test$log_Total_Amt_Chng_Q4_Q1*test$Total_Trans_Ct 
+test_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- test$log_Total_Amt_Chng_Q4_Q1*test$log_Total_Trans_Amt 
+test_int$log_Credit_Limit_Total_Revolving_Bal <- test$log_Credit_Limit*test$Total_Revolving_Bal
+test_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- test$log_Total_Amt_Chng_Q4_Q1*test$Dependent_count 
+test_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- test$Total_Revolving_Bal*test$Avg_Utilization_Ratio
+
+
+#We transorm them into matrix withou Attrition_Flag, Education_Level , Months_on_book and log_Avg_Open_To_Buy
+
+train_mat <- data.matrix(train_int[,-c(1,5,8,14)])
+test_mat <- data.matrix(test_int[,-c(1,5,8,14)])
 
 
 
@@ -1602,8 +1674,29 @@ F1_3
 
 
 
-train_bal_mat <- data.matrix(train_bal[,-c(1)])
-test_mat <- data.matrix(test[,-c(1)])
+#Creation of train_bal and test set with interactions
+train_bal_int <- data.frame(train_bal)
+
+
+train_bal_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- train_bal$log_Total_Amt_Chng_Q4_Q1*train_bal$log_Total_Trans_Amt 
+train_bal_int$log_Avg_Open_To_Buy_Total_Revolving_Bal <- train_bal$log_Avg_Open_To_Buy*train_bal$Total_Revolving_Bal
+train_bal_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- train_bal$log_Total_Amt_Chng_Q4_Q1*train_bal$Dependent_count 
+train_bal_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- train_bal$Total_Revolving_Bal*train_bal$Avg_Utilization_Ratio
+
+
+
+test_bal_int <- data.frame(test)
+
+test_bal_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- test$log_Total_Amt_Chng_Q4_Q1*test$log_Total_Trans_Amt 
+test_bal_int$log_Avg_Open_To_Buy_Total_Revolving_Bal <- test$log_Avg_Open_To_Buy*test$Total_Revolving_Bal
+test_bal_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- test$log_Total_Amt_Chng_Q4_Q1*test$Dependent_count 
+test_bal_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- test$Total_Revolving_Bal*test$Avg_Utilization_Ratio
+
+
+#We transorm them into matrix withou Attrition_Flag, Months_on_book and log_Credit_Limit
+
+train_bal_mat <- data.matrix(train_bal_int[,-c(1,8,12)])
+test_bal_mat <- data.matrix(test_bal_int[,-c(1,8,12)])
 
 
 
@@ -1615,7 +1708,7 @@ plot(lasso_bal)
 opt_lambda_lasso_bal <- lasso_bal$lambda.min
 opt_lambda_lasso_bal
 
-lasso_bal_predict <- predict(lasso_bal,test_mat,type = "class", s = opt_lambda_lasso_bal)
+lasso_bal_predict <- predict(lasso_bal,test_bal_mat,type = "class", s = opt_lambda_lasso_bal)
 
 #Confusion matrix
 
@@ -1654,7 +1747,7 @@ Threshold1 <- 0.6
 Threshold2 <- 0.7
 Threshold3 <- 0.8
 
-lasso_bal_predict_2 <- predict(lasso_bal,test_mat,type = "response", s = opt_lambda_lasso_bal)
+lasso_bal_predict_2 <- predict(lasso_bal,test_bal_mat,type = "response", s = opt_lambda_lasso_bal)
 
 pred_1 <- ifelse(lasso_bal_predict_2 >= Threshold1 , 1,0)
 pred_2 <- ifelse(lasso_bal_predict_2 >= Threshold2 , 1,0)
