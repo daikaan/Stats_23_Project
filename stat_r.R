@@ -21,6 +21,7 @@ library("e1071")
 library("ppcor")
 library("pROC")
 library("interactions")
+library("glmnet")
 
 
 
@@ -799,61 +800,61 @@ lda_1
 
 lda_1_predict <- predict(lda_1,test,type = "response")
 lda_predict_1 <- lda_1_predict$posterior
-pred_1_f <- ifelse(lda_predict_1[,2] >= Threshold1 , 1,0)
-pred_2_f <- ifelse(lda_predict_1[,2] >= Threshold2 , 1,0)
-pred_3_f <- ifelse(lda_predict_1[,2] >= Threshold3 , 1,0)
+pred_1 <- ifelse(lda_predict_1[,2] >= Threshold1 , 1,0)
+pred_2 <- ifelse(lda_predict_1[,2] >= Threshold2 , 1,0)
+pred_3 <- ifelse(lda_predict_1[,2] >= Threshold3 , 1,0)
 
 #Confusion matrix
 
-c_mat_1_f <- table(test$Attrition_Flag,pred_1_f)
-c_mat_2_f <- table(test$Attrition_Flag,pred_2_f)
-c_mat_3_f <- table(test$Attrition_Flag,pred_3_f)
-c_mat_1_f
-c_mat_2_f
-c_mat_3_f
+c_mat_1 <- table(test$Attrition_Flag,pred_1)
+c_mat_2 <- table(test$Attrition_Flag,pred_2)
+c_mat_3 <- table(test$Attrition_Flag,pred_3)
+c_mat_1
+c_mat_2
+c_mat_3
 
 #Accuracy
 
-mean(pred_1_f==test$Attrition_Flag)*100
-mean(pred_2_f==test$Attrition_Flag)*100
-mean(pred_3_f==test$Attrition_Flag)*100
+mean(pred_1==test$Attrition_Flag)*100
+mean(pred_2==test$Attrition_Flag)*100
+mean(pred_3==test$Attrition_Flag)*100
 
 #True Negative Rate / Specificity
 
-Spec_1_f <- c_mat_1_f[1,1]/sum(c_mat_1_f[1,])
-Spec_2_f <- c_mat_2_f[1,1]/sum(c_mat_2_f[1,])
-Spec_3_f <- c_mat_3_f[1,1]/sum(c_mat_3_f[1,])
-Spec_1_f
-Spec_2_f
-Spec_3_f
+Spec_1 <- c_mat_1[1,1]/sum(c_mat_1[1,])
+Spec_2 <- c_mat_2[1,1]/sum(c_mat_2[1,])
+Spec_3 <- c_mat_3[1,1]/sum(c_mat_3[1,])
+Spec_1
+Spec_2
+Spec_3
 
 
 #Precision / Positive Predicted Value
 
-Prec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[,2])
-Prec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[,2])
-Prec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[,2])
-Prec_1_f
-Prec_2_f
-Prec_3_f
+Prec_1 <- c_mat_1[2,2]/sum(c_mat_1[,2])
+Prec_2 <- c_mat_2[2,2]/sum(c_mat_2[,2])
+Prec_3 <- c_mat_3[2,2]/sum(c_mat_3[,2])
+Prec_1
+Prec_2
+Prec_3
 
 #Recall / True Positive Rate / Sensitivity
 
-Rec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[2,])
-Rec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[2,])
-Rec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[2,])
-Rec_1_f
-Rec_2_f
-Rec_3_f
+Rec_1 <- c_mat_1[2,2]/sum(c_mat_1[2,])
+Rec_2 <- c_mat_2[2,2]/sum(c_mat_2[2,])
+Rec_3 <- c_mat_3[2,2]/sum(c_mat_3[2,])
+Rec_1
+Rec_2
+Rec_3
 
 #F1 Score
 
-F1_1_f <- 2 * (Prec_1_f * Rec_1_f)/(Prec_1_f + Rec_1_f)
-F1_2_f <- 2 * (Prec_2_f * Rec_2_f)/(Prec_2_f + Rec_2_f)
-F1_3_f <- 2 * (Prec_3_f * Rec_3_f)/(Prec_3_f + Rec_3_f)
-F1_1_f
-F1_2_f
-F1_3_f
+F1_1 <- 2 * (Prec_1 * Rec_1)/(Prec_1 + Rec_1)
+F1_2 <- 2 * (Prec_2 * Rec_2)/(Prec_2 + Rec_2)
+F1_3 <- 2 * (Prec_3 * Rec_3)/(Prec_3 + Rec_3)
+F1_1
+F1_2
+F1_3
 
 
 
@@ -885,61 +886,61 @@ lda_2
 
 lda_2_predict <- predict(lda_2,test,type = "response")
 lda_predict_2 <- lda_2_predict$posterior
-pred_1_f <- ifelse(lda_predict_2[,2] >= Threshold1 , 1,0)
-pred_2_f <- ifelse(lda_predict_2[,2] >= Threshold2 , 1,0)
-pred_3_f <- ifelse(lda_predict_2[,2] >= Threshold3 , 1,0)
+pred_1 <- ifelse(lda_predict_2[,2] >= Threshold1 , 1,0)
+pred_2 <- ifelse(lda_predict_2[,2] >= Threshold2 , 1,0)
+pred_3 <- ifelse(lda_predict_2[,2] >= Threshold3 , 1,0)
 
 #Confusion matrix
 
-c_mat_1_f <- table(test$Attrition_Flag,pred_1_f)
-c_mat_2_f <- table(test$Attrition_Flag,pred_2_f)
-c_mat_3_f <- table(test$Attrition_Flag,pred_3_f)
-c_mat_1_f
-c_mat_2_f
-c_mat_3_f
+c_mat_1 <- table(test$Attrition_Flag,pred_1)
+c_mat_2 <- table(test$Attrition_Flag,pred_2)
+c_mat_3 <- table(test$Attrition_Flag,pred_3)
+c_mat_1
+c_mat_2
+c_mat_3
 
 #Accuracy
 
-mean(pred_1_f==test$Attrition_Flag)*100
-mean(pred_2_f==test$Attrition_Flag)*100
-mean(pred_3_f==test$Attrition_Flag)*100
+mean(pred_1==test$Attrition_Flag)*100
+mean(pred_2==test$Attrition_Flag)*100
+mean(pred_3==test$Attrition_Flag)*100
 
 #True Negative Rate / Specificity
 
-Spec_1_f <- c_mat_1_f[1,1]/sum(c_mat_1_f[1,])
-Spec_2_f <- c_mat_2_f[1,1]/sum(c_mat_2_f[1,])
-Spec_3_f <- c_mat_3_f[1,1]/sum(c_mat_3_f[1,])
-Spec_1_f
-Spec_2_f
-Spec_3_f
+Spec_1 <- c_mat_1[1,1]/sum(c_mat_1[1,])
+Spec_2 <- c_mat_2[1,1]/sum(c_mat_2[1,])
+Spec_3 <- c_mat_3[1,1]/sum(c_mat_3[1,])
+Spec_1
+Spec_2
+Spec_3
 
 
 #Precision / Positive Predicted Value
 
-Prec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[,2])
-Prec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[,2])
-Prec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[,2])
-Prec_1_f
-Prec_2_f
-Prec_3_f
+Prec_1 <- c_mat_1[2,2]/sum(c_mat_1[,2])
+Prec_2 <- c_mat_2[2,2]/sum(c_mat_2[,2])
+Prec_3 <- c_mat_3[2,2]/sum(c_mat_3[,2])
+Prec_1
+Prec_2
+Prec_3
 
 #Recall / True Positive Rate / Sensitivity
 
-Rec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[2,])
-Rec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[2,])
-Rec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[2,])
-Rec_1_f
-Rec_2_f
-Rec_3_f
+Rec_1 <- c_mat_1[2,2]/sum(c_mat_1[2,])
+Rec_2 <- c_mat_2[2,2]/sum(c_mat_2[2,])
+Rec_3 <- c_mat_3[2,2]/sum(c_mat_3[2,])
+Rec_1
+Rec_2
+Rec_3
 
 #F1 Score
 
-F1_1_f <- 2 * (Prec_1_f * Rec_1_f)/(Prec_1_f + Rec_1_f)
-F1_2_f <- 2 * (Prec_2_f * Rec_2_f)/(Prec_2_f + Rec_2_f)
-F1_3_f <- 2 * (Prec_3_f * Rec_3_f)/(Prec_3_f + Rec_3_f)
-F1_1_f
-F1_2_f
-F1_3_f
+F1_1 <- 2 * (Prec_1 * Rec_1)/(Prec_1 + Rec_1)
+F1_2 <- 2 * (Prec_2 * Rec_2)/(Prec_2 + Rec_2)
+F1_3 <- 2 * (Prec_3 * Rec_3)/(Prec_3 + Rec_3)
+F1_1
+F1_2
+F1_3
 
 
 
@@ -1001,61 +1002,61 @@ qda_1
 
 qda_1_predict <- predict(qda_1,test,type = "response")
 qda_predict_1 <- qda_1_predict$posterior
-pred_1_f <- ifelse(qda_predict_1[,2] >= Threshold1 , 1,0)
-pred_2_f <- ifelse(qda_predict_1[,2] >= Threshold2 , 1,0)
-pred_3_f <- ifelse(qda_predict_1[,2] >= Threshold3 , 1,0)
+pred_1 <- ifelse(qda_predict_1[,2] >= Threshold1 , 1,0)
+pred_2 <- ifelse(qda_predict_1[,2] >= Threshold2 , 1,0)
+pred_3 <- ifelse(qda_predict_1[,2] >= Threshold3 , 1,0)
 
 #Confusion matrix
 
-c_mat_1_f <- table(test$Attrition_Flag,pred_1_f)
-c_mat_2_f <- table(test$Attrition_Flag,pred_2_f)
-c_mat_3_f <- table(test$Attrition_Flag,pred_3_f)
-c_mat_1_f
-c_mat_2_f
-c_mat_3_f
+c_mat_1 <- table(test$Attrition_Flag,pred_1)
+c_mat_2 <- table(test$Attrition_Flag,pred_2)
+c_mat_3 <- table(test$Attrition_Flag,pred_3)
+c_mat_1
+c_mat_2
+c_mat_3
 
 #Accuracy
 
-mean(pred_1_f==test$Attrition_Flag)*100
-mean(pred_2_f==test$Attrition_Flag)*100
-mean(pred_3_f==test$Attrition_Flag)*100
+mean(pred_1==test$Attrition_Flag)*100
+mean(pred_2==test$Attrition_Flag)*100
+mean(pred_3==test$Attrition_Flag)*100
 
 #True Negative Rate / Specificity
 
-Spec_1_f <- c_mat_1_f[1,1]/sum(c_mat_1_f[1,])
-Spec_2_f <- c_mat_2_f[1,1]/sum(c_mat_2_f[1,])
-Spec_3_f <- c_mat_3_f[1,1]/sum(c_mat_3_f[1,])
-Spec_1_f
-Spec_2_f
-Spec_3_f
+Spec_1 <- c_mat_1[1,1]/sum(c_mat_1[1,])
+Spec_2 <- c_mat_2[1,1]/sum(c_mat_2[1,])
+Spec_3 <- c_mat_3[1,1]/sum(c_mat_3[1,])
+Spec_1
+Spec_2
+Spec_3
 
 
 #Precision / Positive Predicted Value
 
-Prec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[,2])
-Prec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[,2])
-Prec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[,2])
-Prec_1_f
-Prec_2_f
-Prec_3_f
+Prec_1 <- c_mat_1[2,2]/sum(c_mat_1[,2])
+Prec_2 <- c_mat_2[2,2]/sum(c_mat_2[,2])
+Prec_3 <- c_mat_3[2,2]/sum(c_mat_3[,2])
+Prec_1
+Prec_2
+Prec_3
 
 #Recall / True Positive Rate / Sensitivity
 
-Rec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[2,])
-Rec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[2,])
-Rec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[2,])
-Rec_1_f
-Rec_2_f
-Rec_3_f
+Rec_1 <- c_mat_1[2,2]/sum(c_mat_1[2,])
+Rec_2 <- c_mat_2[2,2]/sum(c_mat_2[2,])
+Rec_3 <- c_mat_3[2,2]/sum(c_mat_3[2,])
+Rec_1
+Rec_2
+Rec_3
 
 #F1 Score
 
-F1_1_f <- 2 * (Prec_1_f * Rec_1_f)/(Prec_1_f + Rec_1_f)
-F1_2_f <- 2 * (Prec_2_f * Rec_2_f)/(Prec_2_f + Rec_2_f)
-F1_3_f <- 2 * (Prec_3_f * Rec_3_f)/(Prec_3_f + Rec_3_f)
-F1_1_f
-F1_2_f
-F1_3_f
+F1_1 <- 2 * (Prec_1 * Rec_1)/(Prec_1 + Rec_1)
+F1_2 <- 2 * (Prec_2 * Rec_2)/(Prec_2 + Rec_2)
+F1_3 <- 2 * (Prec_3 * Rec_3)/(Prec_3 + Rec_3)
+F1_1
+F1_2
+F1_3
 
 
 
@@ -1087,61 +1088,61 @@ qda_2
 
 qda_2_predict <- predict(qda_2,test,type = "response")
 qda_predict_2 <- qda_2_predict$posterior
-pred_1_f <- ifelse(qda_predict_2[,2] >= Threshold1 , 1,0)
-pred_2_f <- ifelse(qda_predict_2[,2] >= Threshold2 , 1,0)
-pred_3_f <- ifelse(qda_predict_2[,2] >= Threshold3 , 1,0)
+pred_1 <- ifelse(qda_predict_2[,2] >= Threshold1 , 1,0)
+pred_2 <- ifelse(qda_predict_2[,2] >= Threshold2 , 1,0)
+pred_3 <- ifelse(qda_predict_2[,2] >= Threshold3 , 1,0)
 
 #Confusion matrix
 
-c_mat_1_f <- table(test$Attrition_Flag,pred_1_f)
-c_mat_2_f <- table(test$Attrition_Flag,pred_2_f)
-c_mat_3_f <- table(test$Attrition_Flag,pred_3_f)
-c_mat_1_f
-c_mat_2_f
-c_mat_3_f
+c_mat_1 <- table(test$Attrition_Flag,pred_1)
+c_mat_2 <- table(test$Attrition_Flag,pred_2)
+c_mat_3 <- table(test$Attrition_Flag,pred_3)
+c_mat_1
+c_mat_2
+c_mat_3
 
 #Accuracy
 
-mean(pred_1_f==test$Attrition_Flag)*100
-mean(pred_2_f==test$Attrition_Flag)*100
-mean(pred_3_f==test$Attrition_Flag)*100
+mean(pred_1==test$Attrition_Flag)*100
+mean(pred_2==test$Attrition_Flag)*100
+mean(pred_3==test$Attrition_Flag)*100
 
 #True Negative Rate / Specificity
 
-Spec_1_f <- c_mat_1_f[1,1]/sum(c_mat_1_f[1,])
-Spec_2_f <- c_mat_2_f[1,1]/sum(c_mat_2_f[1,])
-Spec_3_f <- c_mat_3_f[1,1]/sum(c_mat_3_f[1,])
-Spec_1_f
-Spec_2_f
-Spec_3_f
+Spec_1 <- c_mat_1[1,1]/sum(c_mat_1[1,])
+Spec_2 <- c_mat_2[1,1]/sum(c_mat_2[1,])
+Spec_3 <- c_mat_3[1,1]/sum(c_mat_3[1,])
+Spec_1
+Spec_2
+Spec_3
 
 
 #Precision / Positive Predicted Value
 
-Prec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[,2])
-Prec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[,2])
-Prec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[,2])
-Prec_1_f
-Prec_2_f
-Prec_3_f
+Prec_1 <- c_mat_1[2,2]/sum(c_mat_1[,2])
+Prec_2 <- c_mat_2[2,2]/sum(c_mat_2[,2])
+Prec_3 <- c_mat_3[2,2]/sum(c_mat_3[,2])
+Prec_1
+Prec_2
+Prec_3
 
 #Recall / True Positive Rate / Sensitivity
 
-Rec_1_f <- c_mat_1_f[2,2]/sum(c_mat_1_f[2,])
-Rec_2_f <- c_mat_2_f[2,2]/sum(c_mat_2_f[2,])
-Rec_3_f <- c_mat_3_f[2,2]/sum(c_mat_3_f[2,])
-Rec_1_f
-Rec_2_f
-Rec_3_f
+Rec_1 <- c_mat_1[2,2]/sum(c_mat_1[2,])
+Rec_2 <- c_mat_2[2,2]/sum(c_mat_2[2,])
+Rec_3 <- c_mat_3[2,2]/sum(c_mat_3[2,])
+Rec_1
+Rec_2
+Rec_3
 
 #F1 Score
 
-F1_1_f <- 2 * (Prec_1_f * Rec_1_f)/(Prec_1_f + Rec_1_f)
-F1_2_f <- 2 * (Prec_2_f * Rec_2_f)/(Prec_2_f + Rec_2_f)
-F1_3_f <- 2 * (Prec_3_f * Rec_3_f)/(Prec_3_f + Rec_3_f)
-F1_1_f
-F1_2_f
-F1_3_f
+F1_1 <- 2 * (Prec_1 * Rec_1)/(Prec_1 + Rec_1)
+F1_2 <- 2 * (Prec_2 * Rec_2)/(Prec_2 + Rec_2)
+F1_3 <- 2 * (Prec_3 * Rec_3)/(Prec_3 + Rec_3)
+F1_1
+F1_2
+F1_3
 
 
 
@@ -1177,4 +1178,566 @@ rownames(Table_mat) <- c("Unbalanced","Balanced")
 Tab <- as.table(Table_mat)
 show(Tab)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Ridge
+
+
+
+
+
+
+train_mat <- data.matrix(train[,-c(1)])
+test_mat <- data.matrix(test[,-c(1)])
+
+
+
+ridge <- cv.glmnet(train_mat,train$Attrition_Flag, alpha = 0, family = "binomial", type.measure = "class")
+
+plot(ridge)
+
+
+opt_lambda_ridge <- ridge$lambda.min
+opt_lambda_ridge
+
+ridge_predict <- predict(ridge,test_mat,type = "class", s = opt_lambda_ridge)
+
+#Confusion matrix
+
+c_mat_ridge <- table(test$Attrition_Flag,ridge_predict)
+c_mat_ridge
+
+#Accuracy
+
+mean(ridge_predict==test$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_ridge <- c_mat_ridge[1,1]/sum(c_mat_ridge[1,])
+Spec_ridge
+
+
+#Precision / Positive Predicted Value
+
+Prec_ridge <- c_mat_ridge[2,2]/sum(c_mat_ridge[,2])
+Prec_ridge
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_ridge <- c_mat_ridge[2,2]/sum(c_mat_ridge[2,])
+Rec_ridge
+
+#F1 Score
+
+F1_Ridge <- 2 * (Prec_ridge * Rec_ridge)/(Prec_ridge + Rec_ridge)
+F1_Ridge
+
+
+
+#Thresholds
+Threshold1 <- 0.3
+Threshold2 <- 0.4
+Threshold3 <- 0.5
+
+ridge_predict_2 <- predict(ridge,test_mat,type = "response", s = opt_lambda_ridge)
+
+pred_1 <- ifelse(ridge_predict_2 >= Threshold1 , 1,0)
+pred_2 <- ifelse(ridge_predict_2 >= Threshold2 , 1,0)
+pred_3 <- ifelse(ridge_predict_2 >= Threshold3 , 1,0)
+
+#Confusion matrix
+
+c_mat_1 <- table(test$Attrition_Flag,pred_1)
+c_mat_2 <- table(test$Attrition_Flag,pred_2)
+c_mat_3 <- table(test$Attrition_Flag,pred_3)
+c_mat_1
+c_mat_2
+c_mat_3
+
+#Accuracy
+
+mean(pred_1==test$Attrition_Flag)*100
+mean(pred_2==test$Attrition_Flag)*100
+mean(pred_3==test$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_1 <- c_mat_1[1,1]/sum(c_mat_1[1,])
+Spec_2 <- c_mat_2[1,1]/sum(c_mat_2[1,])
+Spec_3 <- c_mat_3[1,1]/sum(c_mat_3[1,])
+Spec_1
+Spec_2
+Spec_3
+
+
+#Precision / Positive Predicted Value
+
+Prec_1 <- c_mat_1[2,2]/sum(c_mat_1[,2])
+Prec_2 <- c_mat_2[2,2]/sum(c_mat_2[,2])
+Prec_3 <- c_mat_3[2,2]/sum(c_mat_3[,2])
+Prec_1
+Prec_2
+Prec_3
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_1 <- c_mat_1[2,2]/sum(c_mat_1[2,])
+Rec_2 <- c_mat_2[2,2]/sum(c_mat_2[2,])
+Rec_3 <- c_mat_3[2,2]/sum(c_mat_3[2,])
+Rec_1
+Rec_2
+Rec_3
+
+#F1 Score
+
+F1_1 <- 2 * (Prec_1 * Rec_1)/(Prec_1 + Rec_1)
+F1_2 <- 2 * (Prec_2 * Rec_2)/(Prec_2 + Rec_2)
+F1_3 <- 2 * (Prec_3 * Rec_3)/(Prec_3 + Rec_3)
+F1_1
+F1_2
+F1_3
+
+
+
+
+
+
+
+
+
+#Ridge
+
+
+
+
+
+
+train_bal_mat <- data.matrix(train_bal[,-c(1)])
+test_mat <- data.matrix(test[,-c(1)])
+
+
+
+ridge_bal <- cv.glmnet(train_bal_mat,train_bal$Attrition_Flag, alpha = 0, family = "binomial", type.measure = "class")
+
+plot(ridge_bal)
+
+
+opt_lambda_ridge_bal <- ridge_bal$lambda.min
+opt_lambda_ridge_bal
+
+ridge_bal_predict <- predict(ridge_bal,test_mat,type = "class", s = opt_lambda_ridge_bal)
+
+#Confusion matrix
+
+c_mat_ridge_bal <- table(test$Attrition_Flag,ridge_bal_predict)
+c_mat_ridge_bal
+
+#Accuracy
+
+mean(ridge_bal_predict==test$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_ridge_bal <- c_mat_ridge_bal[1,1]/sum(c_mat_ridge_bal[1,])
+Spec_ridge_bal
+
+
+#Precision / Positive Predicted Value
+
+Prec_ridge_bal <- c_mat_ridge_bal[2,2]/sum(c_mat_ridge_bal[,2])
+Prec_ridge_bal
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_ridge_bal <- c_mat_ridge_bal[2,2]/sum(c_mat_ridge_bal[2,])
+Rec_ridge_bal
+
+#F1 Score
+
+F1_Ridge_bal <- 2 * (Prec_ridge_bal * Rec_ridge_bal)/(Prec_ridge_bal + Rec_ridge_bal)
+F1_Ridge_bal
+
+
+
+#Thresholds
+Threshold1 <- 0.6
+Threshold2 <- 0.7
+Threshold3 <- 0.8
+
+ridge_bal_predict_2 <- predict(ridge_bal,test_mat,type = "response", s = opt_lambda_ridge_bal)
+
+pred_1 <- ifelse(ridge_bal_predict_2 >= Threshold1 , 1,0)
+pred_2 <- ifelse(ridge_bal_predict_2 >= Threshold2 , 1,0)
+pred_3 <- ifelse(ridge_bal_predict_2 >= Threshold3 , 1,0)
+
+#Confusion matrix
+
+c_mat_1 <- table(test$Attrition_Flag,pred_1)
+c_mat_2 <- table(test$Attrition_Flag,pred_2)
+c_mat_3 <- table(test$Attrition_Flag,pred_3)
+c_mat_1
+c_mat_2
+c_mat_3
+
+#Accuracy
+
+mean(pred_1==test$Attrition_Flag)*100
+mean(pred_2==test$Attrition_Flag)*100
+mean(pred_3==test$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_1 <- c_mat_1[1,1]/sum(c_mat_1[1,])
+Spec_2 <- c_mat_2[1,1]/sum(c_mat_2[1,])
+Spec_3 <- c_mat_3[1,1]/sum(c_mat_3[1,])
+Spec_1
+Spec_2
+Spec_3
+
+
+#Precision / Positive Predicted Value
+
+Prec_1 <- c_mat_1[2,2]/sum(c_mat_1[,2])
+Prec_2 <- c_mat_2[2,2]/sum(c_mat_2[,2])
+Prec_3 <- c_mat_3[2,2]/sum(c_mat_3[,2])
+Prec_1
+Prec_2
+Prec_3
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_1 <- c_mat_1[2,2]/sum(c_mat_1[2,])
+Rec_2 <- c_mat_2[2,2]/sum(c_mat_2[2,])
+Rec_3 <- c_mat_3[2,2]/sum(c_mat_3[2,])
+Rec_1
+Rec_2
+Rec_3
+
+#F1 Score
+
+F1_1 <- 2 * (Prec_1 * Rec_1)/(Prec_1 + Rec_1)
+F1_2 <- 2 * (Prec_2 * Rec_2)/(Prec_2 + Rec_2)
+F1_3 <- 2 * (Prec_3 * Rec_3)/(Prec_3 + Rec_3)
+F1_1
+F1_2
+F1_3
+
+roc_ridge <- roc(test$Attrition_Flag ~ as.numeric(ridge_predict_2))
+roc_ridge_bal <- roc(test$Attrition_Flag ~ as.numeric(ridge_bal_predict_2))
+
+AUC_ridge <- auc(roc_ridge)
+AUC_ridge_bal <- auc(roc_ridge_bal)
+
+plot(roc_ridge, col = "black",print.auc = TRUE, auc.polygon = TRUE, max.auc.polygon = TRUE, lwd=2,print.auc.x = 0.5,print.auc.y = 0.5)
+plot(roc_ridge_bal,add = TRUE,col = "blue", print.auc = TRUE, lwd=2, print.auc.x = 0.5,print.auc.y = 0.43)
+
+#Best thresholds and Best Sensitivity and Specificity
+Best_Treshold_ridge <- coords(roc_ridge,"best",best.method = "closest.topleft")$threshold
+Best_pred_ridge <- ifelse(as.numeric(ridge_predict_2) >= Best_Treshold_ridge , 1,0)
+Best_c_mat <- table(test$Attrition_Flag,Best_pred_ridge)
+Best_Spec_ridge <- Best_c_mat[1,1]/sum(Best_c_mat[1,])
+Best_Sens_ridge <- Best_c_mat[2,2]/sum(Best_c_mat[2,])
+
+Best_Treshold_ridge_bal <- coords(roc_ridge_bal,"best",best.method = "closest.topleft")$threshold
+Best_pred_ridge_bal <- ifelse(as.numeric(ridge_bal_predict_2) >= Best_Treshold_ridge_bal , 1,0)
+Best_c_mat <- table(test$Attrition_Flag,Best_pred_ridge_bal)
+Best_Spec_ridge_bal <- Best_c_mat[1,1]/sum(Best_c_mat[1,])
+Best_Sens_ridge_bal <- Best_c_mat[2,2]/sum(Best_c_mat[2,])
+
+#Table to showing them
+Table_mat <-  matrix(c(Best_Treshold_ridge,Best_Spec_ridge,Best_Sens_ridge,Best_Treshold_ridge_bal,Best_Spec_ridge_bal,Best_Sens_ridge_bal), ncol=3, byrow=TRUE)
+colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
+rownames(Table_mat) <- c("Unbalanced","Balanced")
+Tab <- as.table(Table_mat)
+show(Tab)
+
+
+
+
+
+
+
+
+
+
+
+#Lasso
+
+
+
+train_mat <- data.matrix(train[,-c(1)])
+test_mat <- data.matrix(test[,-c(1)])
+
+
+
+lasso <- cv.glmnet(train_mat,train$Attrition_Flag, alpha = 1, family = "binomial", type.measure = "class")
+
+plot(lasso)
+
+
+opt_lambda_lasso <- lasso$lambda.min
+opt_lambda_lasso
+
+lasso_predict <- predict(lasso,test_mat,type = "class", s = opt_lambda_lasso)
+
+#Confusion matrix
+
+c_mat_lasso <- table(test$Attrition_Flag,lasso_predict)
+c_mat_lasso
+
+#Accuracy
+
+mean(lasso_predict==test$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_lasso <- c_mat_lasso[1,1]/sum(c_mat_lasso[1,])
+Spec_lasso
+
+
+#Precision / Positive Predicted Value
+
+Prec_lasso <- c_mat_lasso[2,2]/sum(c_mat_lasso[,2])
+Prec_lasso
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_lasso <- c_mat_lasso[2,2]/sum(c_mat_lasso[2,])
+Rec_lasso
+
+#F1 Score
+
+F1_lasso <- 2 * (Prec_lasso * Rec_lasso)/(Prec_lasso + Rec_lasso)
+F1_lasso
+
+
+
+#Thresholds
+Threshold1 <- 0.3
+Threshold2 <- 0.4
+Threshold3 <- 0.5
+
+lasso_predict_2 <- predict(lasso,test_mat,type = "response", s = opt_lambda_lasso)
+
+pred_1 <- ifelse(lasso_predict_2 >= Threshold1 , 1,0)
+pred_2 <- ifelse(lasso_predict_2 >= Threshold2 , 1,0)
+pred_3 <- ifelse(lasso_predict_2 >= Threshold3 , 1,0)
+
+#Confusion matrix
+
+c_mat_1 <- table(test$Attrition_Flag,pred_1)
+c_mat_2 <- table(test$Attrition_Flag,pred_2)
+c_mat_3 <- table(test$Attrition_Flag,pred_3)
+c_mat_1
+c_mat_2
+c_mat_3
+
+#Accuracy
+
+mean(pred_1==test$Attrition_Flag)*100
+mean(pred_2==test$Attrition_Flag)*100
+mean(pred_3==test$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_1 <- c_mat_1[1,1]/sum(c_mat_1[1,])
+Spec_2 <- c_mat_2[1,1]/sum(c_mat_2[1,])
+Spec_3 <- c_mat_3[1,1]/sum(c_mat_3[1,])
+Spec_1
+Spec_2
+Spec_3
+
+
+#Precision / Positive Predicted Value
+
+Prec_1 <- c_mat_1[2,2]/sum(c_mat_1[,2])
+Prec_2 <- c_mat_2[2,2]/sum(c_mat_2[,2])
+Prec_3 <- c_mat_3[2,2]/sum(c_mat_3[,2])
+Prec_1
+Prec_2
+Prec_3
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_1 <- c_mat_1[2,2]/sum(c_mat_1[2,])
+Rec_2 <- c_mat_2[2,2]/sum(c_mat_2[2,])
+Rec_3 <- c_mat_3[2,2]/sum(c_mat_3[2,])
+Rec_1
+Rec_2
+Rec_3
+
+#F1 Score
+
+F1_1 <- 2 * (Prec_1 * Rec_1)/(Prec_1 + Rec_1)
+F1_2 <- 2 * (Prec_2 * Rec_2)/(Prec_2 + Rec_2)
+F1_3 <- 2 * (Prec_3 * Rec_3)/(Prec_3 + Rec_3)
+F1_1
+F1_2
+F1_3
+
+
+
+
+
+
+
+
+
+#Lasso Balanced
+
+
+
+
+
+
+train_bal_mat <- data.matrix(train_bal[,-c(1)])
+test_mat <- data.matrix(test[,-c(1)])
+
+
+
+lasso_bal <- cv.glmnet(train_bal_mat,train_bal$Attrition_Flag, alpha = 1, family = "binomial", type.measure = "class")
+
+plot(lasso_bal)
+
+
+opt_lambda_lasso_bal <- lasso_bal$lambda.min
+opt_lambda_lasso_bal
+
+lasso_bal_predict <- predict(lasso_bal,test_mat,type = "class", s = opt_lambda_lasso_bal)
+
+#Confusion matrix
+
+c_mat_lasso_bal <- table(test$Attrition_Flag,lasso_bal_predict)
+c_mat_lasso_bal
+
+#Accuracy
+
+mean(lasso_bal_predict==test$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_lasso_bal <- c_mat_lasso_bal[1,1]/sum(c_mat_lasso_bal[1,])
+Spec_lasso_bal
+
+
+#Precision / Positive Predicted Value
+
+Prec_lasso_bal <- c_mat_lasso_bal[2,2]/sum(c_mat_lasso_bal[,2])
+Prec_lasso_bal
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_lasso_bal <- c_mat_lasso_bal[2,2]/sum(c_mat_lasso_bal[2,])
+Rec_lasso_bal
+
+#F1 Score
+
+F1_lasso_bal <- 2 * (Prec_lasso_bal * Rec_lasso_bal)/(Prec_lasso_bal + Rec_lasso_bal)
+F1_lasso_bal
+
+
+
+#Thresholds
+Threshold1 <- 0.6
+Threshold2 <- 0.7
+Threshold3 <- 0.8
+
+lasso_bal_predict_2 <- predict(lasso_bal,test_mat,type = "response", s = opt_lambda_lasso_bal)
+
+pred_1 <- ifelse(lasso_bal_predict_2 >= Threshold1 , 1,0)
+pred_2 <- ifelse(lasso_bal_predict_2 >= Threshold2 , 1,0)
+pred_3 <- ifelse(lasso_bal_predict_2 >= Threshold3 , 1,0)
+
+#Confusion matrix
+
+c_mat_1 <- table(test$Attrition_Flag,pred_1)
+c_mat_2 <- table(test$Attrition_Flag,pred_2)
+c_mat_3 <- table(test$Attrition_Flag,pred_3)
+c_mat_1
+c_mat_2
+c_mat_3
+
+#Accuracy
+
+mean(pred_1==test$Attrition_Flag)*100
+mean(pred_2==test$Attrition_Flag)*100
+mean(pred_3==test$Attrition_Flag)*100
+
+#True Negative Rate / Specificity
+
+Spec_1 <- c_mat_1[1,1]/sum(c_mat_1[1,])
+Spec_2 <- c_mat_2[1,1]/sum(c_mat_2[1,])
+Spec_3 <- c_mat_3[1,1]/sum(c_mat_3[1,])
+Spec_1
+Spec_2
+Spec_3
+
+
+#Precision / Positive Predicted Value
+
+Prec_1 <- c_mat_1[2,2]/sum(c_mat_1[,2])
+Prec_2 <- c_mat_2[2,2]/sum(c_mat_2[,2])
+Prec_3 <- c_mat_3[2,2]/sum(c_mat_3[,2])
+Prec_1
+Prec_2
+Prec_3
+
+#Recall / True Positive Rate / Sensitivity
+
+Rec_1 <- c_mat_1[2,2]/sum(c_mat_1[2,])
+Rec_2 <- c_mat_2[2,2]/sum(c_mat_2[2,])
+Rec_3 <- c_mat_3[2,2]/sum(c_mat_3[2,])
+Rec_1
+Rec_2
+Rec_3
+
+#F1 Score
+
+F1_1 <- 2 * (Prec_1 * Rec_1)/(Prec_1 + Rec_1)
+F1_2 <- 2 * (Prec_2 * Rec_2)/(Prec_2 + Rec_2)
+F1_3 <- 2 * (Prec_3 * Rec_3)/(Prec_3 + Rec_3)
+F1_1
+F1_2
+F1_3
+
+roc_lasso <- roc(test$Attrition_Flag ~ as.numeric(lasso_predict_2))
+roc_lasso_bal <- roc(test$Attrition_Flag ~ as.numeric(lasso_bal_predict_2))
+
+AUC_lasso <- auc(roc_lasso)
+AUC_lasso_bal <- auc(roc_lasso_bal)
+
+plot(roc_lasso, col = "black",print.auc = TRUE, auc.polygon = TRUE, max.auc.polygon = TRUE, lwd=2,print.auc.x = 0.5,print.auc.y = 0.5)
+plot(roc_lasso_bal,add = TRUE,col = "blue", print.auc = TRUE, lwd=2, print.auc.x = 0.5,print.auc.y = 0.43)
+
+#Best thresholds and Best Sensitivity and Specificity
+Best_Treshold_lasso <- coords(roc_lasso,"best",best.method = "closest.topleft")$threshold
+Best_pred_lasso <- ifelse(as.numeric(lasso_predict_2) >= Best_Treshold_ridge , 1,0)
+Best_c_mat <- table(test$Attrition_Flag,Best_pred_lasso)
+Best_Spec_lasso <- Best_c_mat[1,1]/sum(Best_c_mat[1,])
+Best_Sens_lasso <- Best_c_mat[2,2]/sum(Best_c_mat[2,])
+
+Best_Treshold_lasso_bal <- coords(roc_lasso_bal,"best",best.method = "closest.topleft")$threshold
+Best_pred_lasso_bal <- ifelse(as.numeric(lasso_bal_predict_2) >= Best_Treshold_lasso_bal , 1,0)
+Best_c_mat <- table(test$Attrition_Flag,Best_pred_lasso_bal)
+Best_Spec_lasso_bal <- Best_c_mat[1,1]/sum(Best_c_mat[1,])
+Best_Sens_lasso_bal <- Best_c_mat[2,2]/sum(Best_c_mat[2,])
+
+#Table to showing them
+Table_mat <-  matrix(c(Best_Treshold_lasso,Best_Spec_lasso,Best_Sens_lasso,Best_Treshold_lasso_bal,Best_Spec_lasso_bal,Best_Sens_lasso_bal), ncol=3, byrow=TRUE)
+colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
+rownames(Table_mat) <- c("Unbalanced","Balanced")
+Tab <- as.table(Table_mat)
+show(Tab)
 
