@@ -159,8 +159,9 @@ hist(bank_data_cleaned$Avg_Open_To_Buy)
 #histogram
 hist(bank_data_cleaned$Total_Amt_Chng_Q4_Q1)
 
+
 #boxplot
-credit.limit.boxplot <- boxplot(bank_data_cleaned$Total_Amt_Chng_Q4_Q1, ylab = "Dollars")
+total.amtchng.boxplot <- boxplot(bank_data_cleaned$Total_Amt_Chng_Q4_Q1, ylab = "Dollars")
 
 #Total Transaction Amount
 
@@ -177,12 +178,30 @@ hist(bank_data_cleaned$Total_Ct_Chng_Q4_Q1)
 #histogram
 hist(bank_data_cleaned$Avg_Utilization_Ratio)
 
+dev.off(dev.list()["RStudioGD"]) #to clear the previous plots on the screen
+
+#Histograms
+attach(bank_data_cleaned)
+par(mfrow=c(3,2))
+hist(Avg_Open_To_Buy)
+hist(Total_Trans_Amt)
+hist(Avg_Utilization_Ratio)
+hist(Months_on_book)
+hist(Credit_Limit)
+hist(table(Months_Inactive_12_mon))
 
 
+#Categorical Value Visualizations
 
+#Bar plots
 
+barplot(height=tabulate(as.factor(Income_Category)), names=unique(Income_Category), col= myPalette)
+barplot(height=tabulate(as.factor(Marital_Status)), names=unique(Income_Category), col= myPalette)
+barplot(height=tabulate(as.factor(Education_Level)), names=unique(Income_Category), col= myPalette)
 
+#Pie charts
 
+pie(count(Attrition_)$n, border="white", col=myPalette, labels = depcount.labels)
 
 
 
