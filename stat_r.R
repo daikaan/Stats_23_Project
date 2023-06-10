@@ -211,26 +211,31 @@ length(quantitative)
 length(qualitative)
 quantitative$attrition_flag_binary <- ifelse(cleaned_bank_data_withoutNA_quan$Attrition_Flag=='Existing Customer', 1, 0)
 
+
+dev.off(dev.list()["RStudioGD"]) #to clear the previous plots on the screen
+
+#Histograms
+attach(cleaned_bank_data_withoutNA_quan)
+par(mfrow=c(3,2))
+hist(Avg_Open_To_Buy)
+hist(Total_Trans_Amt)
+hist(Avg_Utilization_Ratio)
+hist(Months_on_book)
+hist(Credit_Limit)
+hist(Months_Inactive_12_mon)
+
+
+#Categorical Value Visualizations
+
+#Bar plots
+
+barplot(height=tabulate(as.factor(Income_Category)), names=unique(Income_Category), col= myPalette)
+barplot(height=tabulate(as.factor(Marital_Status)), names=unique(Marital_Status), col= myPalette)
+barplot(height=tabulate(as.factor(Education_Level)), names=unique(Education_Level), col= myPalette)
+
 #grouped age histogram
 Grouped.age.hist <- hist(as.numeric(quantitative$age_group), xlab="age_group", ylab="freq", breaks=4,
                       main="Customer age group distribution", col="green")
-
-#Avg utilization ratios by age groups
-avguti.agegrp <- quantitative %>% group_by(age_group) %>% summarise(avg_uti = mean(Avg_Utilization_Ratio))
-plot(avguti.agegrp, type = "o")
-
-#combined figure
-ggplot(data = quantitative, aes(x= as.numeric(age_group), color='red')) +
-  geom_histogram(bins = 4, fill="white", show.legend = FALSE, size=1.1) +
-  geom_line(data = avguti.agegrp, aes(x=age_group, y=avg_uti), color= 'blue', size=1.1) +
-  labs(title= 'Avg uti by age group hist', x = 'age_group', y='Count') +   scale_y_continuous(
-    
-    # Features of the first axis
-    name = "First Axis",
-    
-    # Add a second axis and specify its features
-    sec.axis = sec_axis(~./10000, name="Second Axis")
-  )
 
 #Months inactive
 library(yarrr) #to make colors transparent
