@@ -22,6 +22,37 @@ library("ppcor")
 library("pROC")
 library("interactions")
 library("glmnet")
+library(formattable) # for giving a variable dictionary a better look
+
+# BRIEF DESCRIPTION OF EACH VARIABLE
+var.names <- c("Clientnum", "Attrition_Flag", "Customer_Age", "Gender", "Dependent_count", 
+               "Education_Level", "Marital_Status", "Income_Category", "Card_Category", "Months_on_book",
+               "Total_Relationship_Count", "Months_Inactive_12_mon", "Contacts_Count_12_mon", "Credit_Limit",
+               "Total_Revolving_Bal", "Avg_Open_To_Buy", "Total_Amt_Chng_Q4_Q1", "Total_Trans_Amt",
+               "Total_Trans_Ct", "Total_Ct_Chng_Q4_Q1", "Avg_Utilization_Ratio")
+descriptions <- c("represents the unique IDs of customers. It is formed by a unique sequence of 9 digits. There is a total of 10,127 unique customers in the datasets.",
+                  "this target/output variable represents the current status of customers. It has two unique values: one is Existing Customer (current customer) and Attrited Customer (churned customer).",
+                  "this variable consist of the age of customers. The age range of customers is between 27 and 73.",
+                  "this variable is coded as F for Female and M for Male.",
+                  "this variable represents the number of dependents associated with a customer.",
+                  "this variable represents the educational qualification of a customer. It consist of 7 unique values which are High School, Graduate, Uneducated, College, Post-graduate, Doctorate and Unknown. The Unknown group has 1519 customers.",
+                  "this variable represents the marital status of customers. It has 4 unique values which are Married, Single, Unknown, Divorced. The Unknown group has 749 customers.",
+                  "this variable represents the annual income category of card holder: Less than  40K, 40k- 60K, 60K- 80K, 80K-120K, $120+, Unknown. The Unknown group has 1112 customer in this category.",
+                  "this is a product variable that represents the credit card type. It has 4 unique values - Blue, Gold, Silver and Platinum.",
+                  "represents the number of months (period) the account holder has been a customer in the bank.",
+                  "represents the number of products held by the customer.",
+                  "this is the number of months a customer has been inactive in the last 12 months (1 year).",
+                  "this is the number of times a customer has made contact with the bank.",
+                  "this is the credit limit on the credit card owned by customer.",
+                  "represents total revolving balance on the credit card.",
+                  "represents the average Open to Buy Credit Line for last 12 months.",
+                  "represents the change in transaction amount from Q4 over Q1.",
+                  "represents the total transaction amount in the last 12 months.",
+                  "represents the total transaction count in the last 12 months.",
+                  "represents the change in transaction count from Q4 over Q1.",
+                  "represents the average card utilization ratio.")
+var.dict <- as.data.frame(descriptions, row.names = var.names, )
+formattable(var.dict)
 
 
 
@@ -436,42 +467,48 @@ glm_3 <- update(glm_2, . ~ . - Months_on_book)
 summary(glm_3)
 
 
-glm_4 <- update(glm_3, . ~ . + Total_Trans_Ct*log_Total_Amt_Chng_Q4_Q1)
+glm_4 <- update(glm_3, . ~ . + log_Total_Amt_Chng_Q4_Q1*Customer_Age + log_Total_Amt_Chng_Q4_Q1*Dependent_count 
+                             + log_Total_Amt_Chng_Q4_Q1*log_Total_Trans_Amt + log_Total_Amt_Chng_Q4_Q1*Total_Trans_Ct)
 summary(glm_4)
 
 #Show that there is interaction
-interact_plot(glm_4,pred = log_Total_Amt_Chng_Q4_Q1,modx = Total_Trans_Ct)
+interact_plot(glm_4,pred = log_Total_Amt_Chng_Q4_Q1,modx = Customer_Age, outcome.scale = "link")
+interact_plot(glm_4,pred = log_Total_Amt_Chng_Q4_Q1,modx = Dependent_count, outcome.scale = "link")
+interact_plot(glm_4,pred = log_Total_Amt_Chng_Q4_Q1,modx = log_Total_Trans_Amt, outcome.scale = "link")
+interact_plot(glm_4,pred = log_Total_Amt_Chng_Q4_Q1,modx = Total_Trans_Ct, outcome.scale = "link")
 
 
-glm_5 <- update(glm_4, . ~ . + log_Total_Amt_Chng_Q4_Q1*log_Total_Trans_Amt)
+
+glm_5 <- update(glm_4, . ~ . + Total_Revolving_Bal*log_Credit_Limit + Total_Revolving_Bal*Avg_Utilization_Ratio)
 summary(glm_5)
 
 #Interaction
-interact_plot(glm_5,pred = log_Total_Amt_Chng_Q4_Q1,modx = log_Total_Trans_Amt)
+interact_plot(glm_5,pred = Total_Revolving_Bal,modx = log_Credit_Limit, outcome.scale = "link")
+interact_plot(glm_5,pred = Total_Revolving_Bal,modx = Avg_Utilization_Ratio, outcome.scale = "link")
 
 
-glm_6 <- update(glm_5, . ~ . + Total_Revolving_Bal*log_Credit_Limit)
+glm_6 <- update(glm_5, . ~ . + log_Credit_Limit*Avg_Utilization_Ratio)
 summary(glm_6)
 
 #Show that there is interaction
-interact_plot(glm_6,pred = Total_Revolving_Bal,modx = log_Credit_Limit)
+interact_plot(glm_6,pred = log_Credit_Limit,modx = Avg_Utilization_Ratio, outcome.scale = "link")
 
 
-glm_7 <- update(glm_6, . ~ . + Dependent_count*log_Total_Amt_Chng_Q4_Q1)
+glm_7 <- update(glm_6, . ~ . + log_Total_Ct_Chng_Q4_Q1*Is_Female)
 summary(glm_7)
 
 #Interaction
-interact_plot(glm_7,pred = log_Total_Amt_Chng_Q4_Q1,modx = log_Total_Trans_Amt)
+interact_plot(glm_7,pred = log_Total_Ct_Chng_Q4_Q1,modx = Is_Female, outcome.scale = "link")
 
-glm_8 <- update(glm_7, . ~ . + Avg_Utilization_Ratio*Total_Revolving_Bal)
+glm_8 <- update(glm_7, . ~ . - Education_Level)
 summary(glm_8)
 
-#Interaction
-interact_plot(glm_8,pred = Total_Revolving_Bal,modx = Avg_Utilization_Ratio)
 
-
-glm_9 <- update(glm_8, . ~ . - Education_Level)
+glm_9 <- update(glm_8, . ~ .+ Customer_Age*Marital_Status)
 summary(glm_9)
+
+#Interaction
+interact_plot(glm_9,pred = Customer_Age,modx = Marital_Status , outcome.scale = "link")
 
 pred_glm_f <- predict(glm_9,test,type="response")
 pred_1_f <- ifelse(pred_glm_f >= Threshold1 , 1,0)
@@ -555,7 +592,7 @@ Best_c_mat_f <- table(test$Attrition_Flag,Best_pred_f)
 Best_Spec_f <- Best_c_mat_f[1,1]/sum(Best_c_mat_f[1,])
 Best_Sens_f <- Best_c_mat_f[2,2]/sum(Best_c_mat_f[2,])
 
-#Table to showing them
+#Table to show them
 Table_mat <-  matrix(c(Best_Treshold_i,Best_Spec_i,Best_Sens_i,Best_Treshold_f,Best_Spec_f,Best_Sens_f), ncol=3, byrow=TRUE)
 colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
 rownames(Table_mat) <- c("Initial model","Final model")
@@ -648,46 +685,48 @@ glm_3_bal <- update(glm_2_bal, . ~ . - Months_on_book)
 summary(glm_3_bal)
 
 
-glm_4_bal <- update(glm_3_bal, . ~ . + log_Total_Amt_Chng_Q4_Q1*Total_Trans_Ct)
+glm_4_bal <- update(glm_3_bal, . ~ . + log_Total_Amt_Chng_Q4_Q1*Customer_Age + log_Total_Amt_Chng_Q4_Q1*Dependent_count 
+                    + log_Total_Amt_Chng_Q4_Q1*log_Total_Trans_Amt)
 summary(glm_4_bal)
 
 #Show that there is interaction
-interact_plot(glm_4_bal,pred = log_Total_Amt_Chng_Q4_Q1,modx = Total_Trans_Ct)
+interact_plot(glm_4_bal,pred = log_Total_Amt_Chng_Q4_Q1,modx = Customer_Age, outcome.scale = "link")
+interact_plot(glm_4_bal,pred = log_Total_Amt_Chng_Q4_Q1,modx = Dependent_count, outcome.scale = "link")
+interact_plot(glm_4_bal,pred = log_Total_Amt_Chng_Q4_Q1,modx = log_Total_Trans_Amt, outcome.scale = "link")
 
 
-glm_5_bal <- update(glm_4_bal, . ~ . + log_Total_Amt_Chng_Q4_Q1*log_Total_Trans_Amt)
+glm_5_bal <- update(glm_4_bal, . ~ . + Total_Revolving_Bal*log_Avg_Open_To_Buy + Total_Revolving_Bal*Avg_Utilization_Ratio)
 summary(glm_5_bal)
 
 #Interaction
-interact_plot(glm_5_bal,pred = log_Total_Amt_Chng_Q4_Q1,modx = log_Total_Trans_Amt)
+interact_plot(glm_5_bal,pred = Total_Revolving_Bal,modx = log_Avg_Open_To_Buy, outcome.scale = "link")
+interact_plot(glm_5_bal,pred = Avg_Utilization_Ratio,modx = Total_Revolving_Bal, outcome.scale = "link")
 
-
-glm_6_bal <- update(glm_5_bal, . ~ . + Total_Revolving_Bal*log_Avg_Open_To_Buy)
+glm_6_bal <- update(glm_5_bal, . ~ . + log_Avg_Open_To_Buy*Avg_Utilization_Ratio)
 summary(glm_6_bal)
 
 #Show that there is interaction
-interact_plot(glm_6_bal,pred = Total_Revolving_Bal,modx = log_Avg_Open_To_Buy)
+interact_plot(glm_6_bal,pred = Avg_Utilization_Ratio,modx = log_Avg_Open_To_Buy, outcome.scale = "link")
 
 
-glm_7_bal <- update(glm_6_bal, . ~ . + Dependent_count*log_Total_Amt_Chng_Q4_Q1)
+glm_7_bal <- update(glm_6_bal, . ~ . + log_Total_Ct_Chng_Q4_Q1*Is_Female)
 summary(glm_7_bal)
 
 #Interaction
-interact_plot(glm_7_bal,pred = log_Total_Amt_Chng_Q4_Q1,modx = log_Total_Trans_Amt)
+interact_plot(glm_7_bal,pred = log_Total_Ct_Chng_Q4_Q1,modx = Is_Female, outcome.scale = "link")
 
 
-glm_8_bal <- update(glm_7_bal, . ~ . - log_Total_Amt_Chng_Q4_Q1:Total_Trans_Ct)
+glm_8_bal <- update(glm_7_bal, . ~ . + Customer_Age*Marital_Status)
 summary(glm_8_bal)
 
-
-glm_9_bal <- update(glm_8_bal, . ~ . + Total_Revolving_Bal*Avg_Utilization_Ratio)
-summary(glm_9_bal)
+#Interaction
+interact_plot(glm_8_bal,pred = Customer_Age,modx = Marital_Status, outcome.scale = "link")
 
 #Interaction
-interact_plot(glm_9_bal,pred = Avg_Utilization_Ratio, modx = Total_Revolving_Bal)
+interact_plot(glm_8_bal,pred = Avg_Utilization_Ratio, modx = Total_Revolving_Bal, outcome.scale = "link")
 
 
-pred_glm_bal_f <- predict(glm_9_bal,test,type="response")
+pred_glm_bal_f <- predict(glm_8_bal,test,type="response")
 pred_1_f <- ifelse(pred_glm_bal_f >= Threshold1 , 1,0)
 pred_2_f <- ifelse(pred_glm_bal_f >= Threshold2 , 1,0)
 pred_3_f <- ifelse(pred_glm_bal_f >= Threshold3 , 1,0)
@@ -769,7 +808,7 @@ Best_c_mat_f <- table(test$Attrition_Flag,Best_pred_bal_f)
 Best_Spec_bal_f <- Best_c_mat_f[1,1]/sum(Best_c_mat_f[1,])
 Best_Sens_bal_f <- Best_c_mat_f[2,2]/sum(Best_c_mat_f[2,])
 
-#Table to showing them
+#Table to show them
 Table_mat <-  matrix(c(Best_Treshold_bal_i,Best_Spec_bal_i,Best_Sens_bal_i,Best_Treshold_bal_f,Best_Spec_bal_f,Best_Sens_bal_f), ncol=3, byrow=TRUE)
 colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
 rownames(Table_mat) <- c("Initial model","Final model")
@@ -804,8 +843,9 @@ Threshold3 <- 0.6
 lda_1 <- lda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count
               + Marital_Status + Income_Category + Total_Relationship_Count + Months_Inactive_12_mon + Contacts_Count_12_mon + log_Credit_Limit 
               + Total_Revolving_Bal + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio
-              + log_Total_Amt_Chng_Q4_Q1:Total_Trans_Ct + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + log_Credit_Limit:Total_Revolving_Bal
-              + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + Total_Revolving_Bal:Avg_Utilization_Ratio, data = train, family = "binomial")
+              + Customer_Age:log_Total_Amt_Chng_Q4_Q1 + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt 
+              + log_Total_Amt_Chng_Q4_Q1:Total_Trans_Ct + log_Credit_Limit:Total_Revolving_Bal + Total_Revolving_Bal:Avg_Utilization_Ratio
+              + log_Credit_Limit:Avg_Utilization_Ratio + Is_Female:log_Total_Ct_Chng_Q4_Q1 + Customer_Age:Marital_Status , data = train, family = "binomial")
 
 lda_1
 
@@ -890,8 +930,10 @@ Threshold3 <- 0.8
 #We still try the LDA model
 lda_2 <- lda(Attrition_Flag ~  Customer_Age + Is_Female + Dependent_count + Education_Level
               + Marital_Status + Income_Category + Total_Relationship_Count + Months_Inactive_12_mon + Contacts_Count_12_mon + Total_Revolving_Bal + log_Avg_Open_To_Buy
-              + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt 
-             + Total_Revolving_Bal:log_Avg_Open_To_Buy + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + Total_Revolving_Bal:Avg_Utilization_Ratio , data = train_bal, family = "binomial")
+              + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio + Customer_Age:log_Total_Amt_Chng_Q4_Q1
+              + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + Total_Revolving_Bal:log_Avg_Open_To_Buy 
+              + Total_Revolving_Bal:Avg_Utilization_Ratio + log_Avg_Open_To_Buy:Avg_Utilization_Ratio + Is_Female:log_Total_Ct_Chng_Q4_Q1 
+              + Customer_Age:Marital_Status , data = train_bal, family = "binomial")
 
 lda_2
 
@@ -982,7 +1024,7 @@ Best_c_mat <- table(test$Attrition_Flag,Best_pred_lda_bal)
 Best_Spec_lda_bal <- Best_c_mat[1,1]/sum(Best_c_mat[1,])
 Best_Sens_lda_bal <- Best_c_mat[2,2]/sum(Best_c_mat[2,])
 
-#Table to showing them
+#Table to show them
 Table_mat <-  matrix(c(Best_Treshold_lda,Best_Spec_lda,Best_Sens_lda,Best_Treshold_lda_bal,Best_Spec_lda_bal,Best_Sens_lda_bal), ncol=3, byrow=TRUE)
 colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
 rownames(Table_mat) <- c("Unbalanced","Balanced")
@@ -1006,8 +1048,9 @@ Threshold3 <- 0.5
 qda_1 <- qda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count
              + Marital_Status + Income_Category + Total_Relationship_Count + Months_Inactive_12_mon + Contacts_Count_12_mon + log_Credit_Limit 
              + Total_Revolving_Bal + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio
-             + log_Total_Amt_Chng_Q4_Q1:Total_Trans_Ct + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + log_Credit_Limit:Total_Revolving_Bal
-             + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + Total_Revolving_Bal:Avg_Utilization_Ratio, data = train, family = "binomial")
+             + Customer_Age:log_Total_Amt_Chng_Q4_Q1 + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt 
+             + log_Total_Amt_Chng_Q4_Q1:Total_Trans_Ct + log_Credit_Limit:Total_Revolving_Bal + Total_Revolving_Bal:Avg_Utilization_Ratio
+             + log_Credit_Limit:Avg_Utilization_Ratio + Is_Female:log_Total_Ct_Chng_Q4_Q1 + Customer_Age:Marital_Status , data = train, family = "binomial")
 
 qda_1
 
@@ -1092,8 +1135,10 @@ Threshold3 <- 0.9
 #We still try the QDA model
 qda_2 <- qda(Attrition_Flag ~  Customer_Age + Is_Female + Dependent_count + Education_Level
              + Marital_Status + Income_Category + Total_Relationship_Count + Months_Inactive_12_mon + Contacts_Count_12_mon + Total_Revolving_Bal + log_Avg_Open_To_Buy
-             + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt 
-             + Total_Revolving_Bal:log_Avg_Open_To_Buy + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + Total_Revolving_Bal:Avg_Utilization_Ratio, data = train_bal, family = "binomial")
+             + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 + Avg_Utilization_Ratio + Customer_Age:log_Total_Amt_Chng_Q4_Q1
+             + Dependent_count:log_Total_Amt_Chng_Q4_Q1 + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt + Total_Revolving_Bal:log_Avg_Open_To_Buy 
+             + Total_Revolving_Bal:Avg_Utilization_Ratio + log_Avg_Open_To_Buy:Avg_Utilization_Ratio + Is_Female:log_Total_Ct_Chng_Q4_Q1 
+             + Customer_Age:Marital_Status , data = train_bal, family = "binomial")
 
 qda_2
 
@@ -1184,7 +1229,7 @@ Best_c_mat <- table(test$Attrition_Flag,Best_pred_qda_bal)
 Best_Spec_qda_bal <- Best_c_mat[1,1]/sum(Best_c_mat[1,])
 Best_Sens_qda_bal <- Best_c_mat[2,2]/sum(Best_c_mat[2,])
 
-#Table to showing them
+#Table to show them
 Table_mat <-  matrix(c(Best_Treshold_qda,Best_Spec_qda,Best_Sens_qda,Best_Treshold_qda_bal,Best_Spec_qda_bal,Best_Sens_qda_bal), ncol=3, byrow=TRUE)
 colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
 rownames(Table_mat) <- c("Unbalanced","Balanced")
@@ -1211,21 +1256,28 @@ show(Tab)
 #Creation of train and test set with interactions
 train_int <- data.frame(train)
 
-train_int$log_Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- train$log_Total_Amt_Chng_Q4_Q1*train$Total_Trans_Ct 
-train_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- train$log_Total_Amt_Chng_Q4_Q1*train$log_Total_Trans_Amt 
-train_int$log_Credit_Limit_Total_Revolving_Bal <- train$log_Credit_Limit*train$Total_Revolving_Bal
+train_int$log_Total_Amt_Chng_Q4_Q1_Customer_Age <- train$log_Total_Amt_Chng_Q4_Q1*train$Customer_Age
 train_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- train$log_Total_Amt_Chng_Q4_Q1*train$Dependent_count 
+train_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- train$log_Total_Amt_Chng_Q4_Q1*train$log_Total_Trans_Amt
+train_int$log_Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- train$log_Total_Amt_Chng_Q4_Q1*train$Total_Trans_Ct 
+train_int$log_Credit_Limit_Total_Revolving_Bal <- train$log_Credit_Limit*train$Total_Revolving_Bal
 train_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- train$Total_Revolving_Bal*train$Avg_Utilization_Ratio
-
+train_int$log_Credit_Limit_Avg_Utilization_Ratio <- train$log_Credit_Limit*train$Avg_Utilization_Ratio
+train_int$Is_Female_log_Total_Ct_Chng_Q4_Q1 <- train$Is_Female*train$log_Total_Ct_Chng_Q4_Q1
+train_int$Customer_Age_Marital_Status <- train$Customer_Age*train$Marital_Status
 
 
 test_int <- data.frame(test)
 
-test_int$log_Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- test$log_Total_Amt_Chng_Q4_Q1*test$Total_Trans_Ct 
-test_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- test$log_Total_Amt_Chng_Q4_Q1*test$log_Total_Trans_Amt 
-test_int$log_Credit_Limit_Total_Revolving_Bal <- test$log_Credit_Limit*test$Total_Revolving_Bal
+test_int$log_Total_Amt_Chng_Q4_Q1_Customer_Age <- test$log_Total_Amt_Chng_Q4_Q1*test$Customer_Age
 test_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- test$log_Total_Amt_Chng_Q4_Q1*test$Dependent_count 
+test_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- test$log_Total_Amt_Chng_Q4_Q1*test$log_Total_Trans_Amt
+test_int$log_Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- test$log_Total_Amt_Chng_Q4_Q1*test$Total_Trans_Ct 
+test_int$log_Credit_Limit_Total_Revolving_Bal <- test$log_Credit_Limit*test$Total_Revolving_Bal
 test_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- test$Total_Revolving_Bal*test$Avg_Utilization_Ratio
+test_int$log_Credit_Limit_Avg_Utilization_Ratio <- test$log_Credit_Limit*test$Avg_Utilization_Ratio
+test_int$Is_Female_log_Total_Ct_Chng_Q4_Q1 <- test$Is_Female*test$log_Total_Ct_Chng_Q4_Q1
+test_int$Customer_Age_Marital_Status <- test$Customer_Age*test$Marital_Status
 
 
 #We transorm them into matrix withou Attrition_Flag, Education_Level , Months_on_book and log_Avg_Open_To_Buy
@@ -1357,20 +1409,26 @@ F1_3
 train_bal_int <- data.frame(train_bal)
 
 
+train_bal_int$log_Total_Amt_Chng_Q4_Q1_Customer_Age <- train_bal$log_Total_Amt_Chng_Q4_Q1*train_bal$Customer_Age
+train_bal_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- train_bal$log_Total_Amt_Chng_Q4_Q1*train_bal$Dependent_count 
 train_bal_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- train_bal$log_Total_Amt_Chng_Q4_Q1*train_bal$log_Total_Trans_Amt 
 train_bal_int$log_Avg_Open_To_Buy_Total_Revolving_Bal <- train_bal$log_Avg_Open_To_Buy*train_bal$Total_Revolving_Bal
-train_bal_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- train_bal$log_Total_Amt_Chng_Q4_Q1*train_bal$Dependent_count 
 train_bal_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- train_bal$Total_Revolving_Bal*train_bal$Avg_Utilization_Ratio
-
+train_bal_int$log_Avg_Open_To_Buy_Avg_Utilization_Ratio <- train_bal$log_Avg_Open_To_Buy*train_bal$Avg_Utilization_Ratio
+train_bal_int$Is_Female_log_Total_Trans_Ct_Q4_Q1 <- train_bal$Is_Female*train_bal$log_Total_Ct_Chng_Q4_Q1
+train_bal_int$Customer_Age_Marital_Status <- train_bal$Customer_Age*train_bal$Marital_Status
 
 
 test_bal_int <- data.frame(test)
 
+test_bal_int$log_Total_Amt_Chng_Q4_Q1_Customer_Age <- test$log_Total_Amt_Chng_Q4_Q1*test$Customer_Age
+test_bal_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- test$log_Total_Amt_Chng_Q4_Q1*test$Dependent_count 
 test_bal_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- test$log_Total_Amt_Chng_Q4_Q1*test$log_Total_Trans_Amt 
 test_bal_int$log_Avg_Open_To_Buy_Total_Revolving_Bal <- test$log_Avg_Open_To_Buy*test$Total_Revolving_Bal
-test_bal_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- test$log_Total_Amt_Chng_Q4_Q1*test$Dependent_count 
 test_bal_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- test$Total_Revolving_Bal*test$Avg_Utilization_Ratio
-
+test_bal_int$log_Avg_Open_To_Buy_Avg_Utilization_Ratio <- test$log_Avg_Open_To_Buy*test$Avg_Utilization_Ratio
+test_bal_int$Is_Female_log_Total_Trans_Ct_Q4_Q1 <- test$Is_Female*test$log_Total_Ct_Chng_Q4_Q1
+test_bal_int$Customer_Age_Marital_Status <- test$Customer_Age*test$Marital_Status
 
 #We transorm them into matrix withou Attrition_Flag, Months_on_book and log_Credit_Limit
 
@@ -1506,7 +1564,7 @@ Best_c_mat <- table(test$Attrition_Flag,Best_pred_ridge_bal)
 Best_Spec_ridge_bal <- Best_c_mat[1,1]/sum(Best_c_mat[1,])
 Best_Sens_ridge_bal <- Best_c_mat[2,2]/sum(Best_c_mat[2,])
 
-#Table to showing them
+#Table to show them
 Table_mat <-  matrix(c(Best_Treshold_ridge,Best_Spec_ridge,Best_Sens_ridge,Best_Treshold_ridge_bal,Best_Spec_ridge_bal,Best_Sens_ridge_bal), ncol=3, byrow=TRUE)
 colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
 rownames(Table_mat) <- c("Unbalanced","Balanced")
@@ -1530,21 +1588,28 @@ show(Tab)
 #Creation of train and test set with interactions
 train_int <- data.frame(train)
 
-train_int$log_Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- train$log_Total_Amt_Chng_Q4_Q1*train$Total_Trans_Ct 
-train_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- train$log_Total_Amt_Chng_Q4_Q1*train$log_Total_Trans_Amt 
-train_int$log_Credit_Limit_Total_Revolving_Bal <- train$log_Credit_Limit*train$Total_Revolving_Bal
+train_int$log_Total_Amt_Chng_Q4_Q1_Customer_Age <- train$log_Total_Amt_Chng_Q4_Q1*train$Customer_Age
 train_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- train$log_Total_Amt_Chng_Q4_Q1*train$Dependent_count 
+train_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- train$log_Total_Amt_Chng_Q4_Q1*train$log_Total_Trans_Amt
+train_int$log_Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- train$log_Total_Amt_Chng_Q4_Q1*train$Total_Trans_Ct 
+train_int$log_Credit_Limit_Total_Revolving_Bal <- train$log_Credit_Limit*train$Total_Revolving_Bal
 train_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- train$Total_Revolving_Bal*train$Avg_Utilization_Ratio
-
+train_int$log_Credit_Limit_Avg_Utilization_Ratio <- train$log_Credit_Limit*train$Avg_Utilization_Ratio
+train_int$Is_Female_log_Total_Ct_Chng_Q4_Q1 <- train$Is_Female*train$log_Total_Ct_Chng_Q4_Q1
+train_int$Customer_Age_Marital_Status <- train$Customer_Age*train$Marital_Status
 
 
 test_int <- data.frame(test)
 
-test_int$log_Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- test$log_Total_Amt_Chng_Q4_Q1*test$Total_Trans_Ct 
-test_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- test$log_Total_Amt_Chng_Q4_Q1*test$log_Total_Trans_Amt 
-test_int$log_Credit_Limit_Total_Revolving_Bal <- test$log_Credit_Limit*test$Total_Revolving_Bal
+test_int$log_Total_Amt_Chng_Q4_Q1_Customer_Age <- test$log_Total_Amt_Chng_Q4_Q1*test$Customer_Age
 test_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- test$log_Total_Amt_Chng_Q4_Q1*test$Dependent_count 
+test_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- test$log_Total_Amt_Chng_Q4_Q1*test$log_Total_Trans_Amt
+test_int$log_Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- test$log_Total_Amt_Chng_Q4_Q1*test$Total_Trans_Ct 
+test_int$log_Credit_Limit_Total_Revolving_Bal <- test$log_Credit_Limit*test$Total_Revolving_Bal
 test_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- test$Total_Revolving_Bal*test$Avg_Utilization_Ratio
+test_int$log_Credit_Limit_Avg_Utilization_Ratio <- test$log_Credit_Limit*test$Avg_Utilization_Ratio
+test_int$Is_Female_log_Total_Ct_Chng_Q4_Q1 <- test$Is_Female*test$log_Total_Ct_Chng_Q4_Q1
+test_int$Customer_Age_Marital_Status <- test$Customer_Age*test$Marital_Status
 
 
 #We transorm them into matrix withou Attrition_Flag, Education_Level , Months_on_book and log_Avg_Open_To_Buy
@@ -1678,19 +1743,26 @@ F1_3
 train_bal_int <- data.frame(train_bal)
 
 
+train_bal_int$log_Total_Amt_Chng_Q4_Q1_Customer_Age <- train_bal$log_Total_Amt_Chng_Q4_Q1*train_bal$Customer_Age
+train_bal_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- train_bal$log_Total_Amt_Chng_Q4_Q1*train_bal$Dependent_count 
 train_bal_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- train_bal$log_Total_Amt_Chng_Q4_Q1*train_bal$log_Total_Trans_Amt 
 train_bal_int$log_Avg_Open_To_Buy_Total_Revolving_Bal <- train_bal$log_Avg_Open_To_Buy*train_bal$Total_Revolving_Bal
-train_bal_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- train_bal$log_Total_Amt_Chng_Q4_Q1*train_bal$Dependent_count 
 train_bal_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- train_bal$Total_Revolving_Bal*train_bal$Avg_Utilization_Ratio
-
+train_bal_int$log_Avg_Open_To_Buy_Avg_Utilization_Ratio <- train_bal$log_Avg_Open_To_Buy*train_bal$Avg_Utilization_Ratio
+train_bal_int$Is_Female_log_Total_Trans_Ct_Q4_Q1 <- train_bal$Is_Female*train_bal$log_Total_Ct_Chng_Q4_Q1
+train_bal_int$Customer_Age_Marital_Status <- train_bal$Customer_Age*train_bal$Marital_Status
 
 
 test_bal_int <- data.frame(test)
 
+test_bal_int$log_Total_Amt_Chng_Q4_Q1_Customer_Age <- test$log_Total_Amt_Chng_Q4_Q1*test$Customer_Age
+test_bal_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- test$log_Total_Amt_Chng_Q4_Q1*test$Dependent_count 
 test_bal_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- test$log_Total_Amt_Chng_Q4_Q1*test$log_Total_Trans_Amt 
 test_bal_int$log_Avg_Open_To_Buy_Total_Revolving_Bal <- test$log_Avg_Open_To_Buy*test$Total_Revolving_Bal
-test_bal_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- test$log_Total_Amt_Chng_Q4_Q1*test$Dependent_count 
 test_bal_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- test$Total_Revolving_Bal*test$Avg_Utilization_Ratio
+test_bal_int$log_Avg_Open_To_Buy_Avg_Utilization_Ratio <- test$log_Avg_Open_To_Buy*test$Avg_Utilization_Ratio
+test_bal_int$Is_Female_log_Total_Trans_Ct_Q4_Q1 <- test$Is_Female*test$log_Total_Ct_Chng_Q4_Q1
+test_bal_int$Customer_Age_Marital_Status <- test$Customer_Age*test$Marital_Status
 
 
 #We transorm them into matrix withou Attrition_Flag, Months_on_book and log_Credit_Limit
@@ -1827,7 +1899,7 @@ Best_c_mat <- table(test$Attrition_Flag,Best_pred_lasso_bal)
 Best_Spec_lasso_bal <- Best_c_mat[1,1]/sum(Best_c_mat[1,])
 Best_Sens_lasso_bal <- Best_c_mat[2,2]/sum(Best_c_mat[2,])
 
-#Table to showing them
+#Table to show them
 Table_mat <-  matrix(c(Best_Treshold_lasso,Best_Spec_lasso,Best_Sens_lasso,Best_Treshold_lasso_bal,Best_Spec_lasso_bal,Best_Sens_lasso_bal), ncol=3, byrow=TRUE)
 colnames(Table_mat) <- c("Threshold","Specificity","Sensitivity")
 rownames(Table_mat) <- c("Unbalanced","Balanced")
