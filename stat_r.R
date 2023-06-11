@@ -15,33 +15,37 @@ library(ggplot2)
 library(PCAmixdata)
 library(dplyr)
 
-
-#FEATURES: (I copied them from another project)
-# No NA
-# Clientum: represents the unique IDs of customers. It is formed by a unique sequence of 9 digits. There is a total of 10,127 unique customers in the datasets.
-# Attrition_Flag: this target/output variable represents the current status of customers. It has two unique values: one is Existing Customer (current customer) and Attrited Customer (churned customer).
-# Customer_Age: this variable consist of the age of customers. The age range of customers is between 27 and 73.
-# Gender: this variable is coded as F for Female and M for Male.
-# Dependent_count: this variable represents the number of dependents associated with a customer.
-# Education_Level: this variable represents the educational qualification of a customer. It consist of 7 unique values which are High School, Graduate, Uneducated, College, Post-graduate, Doctorate and Unknown. The Unknown group has 1519 customers.
-# Marital_Status: this variable represents the marital status of customers. It has 4 unique values which are Married, Single, Unknown, Divorced. The Unknown group has 749 customers.
-# Income_Category: this variable represents the annual income category of card holder: Less than  40K,
-# 40k- 60K,
-# 60K- 80K,
-# 80K-120K, $120+, Unknown. The Unknown group has 1112 customer in this category.
-# Card_Category: this is a product variable that represents the credit card type. It has 4 unique values - Blue, Gold, Silver and Platinum.
-# Months_on_book: represents the number of months (period) the account holder has been a customer in the bank.
-# Total_Relationship_Count: represents the number of products held by the customer.
-# Months_Inactive_12_mon: this is the number of months a customer has been inactive in the last 12 months (1 year).
-# Contacts_Count_12_mon: this is the number of times a customer has made contact with the bank.
-# Credit_Limit: this is the credit limit on the credit card owned by customer.
-# Total_Revolving_Bal: represents total revolving balance on the credit card.
-# Avg_Open_To_Buy: represents the average Open to Buy Credit Line for last 12 months.
-# Total_Amt_Chng_Q4_Q1: represents the change in transaction amount from Q4 over Q1.
-# Total_Trans_Amt: represents the total transaction amount in the last 12 months.
-# Total_Trans_Ct: represents the total transaction count in the last 12 months.
-# Total_Ct_Chng_Q4_Q1: represents the change in transaction count from Q4 over Q1.
-# Avg_Utilization_Ratio: represents the average card utilization ratio.
+# BRIEF DESCRIPTION OF EACH VARIABLE
+var.names <- c("Clientnum", "Attrition_Flag", "Customer_Age", "Gender", "Dependent_count", 
+               "Education_Level", "Marital_Status", "Income_Category", "Card_Category", "Months_on_book",
+               "Total_Relationship_Count", "Months_Inactive_12_mon", "Contacts_Count_12_mon", "Credit_Limit",
+               "Total_Revolving_Bal", "Avg_Open_To_Buy", "Total_Amt_Chng_Q4_Q1", "Total_Trans_Amt",
+               "Total_Trans_Ct", "Total_Ct_Chng_Q4_Q1", "Avg_Utilization_Ratio")
+descriptions <- c("represents the unique IDs of customers. It is formed by a unique sequence of 9 digits. There is a total of 10,127 unique customers in the datasets.",
+                 "this target/output variable represents the current status of customers. It has two unique values: one is Existing Customer (current customer) and Attrited Customer (churned customer).",
+                 "this variable consist of the age of customers. The age range of customers is between 27 and 73.",
+                 "this variable is coded as F for Female and M for Male.",
+                 "this variable represents the number of dependents associated with a customer.",
+                 "this variable represents the educational qualification of a customer. It consist of 7 unique values which are High School, Graduate, Uneducated, College, Post-graduate, Doctorate and Unknown. The Unknown group has 1519 customers.",
+                 "this variable represents the marital status of customers. It has 4 unique values which are Married, Single, Unknown, Divorced. The Unknown group has 749 customers.",
+                 "this variable represents the annual income category of card holder: Less than  40K, 40k- 60K, 60K- 80K, 80K-120K, $120+, Unknown. The Unknown group has 1112 customer in this category.",
+                 "this is a product variable that represents the credit card type. It has 4 unique values - Blue, Gold, Silver and Platinum.",
+                 "represents the number of months (period) the account holder has been a customer in the bank.",
+                 "represents the number of products held by the customer.",
+                 "this is the number of months a customer has been inactive in the last 12 months (1 year).",
+                 "this is the number of times a customer has made contact with the bank.",
+                 "this is the credit limit on the credit card owned by customer.",
+                 "represents total revolving balance on the credit card.",
+                 "represents the average Open to Buy Credit Line for last 12 months.",
+                 "represents the change in transaction amount from Q4 over Q1.",
+                 "represents the total transaction amount in the last 12 months.",
+                 "represents the total transaction count in the last 12 months.",
+                 "represents the change in transaction count from Q4 over Q1.",
+                 "represents the average card utilization ratio.")
+var.dict <- as.data.frame(descriptions, row.names = var.names, )
+install.packages("formattable")
+library(formattable) # for giving a variable dictionary a better look
+formattable(var.dict)
 
 
 data.split <- splitmix(bank_data)
