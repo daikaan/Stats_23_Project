@@ -23,26 +23,46 @@ var.names <- c("Clientnum", "Attrition_Flag", "Customer_Age", "Gender", "Depende
                "Total_Relationship_Count", "Months_Inactive_12_mon", "Contacts_Count_12_mon", "Credit_Limit",
                "Total_Revolving_Bal", "Avg_Open_To_Buy", "Total_Amt_Chng_Q4_Q1", "Total_Trans_Amt",
                "Total_Trans_Ct", "Total_Ct_Chng_Q4_Q1", "Avg_Utilization_Ratio")
-descriptions <- c("represents the unique IDs of customers. It is formed by a unique sequence of 9 digits. There is a total of 10,127 unique customers in the datasets.",
-                  "this target/output variable represents the current status of customers. It has two unique values: one is Existing Customer (current customer) and Attrited Customer (churned customer).",
-                  "this variable consist of the age of customers. The age range of customers is between 27 and 73.",
-                  "this variable is coded as F for Female and M for Male.",
-                  "this variable represents the number of dependents associated with a customer.",
-                  "this variable represents the educational qualification of a customer. It consist of 7 unique values which are High School, Graduate, Uneducated, College, Post-graduate, Doctorate and Unknown. The Unknown group has 1519 customers.",
-                  "this variable represents the marital status of customers. It has 4 unique values which are Married, Single, Unknown, Divorced. The Unknown group has 749 customers.",
-                  "this variable represents the annual income category of card holder: Less than  40K, 40k- 60K, 60K- 80K, 80K-120K, $120+, Unknown. The Unknown group has 1112 customer in this category.",
-                  "this is a product variable that represents the credit card type. It has 4 unique values - Blue, Gold, Silver and Platinum.",
-                  "represents the number of months (period) the account holder has been a customer in the bank.",
-                  "represents the number of products held by the customer.",
-                  "this is the number of months a customer has been inactive in the last 12 months (1 year).",
-                  "this is the number of times a customer has made contact with the bank.",
-                  "this is the credit limit on the credit card owned by customer.",
-                  "represents total revolving balance on the credit card.",
-                  "represents the average Open to Buy Credit Line for last 12 months.",
-                  "represents the change in transaction amount from Q4 over Q1.",
+descriptions <- c("refers to the distinct identification numbers assigned to customers, consisting of a unique sequence of 9 digits. The datasets contain a total of 10,127 customers with unique IDs.",
+                  
+                  "refers to the current status of customers, indicating whether they are Existing Customers (current customers) or Attrited Customers (churned customers). There are two distinct values for this target/output variable.",
+                  
+                  "represents the age of customers, with a range between 27 and 73.",
+                  
+                  "is encoded as 'F' for Female and 'M' for Male.",
+                  
+                  "represents the number of dependents associated with a customer.",
+                  
+                  "represents the educational qualification of a customer. It encompasses seven distinct values: High School, Graduate, Uneducated, College, Post-graduate, Doctorate, and Unknown. The Unknown category includes 1519 customers.",
+                  
+                  "represents the marital status of customers, with four unique values: Married, Single, Unknown, and Divorced. The Unknown category includes 749 customers.",
+                  
+                  "represents the annual income category of cardholders: Less than 40K, 40K-60K, 60K-80K, 80K-120K, $120+, and Unknown. The Unknown category includes 1112 customers.",
+                  
+                  "refers to a product variable that indicates the type of credit card held by customers. It includes four unique values: Blue, Gold, Silver, and Platinum.",
+                  
+                  "represents the duration, in months, that an account holder has been a customer at the bank.",
+                  
+                  "represents the number of products held by a customer.",
+                  
+                  "represents the number of months during which a customer has been inactive in the last 12 months (1 year).",
+                  
+                  "represents the number of times a customer has contacted the bank.",
+                  
+                  "represents the credit limit on the customer's credit card.",
+                  
+                  "represents the total revolving balance on the customer's credit card.",
+                  
+                  "represents the average Open to Buy Credit Line for the last 12 months.",
+                  
+                  "represents the change in transaction amount from the fourth quarter (Q4) to the first quarter (Q1).",
+                  
                   "represents the total transaction amount in the last 12 months.",
+                  
                   "represents the total transaction count in the last 12 months.",
-                  "represents the change in transaction count from Q4 over Q1.",
+                  
+                  "represents the change in transaction count from the fourth quarter (Q4) to the first quarter (Q1).",
+                  
                   "represents the average card utilization ratio.")
 var.dict <- as.data.frame(descriptions, row.names = var.names, )
 formattable(var.dict)
@@ -158,7 +178,8 @@ Grouped.age.hist <- hist(as.numeric(cleaned_bank_data_withoutNA_quan$age_group),
 # grouped age piechart
 library(RColorBrewer)#for the
 myPalette <- brewer.pal(6, "Set2") 
-cust.age.piechart <- pie(count(cleaned_bank_data_withoutNA_quan, age_group)$n, border="white", col=myPalette)
+age.labels <- c("<=34", "35-44", "45-54", ">=55")
+cust.age.piechart <- pie(count(cleaned_bank_data_withoutNA_quan, age_group)$n, border="white", col=myPalette, labels = age.labels)
 
 #Dependent Count
 
@@ -260,21 +281,27 @@ hist(Months_Inactive_12_mon)
 
 #Bar plots
 
+par(mfrow=c(2,2))
 barplot(height=tabulate(as.factor(Income_Category)), names=unique(Income_Category), col= myPalette)
 barplot(height=tabulate(as.factor(Marital_Status)), names=unique(Marital_Status), col= myPalette)
 barplot(height=tabulate(as.factor(Education_Level)), names=unique(Education_Level), col= myPalette)
 
+
 #grouped age histogram
-Grouped.age.hist <- hist(as.numeric(quantitative$age_group), xlab="age_group", ylab="freq", breaks=4,
+par(mfrow=c(1,1))
+Grouped.age.hist <- hist(as.numeric(cleaned_bank_data_withoutNA_quan$age_group), xlab="age_group", ylab="freq",
                       main="Customer age group distribution", col="green")
 
 #Months inactive
 library(yarrr) #to make colors transparent
-hist(bank_data$Months_Inactive_12_mon, col = yarrr::transparent('red',trans.val = 0.9))
-hist(bank_data$Contacts_Count_12_mon, col = yarrr::transparent('blue', trans.val = 0.8), add = TRUE)
+barplot(table(factor(Months_Inactive_12_mon,levels=min(Months_Inactive_12_mon):max(Months_Inactive_12_mon))), col = yarrr::transparent('red',trans.val = 0.9))
+barplot(table(factor(Contacts_Count_12_mon,levels=min(Contacts_Count_12_mon):max(Contacts_Count_12_mon))), col = yarrr::transparent('blue', trans.val = 0.8), add = TRUE)
 
-hist(bank_data$Total_Trans_Ct)
+hist(cleaned_bank_data_withoutNA_quan$Total_Trans_Ct)
 
+int.hist = function(x,ylab="Frequency",...) {
+  barplot(table(factor(x,levels=min(x):max(x))),space=0,xaxt="n",ylab=ylab,...);axis(1)
+}
 
 #Correlation matrix
 cor_mat_new <- cor(bank_data_withoutNA_quan[2:15])
@@ -529,7 +556,7 @@ summary(model)
 pred <- (predict(model, test) >= 0.5)*1
 mean(test$Attrition_Flag == pred)
 
-cdplot(factor(Attrition_Flag)~ log_Total_Ct_Chng_Q4_Q1, data=cleaned_bank_data_withoutNA_quan)
+cdplot(factor(Attrition_Flag)~ Total_Ct_Chng_Q4_Q1, data=cleaned_bank_data_withoutNA_quan)
 cdplot(factor(Attrition_Flag)~ Total_Trans_Ct, data=cleaned_bank_data_withoutNA_quan)
 
 cdplot(factor(Attrition_Flag)~ Total_Revolving_Bal, data=cleaned_bank_data_withoutNA_quan)
