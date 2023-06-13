@@ -122,12 +122,6 @@ order_Income_Category <- list("Unknown" = 0,
 bank_data_withoutNA_quan$Income_Category <- unlist(order_Income_Category[as.character(bank_data_withoutNA_quan$Income_Category)])
 
 
-order_Card_Category <- list("Blue" = 1,
-                            "Silver" = 2,
-                            "Gold" = 3,
-                            "Platinum" = 4)
-bank_data_withoutNA_quan$Card_Category <- unlist(order_Card_Category[as.character(bank_data_withoutNA_quan$Card_Category)])
-
 #delete naive...1 and 2
 bank_data_withoutNA_quan <- subset(bank_data_withoutNA_quan, select = -c(Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
 
@@ -146,6 +140,11 @@ cust.age.boxplot
 age.exc.list <- boxplot.stats(cleaned_bank_data_withoutNA_quan$Customer_Age)$out
 
 # Card Category
+
+ggplot(cleaned_bank_data_withoutNA_quan, aes(x = as.factor(Card_Category), fill = factor(Attrition_Flag))) +
+  geom_bar() +
+  labs(fill = "Attrition Flag") +
+  theme_minimal()
 
 ggplot(cleaned_bank_data_withoutNA_quan, aes(x=Months_on_book, y= Credit_Limit, shape = as.factor(Card_Category), color= as.factor(Card_Category)))+
   geom_point() + geom_smooth(method=lm, se=FALSE, fullrange=TRUE)
