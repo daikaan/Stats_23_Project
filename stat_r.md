@@ -195,7 +195,7 @@ install.packages("formattable")
 ## package 'formattable' successfully unpacked and MD5 sums checked
 ## 
 ## The downloaded binary packages are in
-## 	C:\Users\Kaan\AppData\Local\Temp\Rtmpi6VH2B\downloaded_packages
+## 	C:\Users\Kaan\AppData\Local\Temp\Rtmpwbupm1\downloaded_packages
 ```
 
 ```r
@@ -1292,7 +1292,7 @@ chisq.test(qual_to_quant$Attrition_Flag, qual_to_quant$Card_Category, correct=FA
 ## 	Pearson's Chi-squared test with simulated p-value (based on 2000 replicates)
 ## 
 ## data:  qual_to_quant$Attrition_Flag and qual_to_quant$Card_Category
-## X-squared = 2.2342, df = NA, p-value = 0.5397
+## X-squared = 2.2342, df = NA, p-value = 0.5322
 ```
 
 ```r
@@ -1346,7 +1346,7 @@ chisq.test(quantitative$attrition_flag_binary, quantitative$Months_on_book, corr
 ## 	Pearson's Chi-squared test with simulated p-value (based on 2000 replicates)
 ## 
 ## data:  quantitative$attrition_flag_binary and quantitative$Months_on_book
-## X-squared = 58.525, df = NA, p-value = 0.05747
+## X-squared = 58.525, df = NA, p-value = 0.06847
 ```
 
 ```r
@@ -2104,7 +2104,7 @@ chisq.test(quantitative$attrition_flag_binary, quantitative$Credit_Limit, correc
 ## 	Pearson's Chi-squared test with simulated p-value (based on 2000 replicates)
 ## 
 ## data:  quantitative$attrition_flag_binary and quantitative$Credit_Limit
-## X-squared = 6159.6, df = NA, p-value = 0.7091
+## X-squared = 6159.6, df = NA, p-value = 0.6952
 ```
 
 ```r
@@ -3158,7 +3158,7 @@ chisq.test(quantitative$attrition_flag_binary, quantitative$Avg_Open_To_Buy, cor
 ## 	Pearson's Chi-squared test with simulated p-value (based on 2000 replicates)
 ## 
 ## data:  quantitative$attrition_flag_binary and quantitative$Avg_Open_To_Buy
-## X-squared = 6954.3, df = NA, p-value = 0.03948
+## X-squared = 6954.3, df = NA, p-value = 0.04598
 ```
 
 ```r
