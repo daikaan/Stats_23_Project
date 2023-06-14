@@ -1,0 +1,218 @@
+---
+title: "sl_project"
+output: html_document
+date: "2023-06-01"
+---
+
+Import Libraries We Need
+```{r}
+library("dplyr")
+library("corrplot")
+library("caTools")
+library("ggpubr")
+library("ROSE")
+library("correlation")
+library(moments) #to calculate skewness
+library(olsrr) #to use ols_step_backward_p
+library(MASS)
+library(knitr)
+library(forecast)
+library(ggplot2)
+library(PCAmixdata)
+library(purrr)
+library(formattable) # for giving a variable dictionary a better look
+```
+
+Introduction to Data
+
+In this project we are going to predict the probability of a customer attrition. We have a data containing demographic information about customers and their spending behavior. We downloaded the publicly available dataset from Kaggle which can be found in the link below.
+https://www.kaggle.com/datasets/thedevastator/predicting-credit-card-customer-attrition-with-m
+
+```{r}
+bank_data_origin <- read.csv('~/GitHub/Stats_23_Project/BankChurners.csv')
+head(bank_data_origin)
+```
+
+Before diving into modelling, it is important to understand the nature of the set. Here is the summary of the dataset:
+
+```{r}
+summary(bank_data_origin)
+```
+
+As expected, the set we have contains both numerical and categorical variables. Hence, a direct use without cleaning the set would lead us to an inappropriate model. In the beginning we have 23 columns and 10127 rows. However, this dataset was part of a study that had the same aim with a different approach.This approach was Naive Bayes Classification and 2 columns named as "Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1" and "Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2" were the results of their work. Thus, removing them will not only make the dataset more clear, but also will increase the originality of the work done in this project. We will start our project by removing these 2 columns which is independent from others. Finally, we have 21 columns and 10127 rows in the beginning.
+
+```{r}
+dim(bank_data_origin)
+bank_data <- subset(bank_data_origin, select = -c(Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
+final_dim <- dim(bank_data)
+final_dim
+
+```
+
+The columns that is going to be present in the study can be found in the table below next to their descriptions.
+
+```{r, echo = FALSE}
+var.names <- c("Clientnum", "Attrition_Flag", "Customer_Age", "Gender", "Dependent_count", 
+               "Education_Level", "Marital_Status", "Income_Category", "Card_Category", "Months_on_book",
+               "Total_Relationship_Count", "Months_Inactive_12_mon", "Contacts_Count_12_mon", "Credit_Limit",
+               "Total_Revolving_Bal", "Avg_Open_To_Buy", "Total_Amt_Chng_Q4_Q1", "Total_Trans_Amt",
+               "Total_Trans_Ct", "Total_Ct_Chng_Q4_Q1", "Avg_Utilization_Ratio")
+descriptions <- c("refers to the distinct identification numbers assigned to customers, consisting of a unique sequence of 9 digits. The datasets contain a total of 10,127 customers with unique IDs.",
+                  
+                  "refers to the current status of customers, indicating whether they are Existing Customers (current customers) or Attrited Customers (churned customers). There are two distinct values for this target/output variable.",
+                  
+                  "represents the age of customers, with a range between 27 and 73.",
+                  
+                  "is encoded as 'F' for Female and 'M' for Male.",
+                  
+                  "represents the number of dependents associated with a customer.",
+                  
+                  "represents the educational qualification of a customer. It encompasses seven distinct values: High School, Graduate, Uneducated, College, Post-graduate, Doctorate, and Unknown. The Unknown category includes 1519 customers.",
+                  
+                  "represents the marital status of customers, with four unique values: Married, Single, Unknown, and Divorced. The Unknown category includes 749 customers.",
+                  
+                  "represents the annual income category of cardholders: Less than 40K, 40K-60K, 60K-80K, 80K-120K, $120+, and Unknown. The Unknown category includes 1112 customers.",
+                  
+                  "refers to a product variable that indicates the type of credit card held by customers. It includes four unique values: Blue, Gold, Silver, and Platinum.",
+                  
+                  "represents the duration, in months, that an account holder has been a customer at the bank.",
+                  
+                  "represents the number of products held by a customer.",
+                  
+                  "represents the number of months during which a customer has been inactive in the last 12 months (1 year).",
+                  
+                  "represents the number of times a customer has contacted the bank.",
+                  
+                  "represents the credit limit on the customer's credit card.",
+                  
+                  "represents the total revolving balance on the customer's credit card.",
+                  
+                  "represents the average Open to Buy Credit Line for the last 12 months.",
+                  
+                  "represents the change in transaction amount from the fourth quarter (Q4) to the first quarter (Q1).",
+                  
+                  "represents the total transaction amount in the last 12 months.",
+                  
+                  "represents the total transaction count in the last 12 months.",
+                  
+                  "represents the change in transaction count from the fourth quarter (Q4) to the first quarter (Q1).",
+                  
+                  "represents the average card utilization ratio.")
+var.dict <- as.data.frame(descriptions, row.names = var.names, )
+formattable(var.dict)
+```
+
+Data Exploration
+
+After eliminating the columns, our data has 14 numerical and 7 categorical columns. Below is the display of the categorical variables.
+
+```{r}
+#display of the categorical variables
+table(bank_data$CLIENTNUM)
+
+table(bank_data$Attrition_Flag)
+
+table(bank_data$Gender)
+
+table(bank_data$Education_Level)
+
+table(bank_data$Marital_Status)
+
+table(bank_data$Income_Category)
+
+table(bank_data$Card_Category)
+```
+It has been noticed that some of the categorical columns (Education Level, Marital Status and Income Category) have unknown values but it is not in a format that can be detectable by R. In order to fix this, all the "Unknown" values are turned into NA.
+
+```{r}
+#Change Unknown value to NA
+bank_data_NA <- data.frame(bank_data)
+bank_data_NA[bank_data_NA=='Unknown'] <- NA
+```
+After the transformation, removing these unknown data is easier.
+
+```{r}
+#Build a dataset without missing values
+bank_data_withoutNA <- na.omit(bank_data_NA)
+```
+
+In order to show that the cleaning was successful and there is no null value inside our data we added a confirmation step here.
+
+```{r}
+colSums(is.na(bank_data_withoutNA))
+```
+
+For the 6 categorical columns, we change their data form to numeric to be able to implement a model. However, at this point is beneficiary to remind that these variables will stay as categorical type.
+
+```{r}
+bank_data_quan <- bank_data_withoutNA
+
+bank_data_quan$Attrition_Flag <- as.numeric(bank_data_quan$Attrition_Flag == "Attrited Customer")
+
+bank_data_quan$Gender <- as.numeric(bank_data_quan$Gender == "F")
+bank_data_quan <- bank_data_quan %>% rename("Is_Female" = "Gender")
+
+order_education_level <- list("Uneducated" = 1,
+                              "High School" = 2,
+                              "College" = 3,
+                              "Graduate" = 4,
+                              "Post-Graduate" = 5,
+                              "Doctorate" = 6)
+bank_data_quan$Education_Level <- unlist(order_education_level[as.character(bank_data_quan$Education_Level)])
+
+order_Marital_Status <- list("Single" = 1,
+                             "Married" = 2,
+                             "Divorced" = 3)
+bank_data_quan$Marital_Status <- unlist(order_Marital_Status[as.character(bank_data_quan$Marital_Status)])
+
+order_Income_Category <- list("Less than $40K" = 1,
+                              "$40K - $60K" = 2,
+                              "$60K - $80K" = 3,
+                              "$80K - $120K" = 4,
+                              "$120K +" = 5)
+bank_data_quan$Income_Category <- unlist(order_Income_Category[as.character(bank_data_quan$Income_Category)])
+
+
+order_Card_Category <- list("Blue" = 1,
+                            "Silver" = 2,
+                            "Gold" = 3,
+                            "Platinum" = 4)
+bank_data_quan$Card_Category <- unlist(order_Card_Category[as.character(bank_data_quan$Card_Category)])
+
+colSums(is.na(bank_data_quan))
+
+```
+
+Finally, since the people with age greater than or equal to 70 years and Card Category different than the blue is outliers, we remove them to our dataset.
+
+```{r}
+cleaned_bank_data <- bank_data_quan
+
+age.exc.list <- boxplot.stats(cleaned_bank_data$Customer_Age)$out
+card.exc.list <- c(2, 3, 4)
+
+cleaned_bank_data <- subset(cleaned_bank_data,!((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
+dim(cleaned_bank_data)
+```
+
+Data Preparation
+
+Since we are going to predict a probability, we will get a value between 0 and 1. We need to use logistic regression instead of linear regression.
+```{r}
+hist(cleaned_bank_data$Customer_Age, main = "Histogram for Customer Age", xlab = "Customer_Age", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Customer_Age)
+
+hist(cleaned_bank_data$Dependent_count, main = "Histogram for Dependent Count", xlab = "Dependent_count", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Dependent_count)
+
+hist(cleaned_bank_data$Months_on_book, main = "Histogram for Months On Book", xlab = "Months_on_book", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Months_on_book)
+
+hist(cleaned_bank_data$Total_Relationship_Count, main = "Histogram for Total Relationship Count", xlab = "Total_Relationship_Count", ylab = "Count", col = "cornflowerblue")
+
+skewness(cleaned_bank_data$Total_Relationship_Count)
+
+```
