@@ -17,6 +17,8 @@ library(PCAmixdata)
 library(purrr)
 library(formattable) # for giving a variable dictionary a better look
 
+summary(bank_data)
+
 # BRIEF DESCRIPTION OF EACH VARIABLE
 var.names <- c("Clientnum", "Attrition_Flag", "Customer_Age", "Gender", "Dependent_count", 
                "Education_Level", "Marital_Status", "Income_Category", "Card_Category", "Months_on_book",
@@ -69,7 +71,9 @@ formattable(var.dict)
 
 # DATA PREPERATION
 
-#View the categorical variables
+#display of the categorical variables
+table(bank_data$CLIENTNUM)
+
 table(bank_data$Attrition_Flag)
 
 table(bank_data$Gender)
@@ -122,11 +126,6 @@ order_Income_Category <- list("Unknown" = 0,
 bank_data_withoutNA_quan$Income_Category <- unlist(order_Income_Category[as.character(bank_data_withoutNA_quan$Income_Category)])
 
 
-#delete naive...1 and 2
-bank_data_withoutNA_quan <- subset(bank_data_withoutNA_quan, select = -c(Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
-
-cleaned_bank_data_withoutNA_quan <- bank_data_withoutNA_quan
-
 # Extracting Outliers from age and Rescoping the study to only focus on Blue Cards
 
 #Customer age
@@ -134,6 +133,15 @@ cleaned_bank_data_withoutNA_quan <- bank_data_withoutNA_quan
 #boxplot
 cust.age.boxplot <- boxplot(cleaned_bank_data_withoutNA_quan$Customer_Age, ylab = "age")
 cust.age.boxplot
+
+# months on book (how long a customer is using the bank)
+months.onbook.boxplot <- boxplot(quantitative$Months_on_book, ylab = "months")
+
+#using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, outliers
+boxplot.stats(quantitative$Months_on_book)$out
+
+#Since the outliers in months on books can be identifying on whether the customer is going to churn we decided to keep them in the data set
+
 
 #using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, 
 #it is seen that customers over the age of 70 are outliers
@@ -182,29 +190,24 @@ cust.age.piechart <- pie(count(cleaned_bank_data_withoutNA_quan, age_group)$n, b
 
 #Dependent Count
 
-
 depcount.labels <- c(0, 1, 2, 3, 4, 5)
 dependent.count.piechart <- pie(count(cleaned_bank_data_withoutNA_quan, Dependent_count)$n, border="white", col=myPalette, labels = depcount.labels)
 
-# months on book (how long a customer is using the bank)
-
-#boxplot
-months.onbook.boxplot <- boxplot(quantitative$Months_on_book, ylab = "months")
-
-#using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, outliers
-boxplot.stats(quantitative$Months_on_book)$out
-
-#Since the outliers in months on books can be identifying on whether the customer is going to churn we decided to keep them in the data set
-
-
 # Credit Limit
-
-#boxplot
 credit.limit.boxplot <- boxplot(cleaned_bank_data_withoutNA_quan$Credit_Limit, ylab = "Dollars")
+total.amtchg.boxplot <- boxplot(cleaned_bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1, ylab = "Dollars")
 
 
-#boxplot
-credit.limit.boxplot <- boxplot(cleaned_bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1, ylab = "Dollars")
+#Months inactive
+library(yarrr) #to make colors transparent
+barplot(table(factor(Months_Inactive_12_mon,levels=min(Months_Inactive_12_mon):max(Months_Inactive_12_mon))), col = yarrr::transparent('red',trans.val = 0.9))
+barplot(table(factor(Contacts_Count_12_mon,levels=min(Contacts_Count_12_mon):max(Contacts_Count_12_mon))), col = yarrr::transparent('blue', trans.val = 0.8), add = TRUE)
+
+hist(cleaned_bank_data_withoutNA_quan$Total_Trans_Ct)
+
+int.hist = function(x,ylab="Frequency",...) {
+  barplot(table(factor(x,levels=min(x):max(x))),space=0,xaxt="n",ylab=ylab,...);axis(1)
+}
 
 
 unique(cleaned_bank_data_withoutNA_quan$Attrition_Flag) #to make sure there are only 2 strings
@@ -246,16 +249,6 @@ par(mfrow=c(1,1))
 Grouped.age.hist <- hist(as.numeric(cleaned_bank_data_withoutNA_quan$age_group), xlab="age_group", ylab="freq",
                          main="Customer age group distribution", col="green")
 
-#Months inactive
-library(yarrr) #to make colors transparent
-barplot(table(factor(Months_Inactive_12_mon,levels=min(Months_Inactive_12_mon):max(Months_Inactive_12_mon))), col = yarrr::transparent('red',trans.val = 0.9))
-barplot(table(factor(Contacts_Count_12_mon,levels=min(Contacts_Count_12_mon):max(Contacts_Count_12_mon))), col = yarrr::transparent('blue', trans.val = 0.8), add = TRUE)
-
-hist(cleaned_bank_data_withoutNA_quan$Total_Trans_Ct)
-
-int.hist = function(x,ylab="Frequency",...) {
-  barplot(table(factor(x,levels=min(x):max(x))),space=0,xaxt="n",ylab=ylab,...);axis(1)
-}
 
 #Correlation matrix
 cor_mat_new <- cor(bank_data_withoutNA_quan[2:15])
