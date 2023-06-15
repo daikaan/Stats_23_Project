@@ -1,5 +1,3 @@
-bank_data <- read.csv('~/GitHub/Stats_23_Project/BankChurners.csv')
-
 #########
 library("dplyr")
 library("corrplot")
@@ -16,6 +14,17 @@ library(ggplot2)
 library(PCAmixdata)
 library(purrr)
 library(formattable) # for giving a variable dictionary a better look
+
+# Importing the dataset
+bank_data_origin <- read.csv('~/GitHub/Stats_23_Project/BankChurners.csv')
+head(bank_data_origin)
+
+summary(bank_data_origin)
+
+dim(bank_data_origin)
+bank_data <- subset(bank_data_origin, select = -c(Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
+final_dim <- dim(bank_data)
+final_dim
 
 # BRIEF DESCRIPTION OF EACH VARIABLE
 var.names <- c("Clientnum", "Attrition_Flag", "Customer_Age", "Gender", "Dependent_count", 
@@ -69,7 +78,9 @@ formattable(var.dict)
 
 # DATA PREPERATION
 
-#View the categorical variables
+#display of the categorical variables
+table(bank_data$CLIENTNUM)
+
 table(bank_data$Attrition_Flag)
 
 table(bank_data$Gender)
@@ -89,6 +100,7 @@ bank_data_NA[bank_data_NA=='Unknown'] <- NA
 #Build a dataset without missing values
 bank_data_withoutNA <- na.omit(bank_data_NA)
 
+colSums(is.na(bank_data_withoutNA))
 
 #We convert categorical variables into numerical
 bank_data_withoutNA_quan <- data.frame(bank_data_withoutNA)
@@ -121,11 +133,6 @@ order_Income_Category <- list("Unknown" = 0,
                               "$120K +" = 5)
 bank_data_withoutNA_quan$Income_Category <- unlist(order_Income_Category[as.character(bank_data_withoutNA_quan$Income_Category)])
 
-
-#delete naive...1 and 2
-bank_data_withoutNA_quan <- subset(bank_data_withoutNA_quan, select = -c(Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
-
-cleaned_bank_data_withoutNA_quan <- bank_data_withoutNA_quan
 
 # Extracting Outliers from age and Rescoping the study to only focus on Blue Cards
 
