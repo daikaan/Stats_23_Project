@@ -4,7 +4,7 @@ output: html_document
 date: "2023-06-01"
 ---
 
-Import Libraries We Need
+#Import Libraries We Need
 ```{r}
 library("dplyr")
 library("corrplot")
@@ -23,7 +23,7 @@ library(purrr)
 library(formattable) # for giving a variable dictionary a better look
 ```
 
-Introduction to Data
+#Introduction to Data
 
 In this project we are going to predict the probability of a customer attrition. We have a data containing demographic information about customers and their spending behavior. We downloaded the publicly available dataset from Kaggle which can be found in the link below.
 https://www.kaggle.com/datasets/thedevastator/predicting-credit-card-customer-attrition-with-m
@@ -102,14 +102,12 @@ var.dict <- as.data.frame(descriptions, row.names = var.names, )
 formattable(var.dict)
 ```
 
-Data Exploration
+#Data Exploration
 
 After eliminating the columns, our data has 14 numerical and 7 categorical columns. Below is the display of the categorical variables.
 
 ```{r}
 #display of the categorical variables
-table(bank_data$CLIENTNUM)
-
 table(bank_data$Attrition_Flag)
 
 table(bank_data$Gender)
@@ -145,12 +143,12 @@ colSums(is.na(bank_data_withoutNA))
 For the 6 categorical columns, we change their data form to numeric to be able to implement a model. However, at this point is beneficiary to remind that these variables will stay as categorical type.
 
 ```{r}
-bank_data_quan <- bank_data_withoutNA
+bank_data_withoutNA_quan <- bank_data_withoutNA
 
-bank_data_quan$Attrition_Flag <- as.numeric(bank_data_quan$Attrition_Flag == "Attrited Customer")
+bank_data_withoutNA_quan$Attrition_Flag <- as.numeric(bank_data_withoutNA_quan$Attrition_Flag == "Attrited Customer")
 
-bank_data_quan$Gender <- as.numeric(bank_data_quan$Gender == "F")
-bank_data_quan <- bank_data_quan %>% rename("Is_Female" = "Gender")
+bank_data_withoutNA_quan$Gender <- as.numeric(bank_data_withoutNA_quan$Gender == "F")
+bank_data_withoutNA_quan <- bank_data_withoutNA_quan %>% rename("Is_Female" = "Gender")
 
 order_education_level <- list("Uneducated" = 1,
                               "High School" = 2,
@@ -158,28 +156,28 @@ order_education_level <- list("Uneducated" = 1,
                               "Graduate" = 4,
                               "Post-Graduate" = 5,
                               "Doctorate" = 6)
-bank_data_quan$Education_Level <- unlist(order_education_level[as.character(bank_data_quan$Education_Level)])
+bank_data_withoutNA_quan$Education_Level <- unlist(order_education_level[as.character(bank_data_withoutNA_quan$Education_Level)])
 
 order_Marital_Status <- list("Single" = 1,
                              "Married" = 2,
                              "Divorced" = 3)
-bank_data_quan$Marital_Status <- unlist(order_Marital_Status[as.character(bank_data_quan$Marital_Status)])
+bank_data_withoutNA_quan$Marital_Status <- unlist(order_Marital_Status[as.character(bank_data_withoutNA_quan$Marital_Status)])
 
 order_Income_Category <- list("Less than $40K" = 1,
                               "$40K - $60K" = 2,
                               "$60K - $80K" = 3,
                               "$80K - $120K" = 4,
                               "$120K +" = 5)
-bank_data_quan$Income_Category <- unlist(order_Income_Category[as.character(bank_data_quan$Income_Category)])
+bank_data_withoutNA_quan$Income_Category <- unlist(order_Income_Category[as.character(bank_data_withoutNA_quan$Income_Category)])
 
 
 order_Card_Category <- list("Blue" = 1,
                             "Silver" = 2,
                             "Gold" = 3,
                             "Platinum" = 4)
-bank_data_quan$Card_Category <- unlist(order_Card_Category[as.character(bank_data_quan$Card_Category)])
+bank_data_withoutNA_quan$Card_Category <- unlist(order_Card_Category[as.character(bank_data_withoutNA_quan$Card_Category)])
 
-colSums(is.na(bank_data_quan))
+colSums(is.na(bank_data_withoutNA_quan))
 ```
 Here is the visualizations of categorical values regarding our target value, attrition flag.
 
@@ -231,9 +229,10 @@ avg.utilrate.boxplot <- boxplot(Avg_Utilization_Ratio, ylab = "Ratio")
 ```
 It is clear that many of the numerical columns have too many outliers. However, as a result of the nature of our study, eliminating the outliers might significantly affect the sake of study.
 
-Data Preparation
+#Data Preparation
 So, we only selected the outliers in the age since there are only 2 people who is over 70 in addition to card holders other than the blue category.
 ```{r}
+cleaned_bank_data_withoutNA_quan <- bank_data_withoutNA_quan
 #Extracting Outliers from age and Rescoping the study to only focus on Blue Cards
 
 #using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, 
