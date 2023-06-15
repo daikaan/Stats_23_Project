@@ -4,7 +4,7 @@ output: html_document
 date: "2023-06-01"
 ---
 
-#Import Libraries We Need
+# Import Libraries We Need
 ```{r}
 library("dplyr")
 library("corrplot")
@@ -21,9 +21,11 @@ library(ggplot2)
 library(PCAmixdata)
 library(purrr)
 library(formattable) # for giving a variable dictionary a better look
+library(RColorBrewer)
+library(yarrr) #to make colors transparent
 ```
 
-#Introduction to Data
+# Introduction to Data
 
 In this project we are going to predict the probability of a customer attrition. We have a data containing demographic information about customers and their spending behavior. We downloaded the publicly available dataset from Kaggle which can be found in the link below.
 https://www.kaggle.com/datasets/thedevastator/predicting-credit-card-customer-attrition-with-m
@@ -102,7 +104,7 @@ var.dict <- as.data.frame(descriptions, row.names = var.names, )
 formattable(var.dict)
 ```
 
-#Data Exploration
+# Data Exploration
 
 After eliminating the columns, our data has 14 numerical and 7 categorical columns. Below is the display of the categorical variables.
 
@@ -176,14 +178,15 @@ order_Card_Category <- list("Blue" = 1,
                             "Gold" = 3,
                             "Platinum" = 4)
 bank_data_withoutNA_quan$Card_Category <- unlist(order_Card_Category[as.character(bank_data_withoutNA_quan$Card_Category)])
+```
 
+```{r}
 colSums(is.na(bank_data_withoutNA_quan))
 ```
 Here is the visualizations of categorical values regarding our target value, attrition flag.
 
 ```{r}
 #Categorical Value Visualizations
-
 #Bar plots
 par(mfrow=c(2,2))
 myPalette <- brewer.pal(6, "Set2")
@@ -229,7 +232,7 @@ avg.utilrate.boxplot <- boxplot(Avg_Utilization_Ratio, ylab = "Ratio")
 ```
 It is clear that many of the numerical columns have too many outliers. However, as a result of the nature of our study, eliminating the outliers might significantly affect the sake of study.
 
-#Data Preparation
+# Data Preparation
 So, we only selected the outliers in the age since there are only 2 people who is over 70 in addition to card holders other than the blue category.
 ```{r}
 cleaned_bank_data_withoutNA_quan <- bank_data_withoutNA_quan
@@ -245,7 +248,7 @@ card.exc.list <- c(2, 3, 4)
 
 cleaned_bank_data_withoutNA_quan <- subset(cleaned_bank_data_withoutNA_quan,!((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
 cleaned_bank_data_withoutNA_quan<- subset(cleaned_bank_data_withoutNA_quan, select = -c(Card_Category)) #after the cleaning this column is irrelevant since the only category left is blue
-cleaned_bank_data_withoutNA_quan
+head(cleaned_bank_data_withoutNA_quan)
 ```
 
 After the cleaning, lets examine the current situation of the dataset with more graphs.
@@ -279,7 +282,6 @@ depcount.labels <- c(0, 1, 2, 3, 4, 5)
 dependent.count.piechart <- pie(count(cleaned_bank_data_withoutNA_quan, Dependent_count)$n, border="white", col=myPalette, labels = depcount.labels)
 
 #Months inactive
-library(yarrr) #to make colors transparent
 barplot(table(factor(Months_Inactive_12_mon,levels=min(Months_Inactive_12_mon):max(Months_Inactive_12_mon))), col = yarrr::transparent('red',trans.val = 0.9))
 barplot(table(factor(Contacts_Count_12_mon,levels=min(Contacts_Count_12_mon):max(Contacts_Count_12_mon))), col = yarrr::transparent('blue', trans.val = 0.8), add = TRUE)
 
@@ -288,11 +290,11 @@ hist(cleaned_bank_data_withoutNA_quan$Total_Trans_Ct)
 int.hist = function(x,ylab="Frequency",...) {
   barplot(table(factor(x,levels=min(x):max(x))),space=0,xaxt="n",ylab=ylab,...);axis(1)
 }
+```
 
-
-dev.off(dev.list()["RStudioGD"]) #to clear the previous plots on the screen
-
+```{r}
 #Histograms
+#dev.off(dev.list()["RStudioGD"]) #to clear the previous plots on the screen
 attach(cleaned_bank_data_withoutNA_quan)
 par(mfrow=c(3,2))
 hist(Avg_Open_To_Buy)
@@ -308,7 +310,6 @@ par(mfrow=c(1,1))
 Grouped.age.hist <- hist(as.numeric(cleaned_bank_data_withoutNA_quan$age_group), xlab="age_group", ylab="freq",
                          main="Customer age group distribution", col="green")
 ```
-
 
 
 Since we are going to predict a probability, we will get a value between 0 and 1. We need to use logistic regression instead of linear regression.
