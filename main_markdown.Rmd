@@ -180,39 +180,136 @@ order_Card_Category <- list("Blue" = 1,
 bank_data_quan$Card_Category <- unlist(order_Card_Category[as.character(bank_data_quan$Card_Category)])
 
 colSums(is.na(bank_data_quan))
-
 ```
-
-Finally, since the people with age greater than or equal to 70 years and Card Category different than the blue is outliers, we remove them to our dataset.
+Here is the visualizations of categorical values regarding our target value, attrition flag.
 
 ```{r}
-cleaned_bank_data <- bank_data_quan
+#Categorical Value Visualizations
 
-age.exc.list <- boxplot.stats(cleaned_bank_data$Customer_Age)$out
-card.exc.list <- c(2, 3, 4)
-
-cleaned_bank_data <- subset(cleaned_bank_data,!((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
-dim(cleaned_bank_data)
+#Bar plots
+par(mfrow=c(2,2))
+myPalette <- brewer.pal(6, "Set2")
+ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Income_Category), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag") 
+ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Marital_Status), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag") 
+ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Education_Level), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag") 
+ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Card_Category), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag")
 ```
+
+There seems to be a great imbalance on card category, while the others distributions seem to be reasonably similar. Before moving further, card categories' relationship with few other numerical values might be important to understand if card category is going to affect the performance of the model. Below, the relationship between card category and numerical columns that is expected to be decisive in churn out behavior (credit limit and months on book) is presented.
+
+```{r}
+# Card Category
+
+ggplot(bank_data_withoutNA_quan, aes(x=Months_on_book, y= Credit_Limit, shape = as.factor(Card_Category), color= as.factor(Card_Category)))+
+  geom_point() + geom_smooth(method=lm, se=FALSE, fullrange=TRUE)
+```
+
+It is clear that blue card holders have different attributes than the others while the other card holders seem to be acting similar. Thus, we decided to rescope our study only to focus on blue card holders. By doing so, we believe that numerical values fed into the model will have more accurate effect on the model.
+
+```{r}
+#Since most of the data is coming from the Blue cards and there is a visible difference on many parameters among categories, we decided to only focus on blue card category
+card.exc.list <- c(2, 3, 4)
+```
+
+At this point, the numerical columns are decided to be checked whether they have any 
+```{r}
+#Numerical columns analysis
+attach(bank_data_withoutNA_quan)
+
+cust.age.boxplot <- boxplot(Customer_Age, ylab = "age")
+months.onbook.boxplot <- boxplot(Months_on_book, ylab = "months")
+reltn.cnt.boxplot <- boxplot(Total_Relationship_Count, ylab = "#")
+mnths.inact.boxplot <- boxplot(Months_Inactive_12_mon, ylab = "months")
+cntc.cnt.boxplot <- boxplot(Contacts_Count_12_mon, ylab = "#")
+credit.limit.boxplot <- boxplot(Credit_Limit, ylab = "Dollars")
+ttl.revbal.boxplot <- boxplot(Total_Revolving_Bal, ylab = "Dollars")
+avg.opnbuy.boxplot <- boxplot(Avg_Open_To_Buy, ylab = "Dollars")
+total.amtchg.boxplot <- boxplot(Total_Amt_Chng_Q4_Q1, ylab = "Dollars")
+ttl.transct.boxplot <- boxplot(Total_Trans_Ct, ylab = "#")
+total.cntchg.boxplot <- boxplot(Total_Ct_Chng_Q4_Q1, ylab = "Dollars")
+avg.utilrate.boxplot <- boxplot(Avg_Utilization_Ratio, ylab = "Ratio")
+```
+It is clear that many of the numerical columns have too many outliers. However, as a result of the nature of our study, eliminating the outliers might significantly affect the sake of study.
 
 Data Preparation
+So, we only selected the outliers in the age since there are only 2 people who is over 70 in addition to card holders other than the blue category.
+```{r}
+#Extracting Outliers from age and Rescoping the study to only focus on Blue Cards
+
+#using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, 
+#it is seen that customers over the age of 70 are outliers
+age.exc.list <- boxplot.stats(cleaned_bank_data_withoutNA_quan$Customer_Age)$out
+
+#Since most of the data is coming from the Blue cards and there is a visible difference on many parameters among categories, we decided to only focus on blue card category
+card.exc.list <- c(2, 3, 4)
+
+
+cleaned_bank_data_withoutNA_quan <- subset(cleaned_bank_data_withoutNA_quan,!((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
+cleaned_bank_data_withoutNA_quan<- subset(cleaned_bank_data_withoutNA_quan, select = -c(Card_Category)) #after the cleaning this column is irrelevant since the only category left is blue
+cleaned_bank_data_withoutNA_quan
+```
+
+After the cleaning, lets examine the current situation of the dataset with more graphs.
+
+```{r}
+# Descriptive Graphs
+#histogram
+Cust.age.hist <- hist(cleaned_bank_data_withoutNA_quan$Customer_Age, xlab="age", ylab="freq",
+                      main="Customer age distribution", col="orange")
+Cust.age.hist
+#using the histogram, dividing ages into 4 groups seems satisfying
+
+#Creating age groups
+cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age <= 34, "age_group"] <- 1
+cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age > 34 & cleaned_bank_data_withoutNA_quan$Customer_Age <= 44, "age_group"] <- 2
+cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age > 44 & cleaned_bank_data_withoutNA_quan$Customer_Age <= 54, "age_group"] <- 3
+cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age > 54, "age_group"] <- 4
+
+#grouped age histogram
+Grouped.age.hist <- hist(as.numeric(cleaned_bank_data_withoutNA_quan$age_group), xlab="age_group", ylab="freq", breaks=4,
+                         main="Customer age group distribution", col="green")
+
+
+# grouped age piechart
+age.labels <- c("<=34", "35-44", "45-54", ">=55")
+cust.age.piechart <- pie(count(cleaned_bank_data_withoutNA_quan, age_group)$n, border="white", col=myPalette, labels = age.labels)
+
+#Dependent Count
+
+depcount.labels <- c(0, 1, 2, 3, 4, 5)
+dependent.count.piechart <- pie(count(cleaned_bank_data_withoutNA_quan, Dependent_count)$n, border="white", col=myPalette, labels = depcount.labels)
+
+#Months inactive
+library(yarrr) #to make colors transparent
+barplot(table(factor(Months_Inactive_12_mon,levels=min(Months_Inactive_12_mon):max(Months_Inactive_12_mon))), col = yarrr::transparent('red',trans.val = 0.9))
+barplot(table(factor(Contacts_Count_12_mon,levels=min(Contacts_Count_12_mon):max(Contacts_Count_12_mon))), col = yarrr::transparent('blue', trans.val = 0.8), add = TRUE)
+
+hist(cleaned_bank_data_withoutNA_quan$Total_Trans_Ct)
+
+int.hist = function(x,ylab="Frequency",...) {
+  barplot(table(factor(x,levels=min(x):max(x))),space=0,xaxt="n",ylab=ylab,...);axis(1)
+}
+
+
+dev.off(dev.list()["RStudioGD"]) #to clear the previous plots on the screen
+
+#Histograms
+attach(cleaned_bank_data_withoutNA_quan)
+par(mfrow=c(3,2))
+hist(Avg_Open_To_Buy)
+hist(Total_Trans_Amt)
+hist(Avg_Utilization_Ratio)
+hist(Months_on_book)
+hist(Credit_Limit)
+hist(Months_Inactive_12_mon)
+
+
+#grouped age histogram
+par(mfrow=c(1,1))
+Grouped.age.hist <- hist(as.numeric(cleaned_bank_data_withoutNA_quan$age_group), xlab="age_group", ylab="freq",
+                         main="Customer age group distribution", col="green")
+```
+
+
 
 Since we are going to predict a probability, we will get a value between 0 and 1. We need to use logistic regression instead of linear regression.
-```{r}
-hist(cleaned_bank_data$Customer_Age, main = "Histogram for Customer Age", xlab = "Customer_Age", ylab = "Count", col = "cornflowerblue")
-
-skewness(cleaned_bank_data$Customer_Age)
-
-hist(cleaned_bank_data$Dependent_count, main = "Histogram for Dependent Count", xlab = "Dependent_count", ylab = "Count", col = "cornflowerblue")
-
-skewness(cleaned_bank_data$Dependent_count)
-
-hist(cleaned_bank_data$Months_on_book, main = "Histogram for Months On Book", xlab = "Months_on_book", ylab = "Count", col = "cornflowerblue")
-
-skewness(cleaned_bank_data$Months_on_book)
-
-hist(cleaned_bank_data$Total_Relationship_Count, main = "Histogram for Total Relationship Count", xlab = "Total_Relationship_Count", ylab = "Count", col = "cornflowerblue")
-
-skewness(cleaned_bank_data$Total_Relationship_Count)
-
-```
