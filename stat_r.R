@@ -14,8 +14,8 @@ library(ggplot2)
 library(PCAmixdata)
 library(purrr)
 library(formattable) # for giving a variable dictionary a better look
+library(RColorBrewer)#for the visualization colorings
 
-# Importing the dataset
 bank_data_origin <- read.csv('~/GitHub/Stats_23_Project/BankChurners.csv')
 head(bank_data_origin)
 
@@ -25,6 +25,7 @@ dim(bank_data_origin)
 bank_data <- subset(bank_data_origin, select = -c(Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
 final_dim <- dim(bank_data)
 final_dim
+
 
 # BRIEF DESCRIPTION OF EACH VARIABLE
 var.names <- c("Clientnum", "Attrition_Flag", "Customer_Age", "Gender", "Dependent_count", 
@@ -100,18 +101,17 @@ bank_data_NA[bank_data_NA=='Unknown'] <- NA
 #Build a dataset without missing values
 bank_data_withoutNA <- na.omit(bank_data_NA)
 
-colSums(is.na(bank_data_withoutNA))
 
 #We convert categorical variables into numerical
 bank_data_withoutNA_quan <- data.frame(bank_data_withoutNA)
 
+#change 'Existing Customer' to 1 and 'Attrited Customer' to 0 and add new column to quantitative
 bank_data_withoutNA_quan$Attrition_Flag <- as.numeric(bank_data_withoutNA_quan$Attrition_Flag == "Attrited Customer")
 
 bank_data_withoutNA_quan$Gender <- as.numeric(bank_data_withoutNA_quan$Gender == "F")
 bank_data_withoutNA_quan <- bank_data_withoutNA_quan %>% rename("Is_Female" = "Gender")
 
-order_education_level <- list("Unknown" = 0,
-                              "Uneducated" = 1,
+order_education_level <- list("Uneducated" = 1,
                               "High School" = 2,
                               "College" = 3,
                               "Graduate" = 4,
@@ -119,14 +119,12 @@ order_education_level <- list("Unknown" = 0,
                               "Doctorate" = 6)
 bank_data_withoutNA_quan$Education_Level <- unlist(order_education_level[as.character(bank_data_withoutNA_quan$Education_Level)])
 
-order_Marital_Status <- list("Unknown" = 0,
-                             "Single" = 1,
+order_Marital_Status <- list("Single" = 1,
                              "Married" = 2,
                              "Divorced" = 3)
 bank_data_withoutNA_quan$Marital_Status <- unlist(order_Marital_Status[as.character(bank_data_withoutNA_quan$Marital_Status)])
 
-order_Income_Category <- list("Unknown" = 0,
-                              "Less than $40K" = 1,
+order_Income_Category <- list("Less than $40K" = 1,
                               "$40K - $60K" = 2,
                               "$60K - $80K" = 3,
                               "$80K - $120K" = 4,
@@ -134,34 +132,61 @@ order_Income_Category <- list("Unknown" = 0,
 bank_data_withoutNA_quan$Income_Category <- unlist(order_Income_Category[as.character(bank_data_withoutNA_quan$Income_Category)])
 
 
-# Extracting Outliers from age and Rescoping the study to only focus on Blue Cards
+order_Card_Category <- list("Blue" = 1,
+                            "Silver" = 2,
+                            "Gold" = 3,
+                            "Platinum" = 4)
+bank_data_withoutNA_quan$Card_Category <- unlist(order_Card_Category[as.character(bank_data_withoutNA_quan$Card_Category)])
 
-#Customer age
 
-#boxplot
-cust.age.boxplot <- boxplot(cleaned_bank_data_withoutNA_quan$Customer_Age, ylab = "age")
-cust.age.boxplot
+#Categorical Value Visualizations
 
-#using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, 
-#it is seen that customers over the age of 70 are outliers
-age.exc.list <- boxplot.stats(cleaned_bank_data_withoutNA_quan$Customer_Age)$out
+#Bar plots
+
+par(mfrow=c(2,2))
+myPalette <- brewer.pal(6, "Set2")
+ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Income_Category), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag") 
+ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Marital_Status), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag") 
+ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Education_Level), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag") 
+ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Card_Category), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag")
 
 # Card Category
 
-ggplot(cleaned_bank_data_withoutNA_quan, aes(x = as.factor(Card_Category), fill = factor(Attrition_Flag))) +
-  geom_bar() +
-  labs(fill = "Attrition Flag") +
-  theme_minimal()
-
-ggplot(cleaned_bank_data_withoutNA_quan, aes(x=Months_on_book, y= Credit_Limit, shape = as.factor(Card_Category), color= as.factor(Card_Category)))+
+ggplot(bank_data_withoutNA_quan, aes(x=Months_on_book, y= Credit_Limit, shape = as.factor(Card_Category), color= as.factor(Card_Category)))+
   geom_point() + geom_smooth(method=lm, se=FALSE, fullrange=TRUE)
+
+
+#Numerical columns analysis
+attach(bank_data_withoutNA_quan)
+
+cust.age.boxplot <- boxplot(Customer_Age, ylab = "age")
+months.onbook.boxplot <- boxplot(Months_on_book, ylab = "months")
+reltn.cnt.boxplot <- boxplot(Total_Relationship_Count, ylab = "#")
+mnths.inact.boxplot <- boxplot(Months_Inactive_12_mon, ylab = "months")
+cntc.cnt.boxplot <- boxplot(Contacts_Count_12_mon, ylab = "#")
+credit.limit.boxplot <- boxplot(Credit_Limit, ylab = "Dollars")
+ttl.revbal.boxplot <- boxplot(Total_Revolving_Bal, ylab = "Dollars")
+avg.opnbuy.boxplot <- boxplot(Avg_Open_To_Buy, ylab = "Dollars")
+total.amtchg.boxplot <- boxplot(Total_Amt_Chng_Q4_Q1, ylab = "Dollars")
+ttl.transct.boxplot <- boxplot(Total_Trans_Ct, ylab = "#")
+total.cntchg.boxplot <- boxplot(Total_Ct_Chng_Q4_Q1, ylab = "Dollars")
+avg.utilrate.boxplot <- boxplot(Avg_Utilization_Ratio, ylab = "Ratio")
+
+#Since the outliers in most of the numerical columns can be identifying on whether the customer is going to churn we decided to keep them in the data set
+
+#Extracting Outliers from age and Rescoping the study to only focus on Blue Cards
+
+#using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, 
+#it is seen that customers over the age of 70 are outliers
+age.exc.list <- boxplot.stats(bank_data_withoutNA_quan$Customer_Age)$out
 
 #Since most of the data is coming from the Blue cards and there is a visible difference on many parameters among categories, we decided to only focus on blue card category
 card.exc.list <- c(2, 3, 4)
 
-cleaned_bank_data_withoutNA_quan <- subset(cleaned_bank_data_withoutNA_quan,!((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
-cleaned_bank_data_withoutNA_quan
 
+cleaned_bank_data_withoutNA_quan <- subset(bank_data_withoutNA_quan,!((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
+cleaned_bank_data_withoutNA_quan<- subset(cleaned_bank_data_withoutNA_quan, select = -c(Card_Category))
+cleaned_bank_data_withoutNA_quan
 
 # Descriptive Graphs
 #histogram
@@ -182,92 +207,24 @@ Grouped.age.hist <- hist(as.numeric(cleaned_bank_data_withoutNA_quan$age_group),
 
 
 # grouped age piechart
-library(RColorBrewer)#for the
-myPalette <- brewer.pal(6, "Set2") 
 age.labels <- c("<=34", "35-44", "45-54", ">=55")
 cust.age.piechart <- pie(count(cleaned_bank_data_withoutNA_quan, age_group)$n, border="white", col=myPalette, labels = age.labels)
 
 #Dependent Count
 
-ggplot(cleaned_bank_data_withoutNA_quan, aes(x=Dependent_count)) +
-  geom_bar(width=1)
-
 depcount.labels <- c(0, 1, 2, 3, 4, 5)
 dependent.count.piechart <- pie(count(cleaned_bank_data_withoutNA_quan, Dependent_count)$n, border="white", col=myPalette, labels = depcount.labels)
 
-# months on book (how long a customer is using the bank)
-#histogram
-hist(cleaned_bank_data_withoutNA_quan$Months_on_book)
+#Months inactive
+library(yarrr) #to make colors transparent
+barplot(table(factor(Months_Inactive_12_mon,levels=min(Months_Inactive_12_mon):max(Months_Inactive_12_mon))), col = yarrr::transparent('red',trans.val = 0.9))
+barplot(table(factor(Contacts_Count_12_mon,levels=min(Contacts_Count_12_mon):max(Contacts_Count_12_mon))), col = yarrr::transparent('blue', trans.val = 0.8), add = TRUE)
 
-#boxplot
-months.onbook.boxplot <- boxplot(quantitative$Months_on_book, ylab = "months")
+hist(cleaned_bank_data_withoutNA_quan$Total_Trans_Ct)
 
-#using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, outliers
-boxplot.stats(quantitative$Months_on_book)$out
-
-#Since the outliers in months on books can be identifying on whether the customer is going to churn we decided to keep them in the data set
-
-#Total Relationships Count
-ggplot(cleaned_bank_data_withoutNA_quan, aes(x=Total_Relationship_Count)) +
-  geom_bar(width=1)
-
-#Months_Inactive_12months
-ggplot(cleaned_bank_data_withoutNA_quan, aes(x=Months_Inactive_12_mon)) +
-  geom_bar(width=1)
-
-#Contacts Count 12 months
-ggplot(cleaned_bank_data_withoutNA_quan, aes(x=Contacts_Count_12_mon)) +
-  geom_bar(width=1)
-
-# Credit Limit
-
-#boxplot
-credit.limit.boxplot <- boxplot(cleaned_bank_data_withoutNA_quan$Credit_Limit, ylab = "Dollars")
-
-#histogram
-hist(cleaned_bank_data_withoutNA_quan$Credit_Limit)
-
-
-# Total Revolving Balance
-#histogram
-hist(cleaned_bank_data_withoutNA_quan$Total_Revolving_Bal)
-
-#Average Open to Buy
-#histogram
-hist(cleaned_bank_data_withoutNA_quan$Avg_Open_To_Buy)
-
-#Total Amount Change Between Q1 and Q4
-
-#histogram
-hist(cleaned_bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1)
-
-#boxplot
-credit.limit.boxplot <- boxplot(cleaned_bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1, ylab = "Dollars")
-
-#Total Transaction Amount
-
-#histogram
-hist(cleaned_bank_data_withoutNA_quan$Total_Trans_Amt)
-
-#Total Count Change Between Q1 and Q4
-
-#histogram
-hist(cleaned_bank_data_withoutNA_quan$Total_Ct_Chng_Q4_Q1)
-
-#Average Utilization Rate
-
-#histogram
-hist(cleaned_bank_data_withoutNA_quan$Avg_Utilization_Ratio)
-
-unique(cleaned_bank_data_withoutNA_quan$Attrition_Flag) #to make sure there are only 2 strings
-#change 'Existing Customer' to 1 and 'Attrited Customer' to 0 and add new column to quantitative
-data.split <- splitmix(cleaned_bank_data_withoutNA_quan)
-quantitative <- data.split$X.quanti
-qualitative <- data.split$X.quali
-
-length(quantitative)
-length(qualitative)
-quantitative$attrition_flag_binary <- ifelse(cleaned_bank_data_withoutNA_quan$Attrition_Flag=='Existing Customer', 1, 0)
+int.hist = function(x,ylab="Frequency",...) {
+  barplot(table(factor(x,levels=min(x):max(x))),space=0,xaxt="n",ylab=ylab,...);axis(1)
+}
 
 
 dev.off(dev.list()["RStudioGD"]) #to clear the previous plots on the screen
@@ -283,31 +240,11 @@ hist(Credit_Limit)
 hist(Months_Inactive_12_mon)
 
 
-#Categorical Value Visualizations
-
-#Bar plots
-
-par(mfrow=c(2,2))
-barplot(height=tabulate(as.factor(Income_Category)), names=unique(Income_Category), col= myPalette)
-barplot(height=tabulate(as.factor(Marital_Status)), names=unique(Marital_Status), col= myPalette)
-barplot(height=tabulate(as.factor(Education_Level)), names=unique(Education_Level), col= myPalette)
-
-
 #grouped age histogram
 par(mfrow=c(1,1))
 Grouped.age.hist <- hist(as.numeric(cleaned_bank_data_withoutNA_quan$age_group), xlab="age_group", ylab="freq",
-                      main="Customer age group distribution", col="green")
+                         main="Customer age group distribution", col="green")
 
-#Months inactive
-library(yarrr) #to make colors transparent
-barplot(table(factor(Months_Inactive_12_mon,levels=min(Months_Inactive_12_mon):max(Months_Inactive_12_mon))), col = yarrr::transparent('red',trans.val = 0.9))
-barplot(table(factor(Contacts_Count_12_mon,levels=min(Contacts_Count_12_mon):max(Contacts_Count_12_mon))), col = yarrr::transparent('blue', trans.val = 0.8), add = TRUE)
-
-hist(cleaned_bank_data_withoutNA_quan$Total_Trans_Ct)
-
-int.hist = function(x,ylab="Frequency",...) {
-  barplot(table(factor(x,levels=min(x):max(x))),space=0,xaxt="n",ylab=ylab,...);axis(1)
-}
 
 #Correlation matrix
 cor_mat_new <- cor(bank_data_withoutNA_quan[2:15])
@@ -362,11 +299,6 @@ colnames(log_cleaned_bank_data_withoutNA_quan)[16] <- "log_Avg_Open_To_Buy"
 log_cleaned_bank_data_withoutNA_quan$Credit_Limit <- log1p(log_cleaned_bank_data_withoutNA_quan$Credit_Limit)
 colnames(log_cleaned_bank_data_withoutNA_quan)[14] <- "log_Credit_Limit"
 
-#since we have only one card category we can remove it
-
-log_cleaned_bank_data_withoutNA_quan <- subset(log_cleaned_bank_data_withoutNA_quan, select = -c(Card_Category))
-
-cleaned_bank_data_withoutNA_quan <- subset(cleaned_bank_data_withoutNA_quan, select = -c(Card_Category))
 
 #Thresholds for classification:
 threshold1 <- 0.4
@@ -376,7 +308,7 @@ threshold3 <- 0.6
 
 set.seed(0987)
 
-sample <- sample.split(log_cleaned_bank_data_withoutNA_quan$Attrition_Flag,SplitRatio = 0.75)
+sample <- sample.split(log_cleaned_bank_data_withoutNA_quan$Attrition_Flag, SplitRatio = 0.75)
 train <- subset(log_cleaned_bank_data_withoutNA_quan[2:20],sample == TRUE)
 test <- subset(log_cleaned_bank_data_withoutNA_quan[2:20],sample == FALSE)
 
