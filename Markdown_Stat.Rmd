@@ -385,7 +385,7 @@ cleaned_bank_data_withoutNA_quan <- subset(cleaned_bank_data_withoutNA_quan, sel
 
 # Splitting into Training and Test Sets
 
-To be able to build and evaluate a model that predicts if a Customer is likely to churn, we divide the dataset so that 75% of the data will be the *Training set* and the remaining 25% the *Test set*. These two datasets are used respectively to train our models and to evaluate the performances of the models. We will then concentrate on the training set, while the test set will remain "unknown" until the evaluation of the models.
+To be able to build and evaluate a model that predicts if a Customer is likely to churn, we divide the dataset so that 75% of the data will be the *Training set* and the remaining 25% the *Test set*. These two new datasets will be used respectively to train our models and to evaluate the performances of the models. We will then concentrate on the properties of the training set, while the test set will remain "unknown" until the evaluation of the models.
 
 ```{r Train-Test_split}
 set.seed(0237)
@@ -408,7 +408,7 @@ prop.table(table(train$Attrition_Flag))
 prop.table(table(test$Attrition_Flag))
 ```
 
-It can be seen that the dataset is unbalanced. We decide to create a balanced training set to represent better the Attrited Customer. To define this new Training set we utilized a mix of Oversampling and Undersampling to obtain a dataset with the same length of the original.
+It can be seen that the dataset is unbalanced. We decide then to create a balanced training set. By using this dataset the models will be able to represent better the Attrited Customers. To define this new Training set we utilized a mix of Oversampling and Undersampling to obtain a dataset with the same length of the original Training dataset.
 
 ```{r}
 # ovun.sample is a function form the "Rose" library
@@ -425,7 +425,8 @@ prop.table(table(train_bal$Attrition_Flag))
 
 # Correlations
 
-We will now focus on the unbalanced training set and we will investigate the correlation between variables. We will then try to understand which features are connected to attrited customer. First of all we compute the correlations between the response variable and the predictor variables using the *corrplot* function, from the homonym library.
+We will now focus on the unbalanced training set and we will investigate the correlation between variables. We will then try to understand which features are connected to attrited customer.
+First of all we compute the correlations between the response variable and the predictor variables using the *corrplot* function, from the homonym library.
 
 ```{r corr_matrix, fig.width= 12, fig.asp=0.25,fig.align='center'}
 
@@ -489,11 +490,11 @@ We can notice that there are really high value of correlations. This might led t
 # Partial Correlation
 
 
-In the last figure, we analyzed the correlations between the variables in such a way that takes into account the relantionships between the two variables and the other variables present in the training set.
+In the last figure, we analyzed the correlations between the variables in such a way that takes into account the relationships between the two variables involved in the correlation and the other variables present in the training set.
 To investigate the relationship between only the two variables we use the *correlation* function from the *correlation* library to calculate the partial correlations.
 
 ```{r, echo=TRUE, eval=FALSE}
-#Partial correlation (We will not show the output, since it takes to much space)
+#Partial correlation (We will not show the output, since it takes too much space)
 correlation(train,partial = TRUE)
 ```
 
@@ -513,7 +514,7 @@ For the response variable the most significant partial correlations are the foll
 | log_Avg_Open_To_Buy | -0.11 |
 
 
-We can also notice that many variables that had significant correlations have lower value when analyizing the  partial correlations.
+We also point out that many variables that had significant correlations have lower partial correlations values.
 Now we visualize the full results by using the function *corrplot* from the hononym library.
 
 ```{r , fig.align='center',fig.asp= 0.85, fig.width= 7}
@@ -624,7 +625,6 @@ As you can expect from an unbalanced dataset we have that the specificity is clo
 ```{r}
 #Threshold
 Threshold <- 0.4
-
 pred_glm_i <- predict(glm_1,test,type="response")
 pred_i <- ifelse(pred_glm_i >= Threshold , 1,0)
 
@@ -646,28 +646,24 @@ c_mat_i <- table(test$Attrition_Flag,pred_i)
 
 mean(pred_i==test$Attrition_Flag)*100
 ```
-
 ```{r}
 #True Negative Rate / Specificity
 
 Spec_i <- c_mat_i[1,1]/sum(c_mat_i[1,])
 Spec_i
 ```
-
 ```{r}
 #Precision / Positive Predicted Value
 
 Prec_i <- c_mat_i[2,2]/sum(c_mat_i[,2])
 Prec_i
 ```
-
 ```{r}
 #Recall / True Positive Rate / Sensitivity
 
 Rec_i <- c_mat_i[2,2]/sum(c_mat_i[2,])
 Rec_i
 ```
-
 ```{r}
 #F1 Score
 
@@ -785,28 +781,24 @@ c_mat_f <- table(test$Attrition_Flag,pred_f)
 
 mean(pred_f==test$Attrition_Flag)*100
 ```
-
 ```{r}
 #True Negative Rate / Specificity
 
 Spec_f <- c_mat_f[1,1]/sum(c_mat_f[1,])
 Spec_f
 ```
-
 ```{r}
 #Precision / Positive Predicted Value
 
 Prec_f <- c_mat_f[2,2]/sum(c_mat_f[,2])
 Prec_f
 ```
-
 ```{r}
 #Recall / True Positive Rate / Sensitivity
 
 Rec_f <- c_mat_f[2,2]/sum(c_mat_f[2,])
 Rec_f
 ```
-
 ```{r}
 #F1 Score
 
@@ -881,7 +873,6 @@ Considering equal thresholds, it has a better *Recall* than the unbalanced one s
 ```{r}
 #Threshold
 Threshold <- 0.8
-
 pred_glm_i_bal <- predict(glm_1_bal,test,type="response")
 pred_i_bal <- ifelse(pred_glm_i_bal >= Threshold , 1,0)
 
@@ -903,28 +894,24 @@ c_mat_i_bal <- table(test$Attrition_Flag,pred_i_bal)
 
 mean(pred_i_bal==test$Attrition_Flag)*100
 ```
-
 ```{r}
 #True Negative Rate / Specificity
 
 Spec_i_bal <- c_mat_i_bal[1,1]/sum(c_mat_i_bal[1,])
 Spec_i_bal
 ```
-
 ```{r}
 #Precision / Positive Predicted Value
 
 Prec_i_bal <- c_mat_i_bal[2,2]/sum(c_mat_i_bal[,2])
 Prec_i_bal
 ```
-
 ```{r}
 #Recall / True Positive Rate / Sensitivity
 
 Rec_i_bal <- c_mat_i_bal[2,2]/sum(c_mat_i_bal[2,])
 Rec_i_bal
 ```
-
 ```{r}
 #F1 Score
 
@@ -980,7 +967,6 @@ Like it's usually the case, picking the balanced data helps the model to recogni
 ```{r}
 #Threshold
 Threshold <- 0.7
-
 pred_glm_f_bal <- predict(glm_7_bal,test,type="response")
 pred_f_bal <- ifelse(pred_glm_f_bal >= Threshold , 1,0)
 
@@ -1002,28 +988,24 @@ c_mat_f_bal <- table(test$Attrition_Flag,pred_f_bal)
 
 mean(pred_f_bal==test$Attrition_Flag)*100
 ```
-
 ```{r}
 #True Negative Rate / Specificity
 
 Spec_f_bal <- c_mat_f_bal[1,1]/sum(c_mat_f_bal[1,])
 Spec_f_bal
 ```
-
 ```{r}
 #Precision / Positive Predicted Value
 
 Prec_f_bal <- c_mat_f_bal[2,2]/sum(c_mat_f_bal[,2])
 Prec_f_bal
 ```
-
 ```{r}
 #Recall / True Positive Rate / Sensitivity
 
 Rec_f_bal <- c_mat_f_bal[2,2]/sum(c_mat_f_bal[2,])
 Rec_f_bal
 ```
-
 ```{r}
 #F1 Score
 
@@ -1123,7 +1105,6 @@ lda_u <- lda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count
              + log_Credit_Limit:Avg_Utilization_Ratio 
              + Is_Female:log_Total_Ct_Chng_Q4_Q1 + Customer_Age:Marital_Status , 
              data = train, family = "binomial")
-
 lda_u
 ```
 
@@ -1160,21 +1141,18 @@ mean(pred_lda_u==test$Attrition_Flag)*100
 Spec_lda_u <- c_mat_lda_u[1,1]/sum(c_mat_lda_u[1,])
 Spec_lda_u
 ```
-
 ```{r}
 #Precision / Positive Predicted Value
 
 Prec_lda_u <- c_mat_lda_u[2,2]/sum(c_mat_lda_u[,2])
 Prec_lda_u
 ```
-
 ```{r}
 #Recall / True Positive Rate / Sensitivity
 
 Rec_lda_u <- c_mat_lda_u[2,2]/sum(c_mat_lda_u[2,])
 Rec_lda_u
 ```
-
 ```{r}
 #F1 Score
 
@@ -1213,7 +1191,6 @@ lda_b <- lda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count
              + log_Credit_Limit:Avg_Utilization_Ratio 
              + Is_Female:log_Total_Ct_Chng_Q4_Q1 + Customer_Age:Marital_Status , 
              data = train_bal, family = "binomial")
-
 lda_b
 ```
 
@@ -1244,28 +1221,24 @@ c_mat_lda_b <- table(test$Attrition_Flag,pred_lda_b)
 
 mean(pred_lda_b==test$Attrition_Flag)*100
 ```
-
 ```{r}
 #True Negative Rate / Specificity
 
 Spec_lda_b <- c_mat_lda_b[1,1]/sum(c_mat_lda_b[1,])
 Spec_lda_b
 ```
-
 ```{r}
 #Precision / Positive Predicted Value
 
 Prec_lda_b <- c_mat_lda_b[2,2]/sum(c_mat_lda_b[,2])
 Prec_lda_b
 ```
-
 ```{r}
 #Recall / True Positive Rate / Sensitivity
 
 Rec_lda_b <- c_mat_lda_b[2,2]/sum(c_mat_lda_b[2,])
 Rec_lda_b
 ```
-
 ```{r}
 #F1 Score
 
@@ -1292,7 +1265,6 @@ We can notice that the AUC value for the Balanced LDA is even higher than the be
 #ROC curves
 roc_lda_u <- roc(test$Attrition_Flag ~ lda_predict_u[,2])
 roc_lda_b <- roc(test$Attrition_Flag ~ lda_predict_b[,2])
-
 
 plot(roc_lda_u, col = "black",print.auc = FALSE, auc.polygon = TRUE,
      max.auc.polygon = TRUE, lwd=2)
@@ -1390,28 +1362,24 @@ c_mat_qda_u <- table(test$Attrition_Flag,pred_qda_u)
 
 mean(pred_qda_u==test$Attrition_Flag)*100
 ```
-
 ```{r}
 #True Negative Rate / Specificity
 
 Spec_qda_u <- c_mat_qda_u[1,1]/sum(c_mat_qda_u[1,])
 Spec_qda_u
 ```
-
 ```{r}
 #Precision / Positive Predicted Value
 
 Prec_qda_u <- c_mat_qda_u[2,2]/sum(c_mat_qda_u[,2])
 Prec_qda_u
 ```
-
 ```{r}
 #Recall / True Positive Rate / Sensitivity
 
 Rec_qda_u <- c_mat_qda_u[2,2]/sum(c_mat_qda_u[2,])
 Rec_qda_u
 ```
-
 ```{r}
 #F1 Score
 
@@ -1440,7 +1408,6 @@ qda_b <- qda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count
              + log_Credit_Limit:Avg_Utilization_Ratio 
              + Is_Female:log_Total_Ct_Chng_Q4_Q1 + Customer_Age:Marital_Status , 
              data = train_bal, family = "binomial")
-
 qda_b
 ```
 
@@ -1471,37 +1438,30 @@ c_mat_qda_b <- table(test$Attrition_Flag,pred_qda_b)
 
 mean(pred_qda_b==test$Attrition_Flag)*100
 ```
-
 ```{r}
 #True Negative Rate / Specificity
 
 Spec_qda_b <- c_mat_qda_b[1,1]/sum(c_mat_qda_b[1,])
 Spec_qda_b
 ```
-
 ```{r}
 #Precision / Positive Predicted Value
 
 Prec_qda_b <- c_mat_qda_b[2,2]/sum(c_mat_qda_b[,2])
 Prec_qda_b
 ```
-
 ```{r}
 #Recall / True Positive Rate / Sensitivity
 
 Rec_qda_b <- c_mat_qda_b[2,2]/sum(c_mat_qda_b[2,])
 Rec_qda_b
 ```
-
 ```{r}
 #F1 Score
 
 F1_qda_b <- 2 * (Prec_qda_b * Rec_qda_b)/(Prec_qda_b + Rec_qda_b)
 F1_qda_b
 ```
-
-
-
 
 We plot the ROC curves and corresponding AUC values of the two QDA models.
 We can notice that the two ROC curve are pretty similar and there is not a curve which is strictly above the other.
@@ -1511,7 +1471,6 @@ The AUC values are also pretty high but still lower than the LDA model built on 
 #ROC curves
 roc_qda_u <- roc(test$Attrition_Flag ~ qda_predict_u[,2])
 roc_qda_b <- roc(test$Attrition_Flag ~ qda_predict_b[,2])
-
 
 plot(roc_qda_u, col = "black",print.auc = FALSE, auc.polygon = TRUE,
      max.auc.polygon = TRUE, lwd=2)
@@ -1618,7 +1577,6 @@ We do the same for the balanced set
 #Creation of train_bal and test set with interactions
 train_bal_int <- data.frame(train_bal)
 
-
 train_bal_int$log_Total_Amt_Chng_Q4_Q1_Customer_Age <- 
     train_bal$log_Total_Amt_Chng_Q4_Q1 * train_bal$Customer_Age
 train_bal_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- 
@@ -1674,21 +1632,19 @@ train_mat <- data.matrix(train_int[,-c(1,5,8,14)])
 test_mat <- data.matrix(test_int[,-c(1,5,8,14)])
 ```
 
-We apply Ridge logistic regression to our matrix and we plot the misclassification error, which depends on the values of log($\lambda$), where $\lambda$ is the parameter that controls the amount of penalization.
-We can notice that the increase of the penalization leads to an increase of the misclassification error
+We apply Ridge logistic regression to our matrix and we extract the optimal plot the misclassification error, which depends on the values of log($\lambda$), where $\lambda$ is the parameter that controls the amount of penalization.
+We can notice that the increase of the penalization leads to an increase of the misclassification error based on the minimum misclassification error. Finally we extract the value of $\lambda$ that minimizes the misclassification error.
 
-```{r ,fig.align='center',fig.asp= 0.9, fig.width= 7, warning=FALSE, message=FALSE}
+```{r}
 ridge_u <- cv.glmnet(train_mat,train$Attrition_Flag, alpha = 0,
                      family = "binomial", type.measure = "class")
 
-plot(ridge_u)
-```
-
-Finally we extract the optimal lambda based on the minimum misclassification error.
-
-```{r}
 lambda_ridge_u <- ridge_u$lambda.min
 lambda_ridge_u
+```
+
+```{r ,fig.align='center',fig.asp= 0.9, fig.width= 7, warning=FALSE, message=FALSE}
+plot(ridge_u)
 ```
 
 The best threshold for the F1 score is $0.3$. It seems that the model has a worse performance in comparison to the models previously analyzed.
@@ -1696,7 +1652,6 @@ The best threshold for the F1 score is $0.3$. It seems that the model has a wors
 ```{r}
 #Threshold
 Threshold <- 0.3
-
 ridge_predict_u <- predict(ridge_u,test_mat,type = "response", s = lambda_ridge_u)
 pred_ridge_u <- ifelse(ridge_predict_u >= Threshold , 1,0)
 
@@ -1718,28 +1673,24 @@ c_mat_ridge_u <- table(test$Attrition_Flag,pred_ridge_u)
 
 mean(pred_ridge_u==test$Attrition_Flag)*100
 ```
-
 ```{r}
 #True Negative Rate / Specificity
 
 Spec_ridge_u <- c_mat_ridge_u[1,1]/sum(c_mat_ridge_u[1,])
 Spec_ridge_u
 ```
-
 ```{r}
 #Precision / Positive Predicted Value
 
 Prec_ridge_u <- c_mat_ridge_u[2,2]/sum(c_mat_ridge_u[,2])
 Prec_ridge_u
 ```
-
 ```{r}
 #Recall / True Positive Rate / Sensitivity
 
 Rec_ridge_u <- c_mat_ridge_u[2,2]/sum(c_mat_ridge_u[2,])
 Rec_ridge_u
 ```
-
 ```{r}
 #F1 Score
 
@@ -1765,7 +1716,6 @@ We can notice that, like in the previous case the increase of the penalization l
 ```{r ,fig.align='center',fig.asp= 0.9, fig.width= 7, warning=FALSE, message=FALSE}
 ridge_b <- cv.glmnet(train_mat_b,train_bal$Attrition_Flag, alpha = 0,
                      family = "binomial", type.measure = "class")
-
 plot(ridge_b)
 ```
 
@@ -1781,7 +1731,6 @@ The best threshold for the F1 score is $0.6$. While it has a better Recall that 
 ```{r}
 #Threshold
 Threshold <- 0.6
-
 ridge_predict_b <- predict(ridge_b,test_mat_b,type = "response", s = lambda_ridge_b)
 pred_ridge_b <- ifelse(ridge_predict_b >= Threshold , 1,0)
 
@@ -1803,28 +1752,24 @@ c_mat_ridge_b <- table(test$Attrition_Flag,pred_ridge_b)
 
 mean(pred_ridge_b==test$Attrition_Flag)*100
 ```
-
 ```{r}
 #True Negative Rate / Specificity
 
 Spec_ridge_b <- c_mat_ridge_b[1,1]/sum(c_mat_ridge_b[1,])
 Spec_ridge_b
 ```
-
 ```{r}
 #Precision / Positive Predicted Value
 
 Prec_ridge_b <- c_mat_ridge_b[2,2]/sum(c_mat_ridge_b[,2])
 Prec_ridge_b
 ```
-
 ```{r}
 #Recall / True Positive Rate / Sensitivity
 
 Rec_ridge_b <- c_mat_ridge_b[2,2]/sum(c_mat_ridge_b[2,])
 Rec_ridge_b
 ```
-
 ```{r}
 #F1 Score
 
@@ -1840,7 +1785,6 @@ It seems that adding the L2 norm as a penalization term leads to a worse model i
 #ROC curves
 roc_ridge_u <- roc(test$Attrition_Flag ~ as.numeric(ridge_predict_u))
 roc_ridge_b <- roc(test$Attrition_Flag ~ as.numeric(ridge_predict_b))
-
 
 plot(roc_ridge_u, col = "black",print.auc = FALSE, auc.polygon = TRUE,
      max.auc.polygon = TRUE, lwd=2)
@@ -1905,7 +1849,6 @@ Like for the Ridge models, we plot the misclassification error in function of th
 ```{r ,fig.align='center',fig.asp= 0.9, fig.width= 7, warning=FALSE, message=FALSE}
 lasso_u <- cv.glmnet(train_mat,train$Attrition_Flag, alpha = 1,
                      family = "binomial", type.measure = "class")
-
 plot(lasso_u)
 ```
 
@@ -1921,7 +1864,6 @@ The best threshold for the F1 score is $0.4$. Unlike with Ridge, the model's per
 ```{r}
 #Threshold
 Threshold <- 0.4
-
 lasso_predict_u <- predict(lasso_u,test_mat,type = "response", s = lambda_lasso_u)
 pred_lasso_u <- ifelse(lasso_predict_u >= Threshold , 1,0)
 
@@ -1943,28 +1885,24 @@ c_mat_lasso_u <- table(test$Attrition_Flag,pred_lasso_u)
 
 mean(pred_lasso_u==test$Attrition_Flag)*100
 ```
-
 ```{r}
 #True Negative Rate / Specificity
 
 Spec_lasso_u <- c_mat_lasso_u[1,1]/sum(c_mat_lasso_u[1,])
 Spec_lasso_u
 ```
-
 ```{r}
 #Precision / Positive Predicted Value
 
 Prec_lasso_u <- c_mat_lasso_u[2,2]/sum(c_mat_lasso_u[,2])
 Prec_lasso_u
 ```
-
 ```{r}
 #Recall / True Positive Rate / Sensitivity
 
 Rec_lasso_u <- c_mat_lasso_u[2,2]/sum(c_mat_lasso_u[2,])
 Rec_lasso_u
 ```
-
 ```{r}
 #F1 Score
 
@@ -1990,7 +1928,6 @@ We can notice that, like in the previous case the increase of the penalization l
 ```{r ,fig.align='center',fig.asp= 0.9, fig.width= 7, warning=FALSE, message=FALSE}
 lasso_b <- cv.glmnet(train_mat_b,train_bal$Attrition_Flag, alpha = 1,
                      family = "binomial", type.measure = "class")
-
 plot(lasso_b)
 ```
 
@@ -2006,7 +1943,6 @@ After choosing the best threshold we compute some useful test for the model's pe
 ```{r}
 #Threshold
 Threshold <- 0.8
-
 lasso_predict_b <- predict(lasso_b,test_mat_b,type = "response", s = lambda_lasso_b)
 pred_lasso_b <- ifelse(lasso_predict_b >= Threshold , 1,0)
 
@@ -2028,28 +1964,24 @@ c_mat_lasso_b <- table(test$Attrition_Flag,pred_lasso_b)
 
 mean(pred_lasso_b==test$Attrition_Flag)*100
 ```
-
 ```{r}
 #True Negative Rate / Specificity
 
 Spec_lasso_b <- c_mat_lasso_b[1,1]/sum(c_mat_lasso_b[1,])
 Spec_lasso_b
 ```
-
 ```{r}
 #Precision / Positive Predicted Value
 
 Prec_lasso_b <- c_mat_lasso_b[2,2]/sum(c_mat_lasso_b[,2])
 Prec_lasso_b
 ```
-
 ```{r}
 #Recall / True Positive Rate / Sensitivity
 
 Rec_lasso_b <- c_mat_lasso_b[2,2]/sum(c_mat_lasso_b[2,])
 Rec_lasso_b
 ```
-
 ```{r}
 #F1 Score
 
@@ -2064,7 +1996,6 @@ We notice that the ROC curves and the AUC values are nearly equal, however the b
 #ROC curves
 roc_lasso_u <- roc(test$Attrition_Flag ~ as.numeric(lasso_predict_u))
 roc_lasso_b <- roc(test$Attrition_Flag ~ as.numeric(lasso_predict_b))
-
 
 plot(roc_lasso_u, col = "black",print.auc = FALSE, auc.polygon = TRUE,
      max.auc.polygon = TRUE, lwd=2)
@@ -2106,4 +2037,54 @@ Tab <- as.table(Table_mat)
 | Unbalanced | 0.1513986 | 0.8683453 |0.8759690  |
 | Balanced | 0.5175235 | 0.8784173 | 0.8604651 |
 
+
+# Models comparison and conclusions
+
+We are now going to summarize the results obtained with the different models.
+We report in two different tables the best F1 score, the corresponding Recall and the the AUC value associated with the models fitted in the unbalanced and balanced datasets.
+
+**Unbalanced dataset**
+
+We denote with *GLM_i* the GLM with all the independent variables considered and with *GLM_f* the GLM with the addiction of the interaction and the use of stepwise selection.
+We report the Recall of each value since, in case of models with similar performance, we prioritize identifying the Attriting Customer over penalizing Customers who weren't going to churn.
+
+
+| *Model* |     | *F1* | *Recall* | *AUC* |
+| :--- | --- | :---: | :---: | :---: |
+| GLM_i |    | 0.714 | 0.682 | 0.932 |
+| GLM_f |    | 0.742 | 0.721 | 0.944 |
+| LDA |    | 0.735 | 0.698 | 0.941 |
+| QDA |    | 0.754 | 0.806 | 0.942 |
+| RIDGE |    | 0.679 | 0.694 | 0.919 |
+| LASSO |    | 0.731 | 0.701 | 0.942 |
+
+We will consider as the best model the one obtained with QDA, since it has the highest F1 score and Recall,  and the second highest AUC values.
+We also notice how Lasso regression leads to a model with the same AUC values as the QDA but lower F1 score.
+Moreover we can assert that Ridge regression is not a good choice for this dataset since its performance it's even worse than the complete GLM.
+
+
+**Balanced dataset**
+
+
+We apply the same notation used in the Unbalanced models.
+
+
+| *Model* |     | *F1* | *Recall* | *AUC* |
+| :--- | --- | :---: | :---: | :---: |
+| GLM_i |    | 0.698 | 0.659 | 0.933 |
+| GLM_f |    | 0.727 | 0.783 | 0.944 |
+| LDA |    | 0.732 | 0.705 | 0.946 |
+| QDA |    | 0.744 | 0.779 | 0.944 |
+| RIDGE |    | 0.664 | 0.744 | 0.918 |
+| LASSO |    | 0.715 | 0.686 | 0.943 |
+
+
+With the LDA, we obtained the model with the highest AUC value among all the models we analayzed. However its F1 score its considerably lower in comparison to the model built with QDA . For this reason, in addition to the high Recall and AUC values, we pick QDA as the best model fitted on the balanced dataset.
+We also note that, as in the unbalanced models, Ridge as the worst performance among the models analyzed.
+
+## Conclusions
+
+
+Like we said at the beginning of the model's definition, we aim to discover customers who are going to churn without bothering too many customer who did not plan to leave the bank. To do so we have chosen the F1 score as the most significant measure of the model's performance.
+By comparing the two previous tables, we can see that the unbalanced models have a better F1 score compared to the balanced ones. So, even if the highest AUC values was obtained by fitting a model on the balanced dataset, we will pick the model built using QDA and fitted on the unbalanced training set.
 
