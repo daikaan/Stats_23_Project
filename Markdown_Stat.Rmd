@@ -8,9 +8,8 @@ date: "`r Sys.Date()`"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
-```{r first_part, include=FALSE}
-#########
+# Import Libraries We Need
+```{r}
 library("dplyr")
 library("corrplot")
 library("caTools")
@@ -34,19 +33,39 @@ library("interactions")
 library("glmnet")
 library("formattable") # for giving a variable dictionary a better look
 library("RColorBrewer")# for the visualization colorings
+library("yarrr") #to make colors transparent
+library("regclass")
+```
 
+# Introduction to Data
+
+In this project we are going to predict the probability of a customer attrition. We have a data containing demographic information about customers and their spending behavior. We downloaded the publicly available dataset from Kaggle which can be found in the link below.
+https://www.kaggle.com/datasets/thedevastator/predicting-credit-card-customer-attrition-with-m
+
+```{r}
 bank_data_origin <- read.csv('~/GitHub/Stats_23_Project/BankChurners.csv')
 head(bank_data_origin)
+```
 
+Before diving into modelling, it is important to understand the nature of the set. Here is the summary of the dataset:
+
+```{r}
 summary(bank_data_origin)
+```
 
+As expected, the set we have contains both numerical and categorical variables. Hence, a direct use without cleaning the set would lead us to an inappropriate model. In the beginning we have 23 columns and 10127 rows. However, this dataset was part of a study that had the same aim with a different approach.This approach was Naive Bayes Classification and 2 columns named as "Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1" and "Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2" were the results of their work. Thus, removing them will not only make the dataset more clear, but also will increase the originality of the work done in this project. We will start our project by removing these 2 columns which is independent from others. Finally, we have 21 columns and 10127 rows in the beginning.
+
+```{r}
 dim(bank_data_origin)
 bank_data <- subset(bank_data_origin, select = -c(Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
 final_dim <- dim(bank_data)
 final_dim
 
+```
 
-# BRIEF DESCRIPTION OF EACH VARIABLE
+The columns that is going to be present in the study can be found in the table below next to their descriptions.
+
+```{r, echo = FALSE}
 var.names <- c("Clientnum", "Attrition_Flag", "Customer_Age", "Gender", "Dependent_count", 
                "Education_Level", "Marital_Status", "Income_Category", "Card_Category", "Months_on_book",
                "Total_Relationship_Count", "Months_Inactive_12_mon", "Contacts_Count_12_mon", "Credit_Limit",
@@ -95,12 +114,16 @@ descriptions <- c("refers to the distinct identification numbers assigned to cus
                   "represents the average card utilization ratio.")
 var.dict <- as.data.frame(descriptions, row.names = var.names, )
 formattable(var.dict)
+```
 
-# DATA PREPERATION
 
+
+# Data Exploration
+
+After eliminating the columns, our data has 14 numerical and 7 categorical columns. Below is the display of the categorical variables.
+
+```{r}
 #display of the categorical variables
-table(bank_data$CLIENTNUM)
-
 table(bank_data$Attrition_Flag)
 
 table(bank_data$Gender)
@@ -112,19 +135,32 @@ table(bank_data$Marital_Status)
 table(bank_data$Income_Category)
 
 table(bank_data$Card_Category)
+```
+It has been noticed that some of the categorical columns (Education Level, Marital Status and Income Category) have unknown values but it is not in a format that can be detectable by R. In order to fix this, all the "Unknown" values are turned into NA.
 
+```{r}
 #Change Unknown value to NA
 bank_data_NA <- data.frame(bank_data)
 bank_data_NA[bank_data_NA=='Unknown'] <- NA
+```
+After the transformation, removing these unknown data is easier.
 
+```{r}
 #Build a dataset without missing values
 bank_data_withoutNA <- na.omit(bank_data_NA)
+```
 
+In order to show that the cleaning was successful and there is no null value inside our data we added a confirmation step here.
 
-#We convert categorical variables into numerical
-bank_data_withoutNA_quan <- data.frame(bank_data_withoutNA)
+```{r}
+colSums(is.na(bank_data_withoutNA))
+```
 
-#change 'Existing Customer' to 1 and 'Attrited Customer' to 0 and add new column to quantitative
+For the 6 categorical columns, we change their data form to numeric to be able to implement a model. However, at this point is beneficiary to remind that these variables will stay as categorical type.
+
+```{r}
+bank_data_withoutNA_quan <- bank_data_withoutNA
+
 bank_data_withoutNA_quan$Attrition_Flag <- as.numeric(bank_data_withoutNA_quan$Attrition_Flag == "Attrited Customer")
 
 bank_data_withoutNA_quan$Gender <- as.numeric(bank_data_withoutNA_quan$Gender == "F")
@@ -156,25 +192,43 @@ order_Card_Category <- list("Blue" = 1,
                             "Gold" = 3,
                             "Platinum" = 4)
 bank_data_withoutNA_quan$Card_Category <- unlist(order_Card_Category[as.character(bank_data_withoutNA_quan$Card_Category)])
+```
 
+```{r}
+colSums(is.na(bank_data_withoutNA_quan))
+```
+Here is the visualizations of categorical values regarding our target value, attrition flag.
 
+```{r}
 #Categorical Value Visualizations
 
 #Bar plots
-
 par(mfrow=c(2,2))
 myPalette <- brewer.pal(6, "Set2")
 ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Income_Category), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag") 
 ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Marital_Status), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag") 
 ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Education_Level), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag") 
 ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Card_Category), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag")
+```
 
+There seems to be a great imbalance on card category, while the others distributions seem to be reasonably similar. Before moving further, card categories' relationship with few other numerical values might be important to understand if card category is going to affect the performance of the model. Below, the relationship between card category and numerical columns that is expected to be decisive in churn out behavior (credit limit and months on book) is presented.
+
+```{r}
 # Card Category
 
 ggplot(bank_data_withoutNA_quan, aes(x=Months_on_book, y= Credit_Limit, shape = as.factor(Card_Category), color= as.factor(Card_Category)))+
   geom_point() + geom_smooth(method=lm, se=FALSE, fullrange=TRUE)
+```
 
+It is clear that blue card holders have different attributes than the others while the other card holders seem to be acting similar. Thus, we decided to rescope our study only to focus on blue card holders. By doing so, we believe that numerical values fed into the model will have more accurate effect on the model.
 
+```{r}
+#Since most of the data is coming from the Blue cards and there is a visible difference on many parameters among categories, we decided to only focus on blue card category
+card.exc.list <- c(2, 3, 4)
+```
+
+At this point, the numerical columns are decided to be checked whether they have any 
+```{r}
 #Numerical columns analysis
 attach(bank_data_withoutNA_quan)
 
@@ -190,23 +244,34 @@ total.amtchg.boxplot <- boxplot(Total_Amt_Chng_Q4_Q1, ylab = "Dollars")
 ttl.transct.boxplot <- boxplot(Total_Trans_Ct, ylab = "#")
 total.cntchg.boxplot <- boxplot(Total_Ct_Chng_Q4_Q1, ylab = "Dollars")
 avg.utilrate.boxplot <- boxplot(Avg_Utilization_Ratio, ylab = "Ratio")
+```
 
-#Since the outliers in most of the numerical columns can be identifying on whether the customer is going to churn we decided to keep them in the data set
+It is clear that many of the numerical columns have too many outliers. However, as a result of the nature of our study, eliminating the outliers might significantly affect the sake of study.
 
+# Data Preparation
+
+So, we only selected the outliers in the age since there are only 2 people who is over 70 in addition to card holders other than the blue category.
+
+```{r}
+cleaned_bank_data_withoutNA_quan <- bank_data_withoutNA_quan
 #Extracting Outliers from age and Rescoping the study to only focus on Blue Cards
 
 #using the 1st quartile-1.5*IQR and 3rd quartile+1.5*IQR rule, 
 #it is seen that customers over the age of 70 are outliers
-age.exc.list <- boxplot.stats(bank_data_withoutNA_quan$Customer_Age)$out
+age.exc.list <- boxplot.stats(cleaned_bank_data_withoutNA_quan$Customer_Age)$out
 
 #Since most of the data is coming from the Blue cards and there is a visible difference on many parameters among categories, we decided to only focus on blue card category
 card.exc.list <- c(2, 3, 4)
 
 
-cleaned_bank_data_withoutNA_quan <- subset(bank_data_withoutNA_quan,!((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
-cleaned_bank_data_withoutNA_quan<- subset(cleaned_bank_data_withoutNA_quan, select = -c(Card_Category))
-cleaned_bank_data_withoutNA_quan
+cleaned_bank_data_withoutNA_quan <- subset(cleaned_bank_data_withoutNA_quan,!((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
+cleaned_bank_data_withoutNA_quan<- subset(cleaned_bank_data_withoutNA_quan, select = -c(Card_Category)) #after the cleaning this column is irrelevant since the only category left is blue
+head(cleaned_bank_data_withoutNA_quan)
+```
 
+After the cleaning, lets examine the current situation of the dataset with more graphs.
+
+```{r}
 # Descriptive Graphs
 #histogram
 Cust.age.hist <- hist(cleaned_bank_data_withoutNA_quan$Customer_Age, xlab="age", ylab="freq",
@@ -235,7 +300,6 @@ depcount.labels <- c(0, 1, 2, 3, 4, 5)
 dependent.count.piechart <- pie(count(cleaned_bank_data_withoutNA_quan, Dependent_count)$n, border="white", col=myPalette, labels = depcount.labels)
 
 #Months inactive
-library(yarrr) #to make colors transparent
 barplot(table(factor(Months_Inactive_12_mon,levels=min(Months_Inactive_12_mon):max(Months_Inactive_12_mon))), col = yarrr::transparent('red',trans.val = 0.9))
 barplot(table(factor(Contacts_Count_12_mon,levels=min(Contacts_Count_12_mon):max(Contacts_Count_12_mon))), col = yarrr::transparent('blue', trans.val = 0.8), add = TRUE)
 
@@ -244,8 +308,9 @@ hist(cleaned_bank_data_withoutNA_quan$Total_Trans_Ct)
 int.hist = function(x,ylab="Frequency",...) {
   barplot(table(factor(x,levels=min(x):max(x))),space=0,xaxt="n",ylab=ylab,...);axis(1)
 }
+```
 
-
+```{r}
 #Histograms
 attach(cleaned_bank_data_withoutNA_quan)
 par(mfrow=c(3,2))
@@ -261,60 +326,6 @@ hist(Months_Inactive_12_mon)
 par(mfrow=c(1,1))
 Grouped.age.hist <- hist(as.numeric(cleaned_bank_data_withoutNA_quan$age_group), xlab="age_group", ylab="freq",
                          main="Customer age group distribution", col="green")
-
-
-#Correlation matrix
-cor_mat_new <- cor(bank_data_withoutNA_quan[2:15])
-corrplot(cor_mat_new,method = "number",type = "upper", tl.pos = "td",tl.cex=0.5, tl.col = "black" ,diag = FALSE)
-
-
-#calculate skewness in quant to find which are normally dist
-skewness(cleaned_bank_data_withoutNA_quan$Customer_Age)
-skewness(cleaned_bank_data_withoutNA_quan$Dependent_count)
-skewness(cleaned_bank_data_withoutNA_quan$Months_on_book)
-skewness(cleaned_bank_data_withoutNA_quan$Total_Relationship_Count)
-skewness(cleaned_bank_data_withoutNA_quan$Months_Inactive_12_mon)
-skewness(cleaned_bank_data_withoutNA_quan$Contacts_Count_12_mon)
-skewness(cleaned_bank_data_withoutNA_quan$Total_Revolving_Bal)
-skewness(cleaned_bank_data_withoutNA_quan$Total_Trans_Ct)
-skewness(cleaned_bank_data_withoutNA_quan$Avg_Utilization_Ratio)
-skewness(cleaned_bank_data_withoutNA_quan$Is_Female)
-skewness(cleaned_bank_data_withoutNA_quan$Education_Level)
-skewness(cleaned_bank_data_withoutNA_quan$Marital_Status)
-skewness(cleaned_bank_data_withoutNA_quan$Income_Category)
-
-
-#we should take log to normalize and calculate skewness again for these
-skewness(cleaned_bank_data_withoutNA_quan$Total_Ct_Chng_Q4_Q1)
-skewness(cleaned_bank_data_withoutNA_quan$Total_Trans_Amt)
-skewness(cleaned_bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1)
-skewness(cleaned_bank_data_withoutNA_quan$Avg_Open_To_Buy)
-skewness(cleaned_bank_data_withoutNA_quan$Credit_Limit)
-
-#they are normally dist now
-skewness(log1p(cleaned_bank_data_withoutNA_quan$Total_Ct_Chng_Q4_Q1))
-skewness(log1p(cleaned_bank_data_withoutNA_quan$Total_Trans_Amt))
-skewness(log1p(cleaned_bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1))
-skewness(log1p(cleaned_bank_data_withoutNA_quan$Avg_Open_To_Buy))
-skewness(log1p(cleaned_bank_data_withoutNA_quan$Credit_Limit))
-
-
-log_cleaned_bank_data_withoutNA_quan <- cleaned_bank_data_withoutNA_quan
-
-log_cleaned_bank_data_withoutNA_quan$Total_Ct_Chng_Q4_Q1 <- log1p(log_cleaned_bank_data_withoutNA_quan$Total_Ct_Chng_Q4_Q1)
-colnames(log_cleaned_bank_data_withoutNA_quan)[19] <- "log_Total_Ct_Chng_Q4_Q1"
-
-log_cleaned_bank_data_withoutNA_quan$Total_Trans_Amt <- log1p(log_cleaned_bank_data_withoutNA_quan$Total_Trans_Amt)
-colnames(log_cleaned_bank_data_withoutNA_quan)[17] <- "log_Total_Trans_Amt"
-
-log_cleaned_bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1 <- log1p(log_cleaned_bank_data_withoutNA_quan$Total_Amt_Chng_Q4_Q1)
-colnames(log_cleaned_bank_data_withoutNA_quan)[16] <- "log_Total_Amt_Chng_Q4_Q1"
-
-log_cleaned_bank_data_withoutNA_quan$Avg_Open_To_Buy <- log1p(log_cleaned_bank_data_withoutNA_quan$Avg_Open_To_Buy)
-colnames(log_cleaned_bank_data_withoutNA_quan)[15] <- "log_Avg_Open_To_Buy"
-
-log_cleaned_bank_data_withoutNA_quan$Credit_Limit <- log1p(log_cleaned_bank_data_withoutNA_quan$Credit_Limit)
-colnames(log_cleaned_bank_data_withoutNA_quan)[13] <- "log_Credit_Limit"
 ```
 
 # Splitting into Training and Test Sets
@@ -324,10 +335,10 @@ To be able to build and evaluate a model that predicts if a Customer is likely t
 ```{r Train-Test_split}
 set.seed(0237)
 
-sample <- sample.split(log_cleaned_bank_data_withoutNA_quan[,2:20]$Attrition_Flag,
+sample <- sample.split(cleaned_bank_data_withoutNA_quan[,2:20]$Attrition_Flag,
                        SplitRatio = 0.75)
-train <- subset(log_cleaned_bank_data_withoutNA_quan[,2:20],sample == TRUE)
-test <- subset(log_cleaned_bank_data_withoutNA_quan[,2:20],sample == FALSE)
+train <- subset(cleaned_bank_data_withoutNA_quan[,2:20],sample == TRUE)
+test <- subset(cleaned_bank_data_withoutNA_quan[,2:20],sample == FALSE)
 ```
 
 We also check that the proportion of the response variable is approximately the same in the two new datasets.
@@ -382,10 +393,10 @@ We report in the following table the highest values observed
 | Total_Trans_Ct | -0.37 |
 | log_Total_Ct_Chng_Q4_Q1 | -0.33 |
 | Total_Revolving_Bal | -0.25 |
-| log_Total_trans_Amt | -0.23 |
+| Total_trans_Amt | -0.23 |
 | Contacts_Count_12_mon | 0.19 |
 | Avg_Utilization_ratio | -0.18 |
-| log_Total_Trans_Amt | -0.16 |
+| Total_Trans_Amt | -0.16 |
 | Total_Relantioship_Count | -0.16 |
 
 
@@ -404,16 +415,16 @@ We then show the highest correlations in the following table
 | :--------- | :--------: | ----------: |
 | Customer_Age | Months_on_book | 0.79 |
 | Is_Female | Income_Category | -0.78 |
-| Is_Female | log_Credit_Limit | -0.53 |
-| Is_Female | log_Avg_Open_To_Buy | -0.50 |
-| Income_Category | log_Credit_Limit | 0.62 |
-| Income_Category | log_Avg_Open_To_Buy | 0.57 |
-| log_Credit_Limit | log_Avg_Open_To_Buy | 0.91 |
-| log_Credit_Limit | Avg_Utilization_Ratio | -0.50 |
+| Is_Female | Credit_Limit | -0.53 |
+| Is_Female | Avg_Open_To_Buy | -0.50 |
+| Income_Category | Credit_Limit | 0.62 |
+| Income_Category | Avg_Open_To_Buy | 0.57 |
+| Credit_Limit | Avg_Open_To_Buy | 0.91 |
+| Credit_Limit | Avg_Utilization_Ratio | -0.50 |
 | Total_Revolving_Bal | Avg_Utilization_Ratio | 0.66 |
 | log_Avg_Open_To_Buy | Avg_Utilization_Ratio | -0.79 |
-| log_Total_Amt_Chng_Q4_Q1 | log_Total_Ct_Chng_Q4_Q1 | 0.41 |
-| log_Total_Trans_Amt | Total_Trans_Ct | 0.91 |
+| Total_Amt_Chng_Q4_Q1 | Total_Ct_Chng_Q4_Q1 | 0.41 |
+| Total_Trans_Amt | Total_Trans_Ct | 0.91 |
 
 
 
@@ -439,13 +450,13 @@ For the response variable the most significant partial correlations are the foll
 | Variable | Correlation with Attrition_Flag |
 | :----------------------- | ------------------------------: |
 | Total_Trans_Ct | -0.38 |
-| log_Total_Trans_Amt | 0.25 |
-| log_Total_Ct_Chng_Q4_Q1 | -0.23 |
+| Total_Trans_Amt | 0.25 |
+| Total_Ct_Chng_Q4_Q1 | -0.23 |
 | Total_Relantioship_Count | -0.23 |
 | Contacts_Count_12_mon | 0.15 |
 | Months_Inactive_12_mon | 0.13 |
 | Avg_Utilization_Ratio | -0.12 |
-| log_Avg_Open_To_Buy | -0.11 |
+| Avg_Open_To_Buy | -0.11 |
 
 
 We also point out that many variables that had significant correlations have lower partial correlations values.
@@ -466,13 +477,13 @@ As done previously, we will show the highest partial correlations in a table:
 | :--------- | :--------: | ----------: |
 | Customer_Age | Months_on_book | 0.79 |
 | Is_Female | Income_Category | -0.68 |
-| log_Credit_Limit | log_Avg_Open_To_Buy | 0.92 |
-| log_Credit_Limit | Avg_Utilization_Ratio | 0.63 |
-| Total_Revolving_Bal | log_Avg_Open_To_Buy | 0.26 |
+| Credit_Limit | Avg_Open_To_Buy | 0.92 |
+| Credit_Limit | Avg_Utilization_Ratio | 0.63 |
+| Total_Revolving_Bal | Avg_Open_To_Buy | 0.26 |
 | Total_Revolving_Bal | Avg_Utilization_Ratio | 0.64 |
 | log_Avg_Open_To_Buy | Avg_Utilization_Ratio | -0.85 |
-| log_Total_Amt_Chng_Q4_Q1 | log_Total_Ct_Chng_Q4_Q1 | 0.38 |
-| log_Total_Trans_Amt | Total_Trans_Ct | 0.90 |
+| Total_Amt_Chng_Q4_Q1 | Total_Ct_Chng_Q4_Q1 | 0.38 |
+| Total_Trans_Amt | Total_Trans_Ct | 0.90 |
 
 
 
@@ -483,12 +494,12 @@ a <- ggplot(train, aes(x = Total_Trans_Ct, fill = Customer)) +
   geom_density(alpha=0.3) + ggtitle("Total_Trans_Ct") +
   scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
 
-b <- ggplot(train, aes(x = log_Total_Trans_Amt, fill = Customer)) +
-  geom_density(alpha=0.3) + ggtitle("log_Total_Trans_Amt") +
+b <- ggplot(train, aes(x = Total_Trans_Amt, fill = Customer)) +
+  geom_density(alpha=0.3) + ggtitle("Total_Trans_Amt") +
   scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
 
-c <- ggplot(train, aes(x = log_Total_Ct_Chng_Q4_Q1, fill = Customer)) +
-  geom_density(alpha=0.3) + ggtitle("log_Total_Ct_Chng_Q4_Q1")+
+c <- ggplot(train, aes(x = Total_Ct_Chng_Q4_Q1, fill = Customer)) +
+  geom_density(alpha=0.3) + ggtitle("Total_Ct_Chng_Q4_Q1")+
   scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
 
 d <- ggplot(train, aes(x = Total_Relationship_Count, fill = Customer)) +
@@ -510,8 +521,8 @@ g <- ggplot(train, aes(x = Avg_Utilization_Ratio, fill = Customer)) +
   geom_density(alpha=0.3) + ggtitle("Avg_Utilization_Ratio") +
   scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
 
-h <- ggplot(train, aes(x = log_Avg_Open_To_Buy, fill = Customer)) +
-  geom_density(alpha=0.3) + ggtitle("log_Avg_Open_To_Buy") +
+h <- ggplot(train, aes(x = Avg_Open_To_Buy, fill = Customer)) +
+  geom_density(alpha=0.3) + ggtitle("Avg_Open_To_Buy") +
   scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
 
 
@@ -527,7 +538,7 @@ From these plots we can notice that a customer is more likely to churn if:
 * In the last year he has been inactive for many months.
 * He didn't use much his card.
 
-For *log_Avg_Open_To_Buy* we notice that there is a difference between the classes of Attriting and Existing Customer but it's not enough to infer a clear relationship between Attriting customers and the variable analyzed.
+For *Avg_Open_To_Buy* we notice that there is a difference between the classes of Attriting and Existing Customer but it's not enough to infer a clear relationship between Attriting customers and the variable analyzed.
 
 \newpage
 
@@ -565,6 +576,7 @@ pred_i <- ifelse(pred_glm_i >= Threshold , 1,0)
 #Confusion matrix
 
 c_mat_i <- table(test$Attrition_Flag,pred_i)
+c_mat_i
 ```
 
 |        |    Predicted Values     |       |
@@ -630,17 +642,17 @@ By using this method we aim to find the most important variables and interaction
 We will show the final choice of variables and interactions based on the p-value and the *Akaike information criterion* (AIC), which is an estimator of the quality of the model on the training set. Moreover AIC penalize the models with a big number of estimated parameters, reducing the possibility of overfitting.
 
 ```{r}
-glm_3 <- update(glm_2, . ~ . + log_Total_Amt_Chng_Q4_Q1*Customer_Age 
-                + log_Total_Amt_Chng_Q4_Q1*Dependent_count 
-                + log_Total_Amt_Chng_Q4_Q1*log_Total_Trans_Amt 
-                + log_Total_Amt_Chng_Q4_Q1*Total_Trans_Ct)
+glm_3 <- update(glm_2, . ~ . + Total_Amt_Chng_Q4_Q1*Customer_Age 
+                + Total_Amt_Chng_Q4_Q1*Dependent_count 
+                + Total_Amt_Chng_Q4_Q1*Total_Trans_Amt 
+                + Total_Amt_Chng_Q4_Q1*Total_Trans_Ct)
 
-glm_4 <- update(glm_3, . ~ . + Total_Revolving_Bal*log_Credit_Limit 
+glm_4 <- update(glm_3, . ~ . + Total_Revolving_Bal*Credit_Limit 
                 + Total_Revolving_Bal*Avg_Utilization_Ratio)
 
-glm_5 <- update(glm_4, . ~ . + log_Credit_Limit*Avg_Utilization_Ratio)
+glm_5 <- update(glm_4, . ~ . + Credit_Limit*Avg_Utilization_Ratio)
 
-glm_6 <- update(glm_5, . ~ . + log_Total_Ct_Chng_Q4_Q1*Is_Female)
+glm_6 <- update(glm_5, . ~ . + Total_Ct_Chng_Q4_Q1*Is_Female)
 
 glm_7 <- update(glm_6, . ~ . - Education_Level)
 
@@ -668,21 +680,21 @@ We can see from the following figures the effect that one variable has on the re
 We decided to show only two of these plots since they are all pretty similar and we didn't want to use too much space.
 
 ```{r ,fig.align='center',fig.asp= 0.9, fig.width= 7, warning=FALSE}
-i1 <- interact_plot(glm_3,pred = log_Total_Amt_Chng_Q4_Q1,modx = Customer_Age,
+i1 <- interact_plot(glm_3,pred = Total_Amt_Chng_Q4_Q1,modx = Customer_Age,
                     outcome.scale = "link")
-i2 <- interact_plot(glm_3,pred = log_Total_Amt_Chng_Q4_Q1,modx = Dependent_count,
+i2 <- interact_plot(glm_3,pred = Total_Amt_Chng_Q4_Q1,modx = Dependent_count,
                     outcome.scale = "link")
-i3 <- interact_plot(glm_3,pred = log_Total_Amt_Chng_Q4_Q1,modx = log_Total_Trans_Amt,
+i3 <- interact_plot(glm_3,pred = Total_Amt_Chng_Q4_Q1,modx = Total_Trans_Amt,
                     outcome.scale = "link")
-i4 <- interact_plot(glm_3,pred = log_Total_Amt_Chng_Q4_Q1,modx = Total_Trans_Ct,
+i4 <- interact_plot(glm_3,pred = Total_Amt_Chng_Q4_Q1,modx = Total_Trans_Ct,
                     outcome.scale = "link")
-i5 <- interact_plot(glm_4,pred = Total_Revolving_Bal,modx = log_Credit_Limit,
+i5 <- interact_plot(glm_4,pred = Total_Revolving_Bal,modx = Credit_Limit,
                     outcome.scale = "link")
 i6 <- interact_plot(glm_4,pred = Total_Revolving_Bal,modx = Avg_Utilization_Ratio,
                     outcome.scale = "link")
-i7 <- interact_plot(glm_5,pred = log_Credit_Limit,modx = Avg_Utilization_Ratio,
+i7 <- interact_plot(glm_5,pred = Credit_Limit,modx = Avg_Utilization_Ratio,
                     outcome.scale = "link")
-i8 <- interact_plot(glm_6,pred = log_Total_Ct_Chng_Q4_Q1,modx = Is_Female,
+i8 <- interact_plot(glm_6,pred = Total_Ct_Chng_Q4_Q1,modx = Is_Female,
                     outcome.scale = "link")
 i9 <- interact_plot(glm_8,pred = Customer_Age,modx = Marital_Status ,
                     outcome.scale = "link")
@@ -701,6 +713,7 @@ pred_f <- ifelse(pred_glm_f >= Threshold , 1,0)
 
 #Confusion matrix
 c_mat_f <- table(test$Attrition_Flag,pred_f)
+c_mat_f
 ```
 
 |        |    Predicted Values     |       |
@@ -783,6 +796,7 @@ pred_i_bal <- ifelse(pred_glm_i_bal >= Threshold , 1,0)
 #Confusion matrix
 
 c_mat_i_bal <- table(test$Attrition_Flag,pred_i_bal)
+c_mat_i_bal
 ```
 
 |        |    Predicted Values     |       |
@@ -841,13 +855,13 @@ We performed stepwise selection by comparing AIC values and p-values. We report 
 In the final model we decided to keep *Education_level* even if not highly significant. We made this choice because removing it increase the value of the AIC.
 
 ```{r}
-glm_3_bal <- update(glm_2_bal, . ~ . + log_Total_Amt_Chng_Q4_Q1*Customer_Age +
-                      log_Total_Amt_Chng_Q4_Q1*Dependent_count +
-                      log_Total_Amt_Chng_Q4_Q1*log_Total_Trans_Amt)
-glm_4_bal <- update(glm_3_bal, . ~ . + Total_Revolving_Bal*log_Credit_Limit +
+glm_3_bal <- update(glm_2_bal, . ~ . + Total_Amt_Chng_Q4_Q1*Customer_Age +
+                      Total_Amt_Chng_Q4_Q1*Dependent_count +
+                      Total_Amt_Chng_Q4_Q1*Total_Trans_Amt)
+glm_4_bal <- update(glm_3_bal, . ~ . + Total_Revolving_Bal*Credit_Limit +
                       Total_Revolving_Bal*Avg_Utilization_Ratio)
-glm_5_bal <- update(glm_4_bal, . ~ . + log_Credit_Limit*Avg_Utilization_Ratio)
-glm_6_bal <- update(glm_5_bal, . ~ . + log_Total_Ct_Chng_Q4_Q1*Is_Female)
+glm_5_bal <- update(glm_4_bal, . ~ . + Credit_Limit*Avg_Utilization_Ratio)
+glm_6_bal <- update(glm_5_bal, . ~ . + Total_Ct_Chng_Q4_Q1*Is_Female)
 glm_7_bal <- update(glm_6_bal, . ~ . + Customer_Age*Marital_Status)
 
 ```
@@ -877,6 +891,7 @@ pred_f_bal <- ifelse(pred_glm_f_bal >= Threshold , 1,0)
 #Confusion matrix
 
 c_mat_f_bal <- table(test$Attrition_Flag,pred_f_bal)
+c_mat_f_bal
 ```
 
 |        |    Predicted Values     |       |
@@ -969,17 +984,17 @@ We will consider the set of variables and interactions chosen in the final model
 ```{r}
 lda_u <- lda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count
              + Marital_Status + Income_Category + Total_Relationship_Count 
-             + Months_Inactive_12_mon + Contacts_Count_12_mon + log_Credit_Limit 
-             + Total_Revolving_Bal + log_Total_Amt_Chng_Q4_Q1 
-             + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 
-             + Avg_Utilization_Ratio + Customer_Age:log_Total_Amt_Chng_Q4_Q1 
-             + Dependent_count:log_Total_Amt_Chng_Q4_Q1
-             + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt 
-             + log_Total_Amt_Chng_Q4_Q1:Total_Trans_Ct 
-             + log_Credit_Limit:Total_Revolving_Bal 
+             + Months_Inactive_12_mon + Contacts_Count_12_mon + Credit_Limit 
+             + Total_Revolving_Bal + Total_Amt_Chng_Q4_Q1 
+             + Total_Trans_Amt + Total_Trans_Ct + Total_Ct_Chng_Q4_Q1 
+             + Avg_Utilization_Ratio + Customer_Age:Total_Amt_Chng_Q4_Q1 
+             + Dependent_count:Total_Amt_Chng_Q4_Q1
+             + Total_Amt_Chng_Q4_Q1:Total_Trans_Amt 
+             + Total_Amt_Chng_Q4_Q1:Total_Trans_Ct 
+             + Credit_Limit:Total_Revolving_Bal 
              + Total_Revolving_Bal:Avg_Utilization_Ratio 
-             + log_Credit_Limit:Avg_Utilization_Ratio 
-             + Is_Female:log_Total_Ct_Chng_Q4_Q1 + Customer_Age:Marital_Status , 
+             + Credit_Limit:Avg_Utilization_Ratio 
+             + Is_Female:Total_Ct_Chng_Q4_Q1 + Customer_Age:Marital_Status , 
              data = train, family = "binomial")
 lda_u
 ```
@@ -1057,16 +1072,16 @@ We are now repeating the same steps done in the Unbalanced case. We consider the
 lda_b <- lda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count 
              + Education_Level + Marital_Status + Income_Category 
              + Total_Relationship_Count + Months_Inactive_12_mon 
-             + Contacts_Count_12_mon + log_Credit_Limit + Total_Revolving_Bal 
-             + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct 
-             + log_Total_Ct_Chng_Q4_Q1  + Avg_Utilization_Ratio 
-             + Customer_Age:log_Total_Amt_Chng_Q4_Q1 
-             + Dependent_count:log_Total_Amt_Chng_Q4_Q1
-             + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt 
-             + log_Credit_Limit:Total_Revolving_Bal 
+             + Contacts_Count_12_mon + Credit_Limit + Total_Revolving_Bal 
+             + Total_Amt_Chng_Q4_Q1 + Total_Trans_Amt + Total_Trans_Ct 
+             + Total_Ct_Chng_Q4_Q1  + Avg_Utilization_Ratio 
+             + Customer_Age:Total_Amt_Chng_Q4_Q1 
+             + Dependent_count:Total_Amt_Chng_Q4_Q1
+             + Total_Amt_Chng_Q4_Q1:Total_Trans_Amt 
+             + Credit_Limit:Total_Revolving_Bal 
              + Total_Revolving_Bal:Avg_Utilization_Ratio 
-             + log_Credit_Limit:Avg_Utilization_Ratio 
-             + Is_Female:log_Total_Ct_Chng_Q4_Q1 + Customer_Age:Marital_Status , 
+             + Credit_Limit:Avg_Utilization_Ratio 
+             + Is_Female:Total_Ct_Chng_Q4_Q1 + Customer_Age:Marital_Status , 
              data = train_bal, family = "binomial")
 lda_b
 ```
@@ -1163,17 +1178,17 @@ Like in LDA, we consider the set of variables and interactions chosen in *glm_8*
 ```{r}
 qda_u <- qda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count
              + Marital_Status + Income_Category + Total_Relationship_Count 
-             + Months_Inactive_12_mon + Contacts_Count_12_mon + log_Credit_Limit 
-             + Total_Revolving_Bal + log_Total_Amt_Chng_Q4_Q1 
-             + log_Total_Trans_Amt + Total_Trans_Ct + log_Total_Ct_Chng_Q4_Q1 
-             + Avg_Utilization_Ratio + Customer_Age:log_Total_Amt_Chng_Q4_Q1 
-             + Dependent_count:log_Total_Amt_Chng_Q4_Q1
-             + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt 
-             + log_Total_Amt_Chng_Q4_Q1:Total_Trans_Ct 
-             + log_Credit_Limit:Total_Revolving_Bal 
+             + Months_Inactive_12_mon + Contacts_Count_12_mon + Credit_Limit 
+             + Total_Revolving_Bal + Total_Amt_Chng_Q4_Q1 
+             + Total_Trans_Amt + Total_Trans_Ct + Total_Ct_Chng_Q4_Q1 
+             + Avg_Utilization_Ratio + Customer_Age:Total_Amt_Chng_Q4_Q1 
+             + Dependent_count:Total_Amt_Chng_Q4_Q1
+             + Total_Amt_Chng_Q4_Q1:Total_Trans_Amt 
+             + Total_Amt_Chng_Q4_Q1:Total_Trans_Ct 
+             + Credit_Limit:Total_Revolving_Bal 
              + Total_Revolving_Bal:Avg_Utilization_Ratio 
-             + log_Credit_Limit:Avg_Utilization_Ratio 
-             + Is_Female:log_Total_Ct_Chng_Q4_Q1 + Customer_Age:Marital_Status , 
+             + Credit_Limit:Avg_Utilization_Ratio 
+             + Is_Female:Total_Ct_Chng_Q4_Q1 + Customer_Age:Marital_Status , 
              data = train, family = "binomial")
 qda_u
 ```
@@ -1243,16 +1258,16 @@ We consider the final set of variables used on the balanced GLM and we define th
 qda_b <- qda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count 
              + Education_Level + Marital_Status + Income_Category 
              + Total_Relationship_Count + Months_Inactive_12_mon 
-             + Contacts_Count_12_mon + log_Credit_Limit + Total_Revolving_Bal 
-             + log_Total_Amt_Chng_Q4_Q1 + log_Total_Trans_Amt + Total_Trans_Ct 
-             + log_Total_Ct_Chng_Q4_Q1  + Avg_Utilization_Ratio 
-             + Customer_Age:log_Total_Amt_Chng_Q4_Q1 
-             + Dependent_count:log_Total_Amt_Chng_Q4_Q1
-             + log_Total_Amt_Chng_Q4_Q1:log_Total_Trans_Amt 
-             + log_Credit_Limit:Total_Revolving_Bal 
+             + Contacts_Count_12_mon + Credit_Limit + Total_Revolving_Bal 
+             + Total_Amt_Chng_Q4_Q1 + Total_Trans_Amt + Total_Trans_Ct 
+             + Total_Ct_Chng_Q4_Q1  + Avg_Utilization_Ratio 
+             + Customer_Age:Total_Amt_Chng_Q4_Q1 
+             + Dependent_count:Total_Amt_Chng_Q4_Q1
+             + Total_Amt_Chng_Q4_Q1:Total_Trans_Amt 
+             + Credit_Limit:Total_Revolving_Bal 
              + Total_Revolving_Bal:Avg_Utilization_Ratio 
-             + log_Credit_Limit:Avg_Utilization_Ratio 
-             + Is_Female:log_Total_Ct_Chng_Q4_Q1 + Customer_Age:Marital_Status , 
+             + Credit_Limit:Avg_Utilization_Ratio 
+             + Is_Female:Total_Ct_Chng_Q4_Q1 + Customer_Age:Marital_Status , 
              data = train_bal, family = "binomial")
 qda_b
 ```
@@ -1343,43 +1358,43 @@ This is done since we will use the function *cv.glmnet*, from the *glmnet* libra
 #Creation of train and test set with interactions
 train_int <- data.frame(train)
 
-train_int$log_Total_Amt_Chng_Q4_Q1_Customer_Age <- 
-  train$log_Total_Amt_Chng_Q4_Q1 * train$Customer_Age
-train_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- 
-    train$log_Total_Amt_Chng_Q4_Q1 * train$Dependent_count 
-train_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- 
-    train$log_Total_Amt_Chng_Q4_Q1*train$log_Total_Trans_Amt
-train_int$log_Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- 
-    train$log_Total_Amt_Chng_Q4_Q1 * train$Total_Trans_Ct 
-train_int$log_Credit_Limit_Total_Revolving_Bal <- 
-    train$log_Credit_Limit * train$Total_Revolving_Bal
+train_int$Total_Amt_Chng_Q4_Q1_Customer_Age <- 
+  train$Total_Amt_Chng_Q4_Q1 * train$Customer_Age
+train_int$Total_Amt_Chng_Q4_Q1_Dependent_count <- 
+    train$Total_Amt_Chng_Q4_Q1 * train$Dependent_count 
+train_int$Total_Amt_Chng_Q4_Q1_Total_Trans_Amt <- 
+    train$Total_Amt_Chng_Q4_Q1*train$Total_Trans_Amt
+train_int$Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- 
+    train$Total_Amt_Chng_Q4_Q1 * train$Total_Trans_Ct 
+train_int$Credit_Limit_Total_Revolving_Bal <- 
+    train$Credit_Limit * train$Total_Revolving_Bal
 train_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- 
     train$Total_Revolving_Bal * train$Avg_Utilization_Ratio
-train_int$log_Credit_Limit_Avg_Utilization_Ratio <- 
-    train$log_Credit_Limit * train$Avg_Utilization_Ratio
-train_int$Is_Female_log_Total_Ct_Chng_Q4_Q1 <- 
-    train$Is_Female * train$log_Total_Ct_Chng_Q4_Q1
+train_int$Credit_Limit_Avg_Utilization_Ratio <- 
+    train$Credit_Limit * train$Avg_Utilization_Ratio
+train_int$Is_Female_Total_Ct_Chng_Q4_Q1 <- 
+    train$Is_Female * train$Total_Ct_Chng_Q4_Q1
 train_int$Customer_Age_Marital_Status <- 
     train$Customer_Age * train$Marital_Status
 
 test_int <- data.frame(test)
 
-test_int$log_Total_Amt_Chng_Q4_Q1_Customer_Age <- 
-    test$log_Total_Amt_Chng_Q4_Q1 * test$Customer_Age
-test_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- 
-    test$log_Total_Amt_Chng_Q4_Q1 * test$Dependent_count 
-test_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- 
-    test$log_Total_Amt_Chng_Q4_Q1 * test$log_Total_Trans_Amt
-test_int$log_Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- 
-    test$log_Total_Amt_Chng_Q4_Q1 * test$Total_Trans_Ct 
-test_int$log_Credit_Limit_Total_Revolving_Bal <- 
-    test$log_Credit_Limit * test$Total_Revolving_Bal
+test_int$Total_Amt_Chng_Q4_Q1_Customer_Age <- 
+    test$Total_Amt_Chng_Q4_Q1 * test$Customer_Age
+test_int$Total_Amt_Chng_Q4_Q1_Dependent_count <- 
+    test$Total_Amt_Chng_Q4_Q1 * test$Dependent_count 
+test_int$Total_Amt_Chng_Q4_Q1_Total_Trans_Amt <- 
+    test$Total_Amt_Chng_Q4_Q1 * test$Total_Trans_Amt
+test_int$Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- 
+    test$Total_Amt_Chng_Q4_Q1 * test$Total_Trans_Ct 
+test_int$Credit_Limit_Total_Revolving_Bal <- 
+    test$Credit_Limit * test$Total_Revolving_Bal
 test_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- 
     test$Total_Revolving_Bal * test$Avg_Utilization_Ratio
-test_int$log_Credit_Limit_Avg_Utilization_Ratio <- 
-    test$log_Credit_Limit * test$Avg_Utilization_Ratio
-test_int$Is_Female_log_Total_Ct_Chng_Q4_Q1 <- 
-    test$Is_Female * test$log_Total_Ct_Chng_Q4_Q1
+test_int$Credit_Limit_Avg_Utilization_Ratio <- 
+    test$Credit_Limit * test$Avg_Utilization_Ratio
+test_int$Is_Female_Total_Ct_Chng_Q4_Q1 <- 
+    test$Is_Female * test$Total_Ct_Chng_Q4_Q1
 test_int$Customer_Age_Marital_Status <- 
     test$Customer_Age * test$Marital_Status
 ```
@@ -1390,39 +1405,39 @@ We do the same for the balanced set
 #Creation of train_bal and test set with interactions
 train_bal_int <- data.frame(train_bal)
 
-train_bal_int$log_Total_Amt_Chng_Q4_Q1_Customer_Age <- 
-    train_bal$log_Total_Amt_Chng_Q4_Q1 * train_bal$Customer_Age
-train_bal_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- 
-    train_bal$log_Total_Amt_Chng_Q4_Q1 * train_bal$Dependent_count 
-train_bal_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- 
-    train_bal$log_Total_Amt_Chng_Q4_Q1 * train_bal$log_Total_Trans_Amt 
-train_bal_int$log_Credit_Limit_Total_Revolving_Bal <- 
-    train_bal$log_Credit_Limit * train_bal$Total_Revolving_Bal
+train_bal_int$Total_Amt_Chng_Q4_Q1_Customer_Age <- 
+    train_bal$Total_Amt_Chng_Q4_Q1 * train_bal$Customer_Age
+train_bal_int$Total_Amt_Chng_Q4_Q1_Dependent_count <- 
+    train_bal$Total_Amt_Chng_Q4_Q1 * train_bal$Dependent_count 
+train_bal_int$Total_Amt_Chng_Q4_Q1_Total_Trans_Amt <- 
+    train_bal$Total_Amt_Chng_Q4_Q1 * train_bal$Total_Trans_Amt 
+train_bal_int$Credit_Limit_Total_Revolving_Bal <- 
+    train_bal$Credit_Limit * train_bal$Total_Revolving_Bal
 train_bal_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- 
     train_bal$Total_Revolving_Bal * train_bal$Avg_Utilization_Ratio
-train_bal_int$log_Credit_Limit_Avg_Utilization_Ratio <- 
-    train_bal$log_Credit_Limit * train_bal$Avg_Utilization_Ratio
-train_bal_int$Is_Female_log_Total_Trans_Ct_Q4_Q1 <- 
-    train_bal$Is_Female * train_bal$log_Total_Ct_Chng_Q4_Q1
+train_bal_int$Credit_Limit_Avg_Utilization_Ratio <- 
+    train_bal$Credit_Limit * train_bal$Avg_Utilization_Ratio
+train_bal_int$Is_Female_Total_Trans_Ct_Q4_Q1 <- 
+    train_bal$Is_Female * train_bal$Total_Ct_Chng_Q4_Q1
 train_bal_int$Customer_Age_Marital_Status <- 
     train_bal$Customer_Age * train_bal$Marital_Status
 
 test_bal_int <- data.frame(test)
 
-test_bal_int$log_Total_Amt_Chng_Q4_Q1_Customer_Age <- 
-    test$log_Total_Amt_Chng_Q4_Q1 * test$Customer_Age
-test_bal_int$log_Total_Amt_Chng_Q4_Q1_Dependent_count <- 
-    test$log_Total_Amt_Chng_Q4_Q1 * test$Dependent_count 
-test_bal_int$log_Total_Amt_Chng_Q4_Q1_log_Total_Trans_Amt <- 
-    test$log_Total_Amt_Chng_Q4_Q1 * test$log_Total_Trans_Amt 
-test_bal_int$log_Credit_Limit_Total_Revolving_Bal <- 
-    test$log_Credit_Limit * test$Total_Revolving_Bal
+test_bal_int$Total_Amt_Chng_Q4_Q1_Customer_Age <- 
+    test$Total_Amt_Chng_Q4_Q1 * test$Customer_Age
+test_bal_int$Total_Amt_Chng_Q4_Q1_Dependent_count <- 
+    test$Total_Amt_Chng_Q4_Q1 * test$Dependent_count 
+test_bal_int$Total_Amt_Chng_Q4_Q1_Total_Trans_Amt <- 
+    test$Total_Amt_Chng_Q4_Q1 * test$Total_Trans_Amt 
+test_bal_int$Credit_Limit_Total_Revolving_Bal <- 
+    test$Credit_Limit * test$Total_Revolving_Bal
 test_bal_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- 
     test$Total_Revolving_Bal * test$Avg_Utilization_Ratio
-test_bal_int$log_Credit_Limit_Avg_Utilization_Ratio <- 
-    test$log_Credit_Limit * test$Avg_Utilization_Ratio
-test_bal_int$Is_Female_log_Total_Trans_Ct_Q4_Q1 <- 
-    test$Is_Female * test$log_Total_Ct_Chng_Q4_Q1
+test_bal_int$Credit_Limit_Avg_Utilization_Ratio <- 
+    test$Credit_Limit * test$Avg_Utilization_Ratio
+test_bal_int$Is_Female_Total_Trans_Ct_Q4_Q1 <- 
+    test$Is_Female * test$Total_Ct_Chng_Q4_Q1
 test_bal_int$Customer_Age_Marital_Status <- 
     test$Customer_Age * test$Marital_Status
 ```
