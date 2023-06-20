@@ -391,12 +391,11 @@ We report in the following table the highest values observed
 | Variable | Correlation with Attrition_Flag |
 | :----------------------- | ------------------------------: |
 | Total_Trans_Ct | -0.37 |
-| log_Total_Ct_Chng_Q4_Q1 | -0.33 |
+| Total_Ct_Chng_Q4_Q1 | -0.29 |
 | Total_Revolving_Bal | -0.25 |
-| Total_trans_Amt | -0.23 |
 | Contacts_Count_12_mon | 0.19 |
 | Avg_Utilization_ratio | -0.18 |
-| Total_Trans_Amt | -0.16 |
+| Total_Trans_Amt | -0.17 |
 | Total_Relantioship_Count | -0.16 |
 
 
@@ -415,16 +414,16 @@ We then show the highest correlations in the following table
 | :--------- | :--------: | ----------: |
 | Customer_Age | Months_on_book | 0.79 |
 | Is_Female | Income_Category | -0.78 |
-| Is_Female | Credit_Limit | -0.53 |
-| Is_Female | Avg_Open_To_Buy | -0.50 |
+| Is_Female | Credit_Limit | -0.48 |
+| Is_Female | Avg_Open_To_Buy | -0.48 |
 | Income_Category | Credit_Limit | 0.62 |
-| Income_Category | Avg_Open_To_Buy | 0.57 |
-| Credit_Limit | Avg_Open_To_Buy | 0.91 |
-| Credit_Limit | Avg_Utilization_Ratio | -0.50 |
+| Income_Category | Avg_Open_To_Buy | 0.61 |
+| Credit_Limit | Avg_Open_To_Buy | 0.99 |
+| Credit_Limit | Avg_Utilization_Ratio | -0.46 |
 | Total_Revolving_Bal | Avg_Utilization_Ratio | 0.66 |
-| log_Avg_Open_To_Buy | Avg_Utilization_Ratio | -0.79 |
+| Avg_Open_To_Buy | Avg_Utilization_Ratio | -0.53 |
 | Total_Amt_Chng_Q4_Q1 | Total_Ct_Chng_Q4_Q1 | 0.41 |
-| Total_Trans_Amt | Total_Trans_Ct | 0.91 |
+| Total_Trans_Amt | Total_Trans_Ct | 0.80 |
 
 
 
@@ -449,14 +448,14 @@ For the response variable the most significant partial correlations are the foll
 
 | Variable | Correlation with Attrition_Flag |
 | :----------------------- | ------------------------------: |
-| Total_Trans_Ct | -0.38 |
-| Total_Trans_Amt | 0.25 |
-| Total_Ct_Chng_Q4_Q1 | -0.23 |
+| Total_Trans_Ct | -0.41 |
+| Total_Trans_Amt | 0.22 |
+| Total_Ct_Chng_Q4_Q1 | -0.21 |
 | Total_Relantioship_Count | -0.23 |
 | Contacts_Count_12_mon | 0.15 |
-| Months_Inactive_12_mon | 0.13 |
-| Avg_Utilization_Ratio | -0.12 |
-| Avg_Open_To_Buy | -0.11 |
+| Months_Inactive_12_mon | 0.14 |
+| Avg_Utilization_Ratio | -0.02 |
+| Is_Female | 0.11 |
 
 
 We also point out that many variables that had significant correlations have lower partial correlations values.
@@ -481,7 +480,7 @@ As done previously, we will show the highest partial correlations in a table:
 | Credit_Limit | Avg_Utilization_Ratio | 0.63 |
 | Total_Revolving_Bal | Avg_Open_To_Buy | 0.26 |
 | Total_Revolving_Bal | Avg_Utilization_Ratio | 0.64 |
-| log_Avg_Open_To_Buy | Avg_Utilization_Ratio | -0.85 |
+| Avg_Open_To_Buy | Avg_Utilization_Ratio | -0.85 |
 | Total_Amt_Chng_Q4_Q1 | Total_Ct_Chng_Q4_Q1 | 0.38 |
 | Total_Trans_Amt | Total_Trans_Ct | 0.90 |
 
@@ -582,9 +581,9 @@ c_mat_i
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1331 | 59 | 1390 |
-| 1 | 82 | 176 | 258 |
-| Total | 1413 | 235 | 1648 |
+| 0 | 1317 | 73 | 1390 |
+| 1 | 101 | 157 | 258 |
+| Total | 1418 | 230 | 1648 |
 
 
 ```{r}
@@ -624,10 +623,10 @@ vif(glm_1)
 ```
 
 We can notice that there are a lot of values much higher than 1. That means that there is a problem of collinearity which happens because there are variables highly correlated. Collinearity could be a problem in the model definition because it makes it difficult to determine the effects of the highly correlated variables on the response variable.
-To mitigate this effect we remove the indipendent variable *log_Avg_Open_To_Buy*. We also remove *Months_on_book* since, from the summary, it seems that it is not significant and it would be removed with the stepwise selection.
+To mitigate this effect we remove the indipendent variable *Avg_Open_To_Buy*. We also remove *Months_on_book* since, from the summary, it seems that it is not significant and it would be removed with the stepwise selection.
 
 ```{r}
-glm_2 <- update(glm_1, . ~ . - log_Avg_Open_To_Buy - Months_on_book)
+glm_2 <- update(glm_1, . ~ . - Avg_Open_To_Buy - Months_on_book)
 
 vif(glm_2)
 ```
@@ -664,11 +663,11 @@ glm_8 <- update(glm_7, . ~ .+ Customer_Age*Marital_Status)
 summary(glm_8)
 ```
 
-We decided to not remove *log_Total_Amt_Chng_Q4_Q1:Total_Trans_Ct* since removing it actually increases the *AIC*.
-Instead, we decided to keep *log_Total_Trans_Amt* since it's been used in a interaction.
+We decided to not remove *Total_Amt_Chng_Q4_Q1:Total_Trans_Ct* since removing it actually increases the *AIC*.
+Instead, we decided to keep *Total_Trans_Amt* since it's been used in a interaction.
 
 We now check the AIC values.
-We can notice that it gradually gets smaller except in the step where we removed *log_Avg_Open_To_Buy* to reduce the collinearity.
+We can notice that it gradually gets smaller except in the step where we removed *Avg_Open_To_Buy* to reduce the collinearity.
 ```{r}
 AIC(glm_1,glm_2,glm_3,glm_4,glm_5,glm_6,glm_7,glm_8)
 ```
@@ -719,9 +718,9 @@ c_mat_f
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1333 | 57 | 1390 |
-| 1 | 72 | 186 | 258 |
-| Total | 1405 | 243 | 1648 |
+| 0 | 1320 | 70 | 1390 |
+| 1 | 88 | 170 | 258 |
+| Total | 1408 | 240 | 1648 |
 
 ```{r}
 #Accuracy
@@ -802,9 +801,9 @@ c_mat_i_bal
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1331 | 59 | 1390 |
-| 1 | 88 | 170 | 258 |
-| Total | 1419 | 229 | 1648 |
+| 0 | 1316 | 74 | 1390 |
+| 1 | 100 | 158 | 258 |
+| Total | 1416 | 232 | 1648 |
 
 
 ```{r}
@@ -837,14 +836,14 @@ F1_i_bal <- 2 * (Prec_i_bal * Rec_i_bal)/(Prec_i_bal + Rec_i_bal)
 F1_i_bal
 ```
 
-We check for collinearity and, as for the unbalanced case, we decide to remove the variable *log_Avg_Open_To_Buy* and *Months_on_book*.
+We check for collinearity and, as for the unbalanced case, we decide to remove the variable *Avg_Open_To_Buy* and *Months_on_book*.
 
 ```{r}
 vif(glm_1_bal)
 ```
 
 ```{r}
-glm_2_bal <- update(glm_1_bal, . ~ . - log_Avg_Open_To_Buy - Months_on_book)
+glm_2_bal <- update(glm_1_bal, . ~ . - Avg_Open_To_Buy - Months_on_book)
 
 vif(glm_2_bal)
 ```
@@ -897,9 +896,9 @@ c_mat_f_bal
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1294 | 96 | 1390 |
-| 1 | 56 | 202 | 258 |
-| Total | 1350 | 298 | 1648 |
+| 0 | 1274 | 116 | 1390 |
+| 1 | 69 | 189 | 258 |
+| Total | 1343 | 305 | 1648 |
 
 
 ```{r}
@@ -1011,14 +1010,15 @@ pred_lda_u <- ifelse(lda_predict_u[,2] >= Threshold , 1,0)
 
 #Confusion matrix
 c_mat_lda_u <- table(test$Attrition_Flag,pred_lda_u)
+c_mat_lda_u
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1338 | 52 | 1390 |
-| 1 | 78 | 180 | 258 |
-| Total | 1416 | 232 | 1648 |
+| 0 | 1321 | 69 | 1390 |
+| 1 | 85 | 173 | 258 |
+| Total | 1406 | 242 | 1648 |
 
 ```{r}
 #Accuracy
@@ -1099,14 +1099,15 @@ pred_lda_b <- ifelse(lda_predict_b[,2] >= Threshold , 1,0)
 
 #Confusion matrix
 c_mat_lda_b <- table(test$Attrition_Flag,pred_lda_b)
+c_mat_lda_b
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1333 | 57 | 1390 |
-| 1 | 76 | 182 | 258 |
-| Total | 1409 | 239 | 1648 |
+| 0 | 1306 | 84 | 1390 |
+| 1 | 88 | 170 | 258 |
+| Total | 1394 | 254 | 1648 |
 
 ```{r}
 #Accuracy
@@ -1205,14 +1206,15 @@ pred_qda_u <- ifelse(qda_predict_u[,2] >= Threshold , 1,0)
 
 #Confusion matrix
 c_mat_qda_u <- table(test$Attrition_Flag,pred_qda_u)
+c_mat_qda_u
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1304 | 86 | 1390 |
-| 1 | 50 | 208 | 258 |
-| Total | 1354 | 294 | 1648 |
+| 0 | 1255 | 135 | 1390 |
+| 1 | 48 | 210 | 258 |
+| Total | 1303 | 345 | 1648 |
 
 ```{r}
 #Accuracy
@@ -1284,14 +1286,15 @@ pred_qda_b <- ifelse(qda_predict_b[,2] >= Threshold , 1,0)
 
 #Confusion matrix
 c_mat_qda_b <- table(test$Attrition_Flag,pred_qda_b)
+c_mat_qda_b
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1309 | 81 | 1390 |
-| 1 | 57 | 201 | 258 |
-| Total | 1366 | 282 | 1648 |
+| 0 | 1260 | 130 | 1390 |
+| 1 | 59 | 199 | 258 |
+| Total | 1319 | 329 | 1648 |
 ```{r}
 #Accuracy
 
@@ -1453,7 +1456,7 @@ Ridge regression adds a penalty term to the objective function that is proportio
 We create the matrix that we will use for the model
 
 ```{r}
-# Matrix without Attrition_Flag, Education_Level , Months_on_book and log_Avg_Open_To_Buy
+# Matrix without Attrition_Flag, Education_Level , Months_on_book and Avg_Open_To_Buy
 train_mat <- data.matrix(train_int[,-c(1,5,8,14)])
 test_mat <- data.matrix(test_int[,-c(1,5,8,14)])
 ```
@@ -1483,14 +1486,15 @@ pred_ridge_u <- ifelse(ridge_predict_u >= Threshold , 1,0)
 
 #Confusion matrix
 c_mat_ridge_u <- table(test$Attrition_Flag,pred_ridge_u)
+c_mat_ridge_u
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1300 | 90 | 1390 |
-| 1 | 79 | 179 | 258 |
-| Total | 1379 | 269 | 1648 |
+| 0 | 1298 | 92 | 1390 |
+| 1 | 77 | 181 | 258 |
+| Total | 1375 | 273 | 1648 |
 
 ```{r}
 #Accuracy
@@ -1527,7 +1531,7 @@ F1_ridge_u
 We create the matrix that we will use for the model
 
 ```{r}
-# Matrix without Attrition_Flag, Months_on_book and log_Avg_Open_To_Buy
+# Matrix without Attrition_Flag, Months_on_book and Avg_Open_To_Buy
 train_mat_b <- data.matrix(train_bal_int[,-c(1,8,14)])
 test_mat_b <- data.matrix(test_bal_int[,-c(1,8,14)])
 ```
@@ -1558,14 +1562,15 @@ pred_ridge_b <- ifelse(ridge_predict_b >= Threshold , 1,0)
 
 #Confusion matrix
 c_mat_ridge_b <- table(test$Attrition_Flag,pred_ridge_b)
+c_mat_ridge_b
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1262 | 128 | 1390 |
+| 0 | 1250 | 140 | 1390 |
 | 1 | 66 | 192 | 258 |
-| Total | 1328 | 320 | 1648 |
+| Total | 1316 | 332 | 1648 |
 
 ```{r}
 #Accuracy
@@ -1657,14 +1662,15 @@ pred_lasso_u <- ifelse(lasso_predict_u >= Threshold , 1,0)
 
 #Confusion matrix
 c_mat_lasso_u <- table(test$Attrition_Flag,pred_lasso_u)
+c_mat_lasso_u
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1330 | 60 | 1390 |
-| 1 | 76 | 182 | 258 |
-| Total | 1406 | 242 | 1648 |
+| 0 | 1318 | 72 | 1390 |
+| 1 | 85 | 173 | 258 |
+| Total | 1403 | 245 | 1648 |
 
 
 ```{r}
@@ -1736,14 +1742,15 @@ pred_lasso_b <- ifelse(lasso_predict_b >= Threshold , 1,0)
 #Confusion matrix
 
 c_mat_lasso_b <- table(test$Attrition_Flag,pred_lasso_b)
+c_mat_lasso_b
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1330 | 60 | 1390 |
-| 1 | 86 | 172 | 258 |
-| Total | 1416| 232 | 1648 |
+| 0 | 1312 | 78 | 1390 |
+| 1 | 96 | 162 | 258 |
+| Total | 1408 | 240 | 1648 |
 
 
 ```{r}
