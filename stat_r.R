@@ -408,7 +408,8 @@ vif(glm_1)
 
 #Update Checking p-values and AIC
 
-glm_2 <- update(glm_1, . ~ . - Avg_Utilization_Ratio - Months_on_book)summary(glm_2)
+glm_2 <- update(glm_1, . ~ . - Avg_Utilization_Ratio - Months_on_book)
+summary(glm_2)
 
 vif(glm_2)
 
@@ -867,13 +868,6 @@ F1_3
 # class indicates the two classes Existing and Attriting Customers.
 
 ldahist(lda_1_predict$x[,1], g = lda_u_predict$class , col = 2)
-
-
-
-
-
-
-
 
 #LDA Balanced
 
