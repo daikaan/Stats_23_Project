@@ -779,7 +779,7 @@ We now define a logistic model trained on a balanced dataset.
 We repeat the same procedure we used for the unbalanced dataset. We initially analyze the complete model and we check its performance
 
 ```{r}
-glm_1_bal <- glm(data = train_bal,Attrition_Flag~ .,family = "binomial")
+glm_1_bal <- glm(data = train_bal,Attrition_Flag~ . - Avg_Open_To_Buy,family = "binomial")
 summary(glm_1_bal)
 ```
 
@@ -843,7 +843,7 @@ vif(glm_1_bal)
 ```
 
 ```{r}
-glm_2_bal <- update(glm_1_bal, . ~ . - Avg_Open_To_Buy - Months_on_book)
+glm_2_bal <- update(glm_1_bal, . ~ . - Months_on_book)
 
 vif(glm_2_bal)
 ```
@@ -1817,12 +1817,12 @@ We report the Recall of each value since, in case of models with similar perform
 
 | *Model* |     | *F1* | *Recall* | *AUC* |
 | :--- | --- | :---: | :---: | :---: |
-| GLM_i |    | 0.714 | 0.682 | 0.932 |
-| GLM_f |    | 0.742 | 0.721 | 0.944 |
-| LDA |    | 0.735 | 0.698 | 0.941 |
-| QDA |    | 0.754 | 0.806 | 0.942 |
-| RIDGE |    | 0.679 | 0.694 | 0.919 |
-| LASSO |    | 0.731 | 0.701 | 0.942 |
+| GLM_i |    | 0.643 | 0.608 | 0.947 |
+| GLM_f |    | 0.683 | 0.659 | 0.950 |
+| LDA |    | 0.692 | 0.670 | 0.950 |
+| QDA |    | 0.696 | 0.814 | 0.903 |
+| RIDGE |    | 0.682 | 0.702 | 0.934 |
+| LASSO |    | 0.688 | 0.670 | 0.948 |
 
 We will consider as the best model the one obtained with QDA, since it has the highest F1 score and Recall,  and the second highest AUC values.
 We also notice how Lasso regression leads to a model with the same AUC values as the QDA but lower F1 score.
@@ -1837,12 +1837,12 @@ We apply the same notation used in the Unbalanced models.
 
 | *Model* |     | *F1* | *Recall* | *AUC* |
 | :--- | --- | :---: | :---: | :---: |
-| GLM_i |    | 0.698 | 0.659 | 0.933 |
-| GLM_f |    | 0.727 | 0.783 | 0.944 |
-| LDA |    | 0.732 | 0.705 | 0.946 |
-| QDA |    | 0.744 | 0.779 | 0.944 |
-| RIDGE |    | 0.664 | 0.744 | 0.918 |
-| LASSO |    | 0.715 | 0.686 | 0.943 |
+| GLM_i |    | 0.645 | 0.612 | 0.947 |
+| GLM_f |    | 0.671 | 0.733 | 0.916 |
+| LDA |    | 0.664 | 0.659 | 0.940 |
+| QDA |    | 0.678 | 0.771 | 0.906 |
+| RIDGE |    | 0.651 | 0.744 | 0.899 |
+| LASSO |    | 0.651 | 0.628 | 0.944 |
 
 
 With the LDA, we obtained the model with the highest AUC value among all the models we analayzed. However its F1 score its considerably lower in comparison to the model built with QDA . For this reason, in addition to the high Recall and AUC values, we pick QDA as the best model fitted on the balanced dataset.
