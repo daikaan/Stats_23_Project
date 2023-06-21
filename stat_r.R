@@ -1272,13 +1272,13 @@ test_int$Total_Revolving_Bal_Avg_Utilization_Ratio <-
   test$Total_Revolving_Bal * test$Avg_Utilization_Ratio
 test_int$Credit_Limit_Avg_Utilization_Ratio <- 
   test$Credit_Limit * test$Avg_Utilization_Ratio
-test_int$Is_Female_log_Total_Ct_Chng_Q4_Q1 <- 
+test_int$Is_Female_Total_Ct_Chng_Q4_Q1 <- 
   test$Is_Female * test$Total_Ct_Chng_Q4_Q1
 test_int$Customer_Age_Marital_Status <- 
   test$Customer_Age * test$Marital_Status
 
 
-#We transorm them into matrix withou Attrition_Flag, Education_Level , Months_on_book and log_Avg_Open_To_Buy
+#We transorm them into matrix withou Attrition_Flag, Education_Level , Months_on_book and Avg_Open_To_Buy
 
 train_mat <- data.matrix(train_int[,-c(1,5,8,14)])
 test_mat <- data.matrix(test_int[,-c(1,5,8,14)])
@@ -1442,7 +1442,7 @@ test_bal_int$Is_Female_Total_Trans_Ct_Q4_Q1 <-
 test_bal_int$Customer_Age_Marital_Status <- 
   test$Customer_Age * test$Marital_Status
 
-#We transorm them into matrix withou Attrition_Flag, Months_on_book and log_Credit_Limit
+#We transorm them into matrix withou Attrition_Flag, Months_on_book and Credit_Limit
 
 train_bal_mat <- data.matrix(train_bal_int[,-c(1,8,12)])
 test_bal_mat <- data.matrix(test_bal_int[,-c(1,8,12)])
@@ -1641,7 +1641,7 @@ test_int$Customer_Age_Marital_Status <-
   test$Customer_Age * test$Marital_Status
 
 
-#We transorm them into matrix withou Attrition_Flag, Education_Level , Months_on_book and log_Avg_Open_To_Buy
+#We transorm them into matrix withou Attrition_Flag, Education_Level , Months_on_book and Avg_Open_To_Buy
 
 train_mat <- data.matrix(train_int[,-c(1)])
 test_mat <- data.matrix(test_int[,-c(1)])
@@ -1808,7 +1808,7 @@ test_bal_int$Customer_Age_Marital_Status <-
   test$Customer_Age * test$Marital_Status
 
 
-#We transorm them into matrix withou Attrition_Flag, Months_on_book and log_Credit_Limit
+#We transorm them into matrix withou Attrition_Flag, Months_on_book and Credit_Limit
 
 train_bal_mat <- data.matrix(train_bal_int[,-c(1)])
 test_bal_mat <- data.matrix(test_bal_int[,-c(1)])
