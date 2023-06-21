@@ -426,8 +426,8 @@ We then show the highest correlations in the following table
 | Total_Trans_Amt | Total_Trans_Ct | 0.80 |
 
 
-
-We can notice that there are really high value of correlations. This might led to a case of collinearity, as we will see and discuss in the models' definition.
+Since the correlation between *Credit_Limit* and *Avg_Open_To_Buy* is nearly 1, removing one of the two variable will not remove significant from our model. For this reason we decide to remove the variable *Avg_Open_To_Buy*.
+We can notice that even whitout considering the correlation we just removed, there are really high value of correlations. This might led to a case of collinearity, as we will see and discuss in the models' definition.
 
 
 
@@ -564,12 +564,12 @@ glm_1 <- glm(data = train,Attrition_Flag~ . - Avg_Open_To_Buy ,family = "binomia
 summary(glm_1)
 ```
 
-We take $1/n \; , n = 1,...,10$ as different thresholds for testing the *F1 score* and we take the one that maximize it. Here we show the *F1 score* and other significant accuracy's tests obtained for that value of the thresold.
+For every model we will take $1/n \; , n = 1,...,10$ as different thresholds for testing the *F1 score* and we will then consider only the one that maximize it. Here we show the *F1 score* and other significant accuracy's tests obtained for that value of the threshold.
 As you can expect from an unbalanced dataset we have that the specificity is close to 1 while the recall is much lower.
 
 ```{r}
 #Threshold
-Threshold <- 0.4
+Threshold <- 0.3
 pred_glm_i <- predict(glm_1,test,type="response")
 pred_i <- ifelse(pred_glm_i >= Threshold , 1,0)
 
@@ -581,9 +581,9 @@ c_mat_i <- table(test$Attrition_Flag,pred_i)
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1317 | 73 | 1390 |
-| 1 | 101 | 157 | 258 |
-| Total | 1418 | 230 | 1648 |
+| 0 | 1284 | 106 | 1390 |
+| 1 | 76 | 182 | 258 |
+| Total | 1360 | 288 | 1648 |
 
 
 ```{r}
@@ -622,17 +622,18 @@ Before starting with the stepwise selection we check for collinearity by checkin
 vif(glm_1)
 ```
 
-We can notice that there are a lot of values much higher than 1. That means that there is a problem of collinearity which happens because there are variables highly correlated. Collinearity could be a problem in the model definition because it makes it difficult to determine the effects of the highly correlated variables on the response variable.
-To mitigate this effect we remove the indipendent variable *Avg_Open_To_Buy*. We also remove *Months_on_book* since, from the summary, it seems that it is not significant and it would be removed with the stepwise selection.
+We can notice that there are a lot of values much higher than 1. That means that there might be a problem of collinearity which happens because there are variables highly correlated. Collinearity could be a problem in the model definition because it makes it difficult to determine the effects of the highly correlated variables on the response variable.
+We notice that the indipendent variables *Avg_Utilization_Ratio* and *Months_on_book* have high correlation coefficients with other variables and, from the p-values, it seems that they are not significant for the model. 
+However we decide to keep *Avg_Utilization_Ratio* because of an interaction it has with *Total_Revolving_Bal* which is statistically significant for the model.
 
 ```{r}
-glm_2 <- update(glm_1, . ~ . - Avg_Utilization_Ratio - Months_on_book)
+glm_2 <- update(glm_1, . ~ . - Months_on_book)
 
 vif(glm_2)
 ```
 
-We notice that the values of the *VIF* are smaller and they are at least smaller than 10.
-We decide to keep the other variables even if there are two values bigger than 5, because they are statistically significant in face of that collinearity. In fact removing them leads to a much worse performance of the model.
+We notice that the value of the *VIF* for *Customer_Age* is smaller but the others didn't change much.
+We decide to keep the other variables even if there are two values close to 5, because they are statistically significant in face of that collinearity. In fact removing them leads to a much worse performance of the model.
 
 **Stepwise selection**
 
@@ -641,35 +642,32 @@ By using this method we aim to find the most important variables and interaction
 We will show the final choice of variables and interactions based on the p-value and the *Akaike information criterion* (AIC), which is an estimator of the quality of the model on the training set. Moreover AIC penalize the models with a big number of estimated parameters, reducing the possibility of overfitting.
 
 ```{r}
-glm_3 <- update(glm_2, . ~ . + Total_Amt_Chng_Q4_Q1*Customer_Age 
-                + Total_Amt_Chng_Q4_Q1*Dependent_count 
-                + Total_Amt_Chng_Q4_Q1*Total_Trans_Amt 
-                + Total_Amt_Chng_Q4_Q1*Total_Trans_Ct)
+glm_3 <- update(glm_2, . ~ . + Avg_Utilization_Ratio*Total_Revolving_Bal )
 
-glm_4 <- update(glm_3, . ~ . + Total_Revolving_Bal*Credit_Limit 
-                + Total_Revolving_Bal*Avg_Utilization_Ratio)
+glm_4 <- update(glm_3, . ~ . + Total_Trans_Amt*Total_Trans_Ct 
+                + Total_Trans_Amt*Total_Amt_Chng_Q4_Q1 
+                + Total_Trans_Amt*Is_Female 
+                + Total_Trans_Amt*Total_Relationship_Count)
 
-glm_5 <- update(glm_4, . ~ . + Credit_Limit*Avg_Utilization_Ratio)
+glm_5 <- update(glm_4, . ~ . + Total_Ct_Chng_Q4_Q1*Dependent_count 
+                + Total_Ct_Chng_Q4_Q1*Is_Female)
 
-glm_6 <- update(glm_5, . ~ . + Total_Ct_Chng_Q4_Q1*Is_Female)
+glm_6 <- update(glm_5, . ~ . + Customer_Age*Marital_Status)
 
 glm_7 <- update(glm_6, . ~ . - Education_Level)
 
-glm_8 <- update(glm_7, . ~ .+ Customer_Age*Marital_Status)
-
 ```
 
 ```{r}
-summary(glm_8)
+summary(glm_7)
 ```
 
-We decided to not remove *Total_Amt_Chng_Q4_Q1:Total_Trans_Ct* since removing it actually increases the *AIC*.
-Instead, we decided to keep *Total_Trans_Amt* since it's been used in a interaction.
+We decided to not remove *Credit_Limit* since removing it actually increases the *AIC*.
+Moreover, we decided to keep *Total_Ct_Chng_Q4_Q1* since it's been used in a interaction.
 
-We now check the AIC values.
-We can notice that it gradually gets smaller except in the step where we removed *Avg_Open_To_Buy* to reduce the collinearity.
+We now check the AIC values and we can notice that it gradually gets smaller.
 ```{r}
-AIC(glm_1,glm_2,glm_3,glm_4,glm_5,glm_6,glm_7,glm_8)
+AIC(glm_1,glm_2,glm_3,glm_4,glm_5,glm_6,glm_7)
 ```
 
 
@@ -679,48 +677,46 @@ We can see from the following figures the effect that one variable has on the re
 We decided to show only two of these plots since they are all pretty similar and we didn't want to use too much space.
 
 ```{r ,fig.align='center',fig.asp= 0.9, fig.width= 7, warning=FALSE}
-i1 <- interact_plot(glm_3,pred = Total_Amt_Chng_Q4_Q1,modx = Customer_Age,
+i1 <- interact_plot(glm_3,pred = Avg_Utilization_Ratio,modx = Total_Revolving_Bal,
                     outcome.scale = "link")
-i2 <- interact_plot(glm_3,pred = Total_Amt_Chng_Q4_Q1,modx = Dependent_count,
+i2 <- interact_plot(glm_4,pred = Total_Trans_Ct,modx = Total_Trans_Amt,
                     outcome.scale = "link")
-i3 <- interact_plot(glm_3,pred = Total_Amt_Chng_Q4_Q1,modx = Total_Trans_Amt,
+i3 <- interact_plot(glm_4,pred = Total_Trans_Amt,modx = Total_Amt_Chng_Q4_Q1,
                     outcome.scale = "link")
-i4 <- interact_plot(glm_3,pred = Total_Amt_Chng_Q4_Q1,modx = Total_Trans_Ct,
+i4 <- interact_plot(glm_4,pred = Total_Trans_Amt,modx = Is_Female,
                     outcome.scale = "link")
-i5 <- interact_plot(glm_4,pred = Total_Revolving_Bal,modx = Credit_Limit,
+i5 <- interact_plot(glm_4,pred = Total_Trans_Amt,modx = Total_Relationship_Count,
                     outcome.scale = "link")
-i6 <- interact_plot(glm_4,pred = Total_Revolving_Bal,modx = Avg_Utilization_Ratio,
+i6 <- interact_plot(glm_5,pred = Total_Ct_Chng_Q4_Q1,modx = Dependent_count,
                     outcome.scale = "link")
-i7 <- interact_plot(glm_5,pred = Credit_Limit,modx = Avg_Utilization_Ratio,
+i7 <- interact_plot(glm_5,pred = Total_Ct_Chng_Q4_Q1,modx = Is_Female,
                     outcome.scale = "link")
-i8 <- interact_plot(glm_6,pred = Total_Ct_Chng_Q4_Q1,modx = Is_Female,
-                    outcome.scale = "link")
-i9 <- interact_plot(glm_8,pred = Customer_Age,modx = Marital_Status ,
+i8 <- interact_plot(glm_6,pred = Customer_Age,modx = Marital_Status,
                     outcome.scale = "link")
 
-ggarrange(i1,i6,nrow=2,ncol=1)
+
+ggarrange(i1,i8,nrow=2,ncol=1)
 ```
 
 As before, we check the best *F1 score* and the other significant values.
-We can notice that *glm_8* performs better than *glm_1* for every accuracy's test that we considered.
+We can notice that *glm_7* performs better than *glm_1* for every accuracy's test that we considered.
 
 ```{r}
 #Threshold
-Threshold <- 0.4
-pred_glm_f <- predict(glm_8,test,type="response")
+Threshold <- 0.3
+pred_glm_f <- predict(glm_7,test,type="response")
 pred_f <- ifelse(pred_glm_f >= Threshold , 1,0)
 
 #Confusion matrix
 c_mat_f <- table(test$Attrition_Flag,pred_f)
-c_mat_f
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1320 | 70 | 1390 |
-| 1 | 88 | 170 | 258 |
-| Total | 1408 | 240 | 1648 |
+| 0 | 1299 | 91 | 1390 |
+| 1 | 58 | 200 | 258 |
+| Total | 1357 | 291 | 1648 |
 
 ```{r}
 #Accuracy
@@ -756,7 +752,7 @@ We will now compute the ROC curve and the corrisponding AUC values of the initia
 The ROC curve is obtained by plotting the *Sensitivity* against the *Specificity* for various thresholds. 
 The ROC curve and the corrispondent *Area under the curve* (AUC) are used to evaluate the performance of the models.
 In fact a ROC curve which is close to the top-left corner, or equivalently a AUC value close to 1, will indicate that the model predicts accurately the positive and the negative istances.
-We can see that the final model has a higher AUC than the inital one. This, in conjunction with lower AIC and higher F1 score tells us that *glm_8* is a better choice then *glm_1*
+We can see that the final model has a much higher AUC than the initial one. This, in conjunction with lower AIC and higher F1 score tells us that *glm_7* is a better choice then *glm_1*
 
 ```{r ,fig.align='center',fig.asp= 0.9, fig.width= 7, warning=FALSE, message=FALSE}
 #ROC curves
@@ -768,7 +764,7 @@ plot(roc_i, col = "black",print.auc = FALSE, auc.polygon = TRUE,
      max.auc.polygon = TRUE, lwd=2)
 plot(roc_f,add = TRUE,col = "blue", print.auc = FALSE, lwd=2)
 text(0.3, 0.45, paste("AUC for glm_1:", round(roc_i$auc, 3)), col = "black")
-text(0.3, 0.38, paste("AUC for glm_8:", round(roc_f$auc, 3)), col = "blue")
+text(0.3, 0.38, paste("AUC for glm_7:", round(roc_f$auc, 3)), col = "blue")
 ```
 
 
@@ -776,34 +772,34 @@ text(0.3, 0.38, paste("AUC for glm_8:", round(roc_f$auc, 3)), col = "blue")
 **Balanced dataset**
 
 We now define a logistic model trained on a balanced dataset.
+Fitting the model on the balanced data helps the model to recognize the minority class, at the cost of a higher *type I error*. So it's usually better to pick the model obtained from the balanced data if you prioritize finding customers who are likely to churn, or you can pick the unbalanced one if you don't want to penalize the existing customer who didn't plan to churn.
 We repeat the same procedure we used for the unbalanced dataset. We initially analyze the complete model and we check its performance
 
 ```{r}
-glm_1_bal <- glm(data = train_bal,Attrition_Flag~ . - Avg_Open_To_Buy,family = "binomial")
+glm_1_bal <- glm(data = train_bal,Attrition_Flag~ . - Avg_Open_To_Buy ,family = "binomial")
 summary(glm_1_bal)
 ```
 
-By comparing the *F1 score* we found that the best threshold is $0.8$.
+By comparing the *F1 score* we found that the best threshold is $0.7$.
 Considering equal thresholds, it has a better *Recall* than the unbalanced one since it can represent better the Attriting customers. However it also has much worse Precision and this leads to an overall worse performance, as you can see from the *F1 score*.
 
 ```{r}
 #Threshold
-Threshold <- 0.8
+Threshold <- 0.7
 pred_glm_i_bal <- predict(glm_1_bal,test,type="response")
 pred_i_bal <- ifelse(pred_glm_i_bal >= Threshold , 1,0)
 
 #Confusion matrix
 
 c_mat_i_bal <- table(test$Attrition_Flag,pred_i_bal)
-c_mat_i_bal
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1316 | 74 | 1390 |
-| 1 | 100 | 158 | 258 |
-| Total | 1416 | 232 | 1648 |
+| 0 | 1268 | 122 | 1390 |
+| 1 | 75 | 183 | 258 |
+| Total | 1343 | 305 | 1648 |
 
 
 ```{r}
@@ -836,7 +832,7 @@ F1_i_bal <- 2 * (Prec_i_bal * Rec_i_bal)/(Prec_i_bal + Rec_i_bal)
 F1_i_bal
 ```
 
-We check for collinearity and, as for the unbalanced case, we decide to remove the variable *Avg_Open_To_Buy* and *Months_on_book*.
+We check for collinearity and, as for the unbalanced case, we decide to remove the variable *Months_on_book*.
 
 ```{r}
 vif(glm_1_bal)
@@ -854,13 +850,14 @@ We performed stepwise selection by comparing AIC values and p-values. We report 
 In the final model we decided to keep *Education_level* even if not highly significant. We made this choice because removing it increase the value of the AIC.
 
 ```{r}
-glm_3_bal <- update(glm_2_bal, . ~ . + Total_Amt_Chng_Q4_Q1*Customer_Age +
-                      Total_Amt_Chng_Q4_Q1*Dependent_count +
-                      Total_Amt_Chng_Q4_Q1*Total_Trans_Amt)
-glm_4_bal <- update(glm_3_bal, . ~ . + Total_Revolving_Bal*Credit_Limit +
-                      Total_Revolving_Bal*Avg_Utilization_Ratio)
-glm_5_bal <- update(glm_4_bal, . ~ . + Credit_Limit*Avg_Utilization_Ratio)
-glm_6_bal <- update(glm_5_bal, . ~ . + Total_Ct_Chng_Q4_Q1*Is_Female)
+glm_3_bal <- update(glm_2_bal, . ~ . + Avg_Utilization_Ratio*Total_Revolving_Bal)
+glm_4_bal <- update(glm_3_bal, . ~ . + Total_Trans_Amt*Total_Trans_Ct 
+                    + Total_Trans_Amt*Total_Amt_Chng_Q4_Q1 
+                    + Total_Trans_Amt*Is_Female 
+                    + Total_Trans_Amt*Total_Relationship_Count)
+glm_5_bal <- update(glm_4_bal, . ~ . + Total_Ct_Chng_Q4_Q1*Dependent_count 
+                    + Total_Ct_Chng_Q4_Q1*Is_Female)
+glm_6_bal <- update(glm_5_bal, . ~ . - Credit_Limit)
 glm_7_bal <- update(glm_6_bal, . ~ . + Customer_Age*Marital_Status)
 
 ```
@@ -869,7 +866,7 @@ glm_7_bal <- update(glm_6_bal, . ~ . + Customer_Age*Marital_Status)
 summary(glm_7_bal)
 ```
 
-By checking the AIC we notice that the AIC gets smaller except for the first step done to reduce the effect of collinearity.
+By checking the AIC we notice that the AIC gradually gets smaller.
 
 ```{r}
 AIC(glm_1_bal,glm_2_bal,glm_3_bal,glm_4_bal,glm_5_bal,glm_6_bal,glm_7_bal)
@@ -877,28 +874,26 @@ AIC(glm_1_bal,glm_2_bal,glm_3_bal,glm_4_bal,glm_5_bal,glm_6_bal,glm_7_bal)
 
 
 We analyze now the performance of the final model.
-The best threshold obtained by comparing the f1 score has changed from the one used in the inital model.
-Because of this change we obtain lower accuracy, specificity and precision. However we also have a much higher Recall.
-Like it's usually the case, picking the balanced data helps the model to recognize the minority class, at the cost of a higher *type I error*. So you can pick the model obtained from the balanced data if you prioritize finding customers who are likely to churn, or you can pick the unbalanced one if you don't want to penalize the existing customer who didn't plan to churn.
+The best threshold obtained by comparing the F1 score has changed from the one used in the inital model.
+Even with this change we obtain a similar Recall. However we have much better accuracy, specificity and precision.
 
 ```{r}
 #Threshold
-Threshold <- 0.7
+Threshold <- 0.8
 pred_glm_f_bal <- predict(glm_7_bal,test,type="response")
 pred_f_bal <- ifelse(pred_glm_f_bal >= Threshold , 1,0)
 
 #Confusion matrix
 
 c_mat_f_bal <- table(test$Attrition_Flag,pred_f_bal)
-c_mat_f_bal
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1274 | 116 | 1390 |
-| 1 | 69 | 189 | 258 |
-| Total | 1343 | 305 | 1648 |
+| 0 | 1319 | 71 | 1390 |
+| 1 | 75 | 183 | 258 |
+| Total | 1394 | 254 | 1648 |
 
 
 ```{r}
@@ -986,14 +981,14 @@ lda_u <- lda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count
              + Months_Inactive_12_mon + Contacts_Count_12_mon + Credit_Limit 
              + Total_Revolving_Bal + Total_Amt_Chng_Q4_Q1 
              + Total_Trans_Amt + Total_Trans_Ct + Total_Ct_Chng_Q4_Q1 
-             + Avg_Utilization_Ratio + Customer_Age:Total_Amt_Chng_Q4_Q1 
-             + Dependent_count:Total_Amt_Chng_Q4_Q1
+             + Avg_Utilization_Ratio + Total_Revolving_Bal:Avg_Utilization_Ratio 
+             + Total_Trans_Amt:Total_Trans_Ct 
              + Total_Amt_Chng_Q4_Q1:Total_Trans_Amt 
-             + Total_Amt_Chng_Q4_Q1:Total_Trans_Ct 
-             + Credit_Limit:Total_Revolving_Bal 
-             + Total_Revolving_Bal:Avg_Utilization_Ratio 
-             + Credit_Limit:Avg_Utilization_Ratio 
-             + Is_Female:Total_Ct_Chng_Q4_Q1 + Customer_Age:Marital_Status , 
+             + Is_Female:Total_Trans_Amt
+             + Total_Relationship_Count:Total_Trans_Amt 
+             + Dependent_count:Total_Ct_Chng_Q4_Q1
+             + Is_Female:Total_Ct_Chng_Q4_Q1
+             + Customer_Age:Marital_Status , 
              data = train, family = "binomial")
 lda_u
 ```
@@ -1010,15 +1005,14 @@ pred_lda_u <- ifelse(lda_predict_u[,2] >= Threshold , 1,0)
 
 #Confusion matrix
 c_mat_lda_u <- table(test$Attrition_Flag,pred_lda_u)
-c_mat_lda_u
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
 | 0 | 1321 | 69 | 1390 |
-| 1 | 85 | 173 | 258 |
-| Total | 1406 | 242 | 1648 |
+| 1 | 80 | 178 | 258 |
+| Total | 1401 | 247 | 1648 |
 
 ```{r}
 #Accuracy
@@ -1072,22 +1066,24 @@ We are now repeating the same steps done in the Unbalanced case. We consider the
 lda_b <- lda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count 
              + Education_Level + Marital_Status + Income_Category 
              + Total_Relationship_Count + Months_Inactive_12_mon 
-             + Contacts_Count_12_mon + Credit_Limit + Total_Revolving_Bal 
+             + Contacts_Count_12_mon + Total_Revolving_Bal 
              + Total_Amt_Chng_Q4_Q1 + Total_Trans_Amt + Total_Trans_Ct 
              + Total_Ct_Chng_Q4_Q1  + Avg_Utilization_Ratio 
              + Customer_Age:Total_Amt_Chng_Q4_Q1 
-             + Dependent_count:Total_Amt_Chng_Q4_Q1
-             + Total_Amt_Chng_Q4_Q1:Total_Trans_Amt 
-             + Credit_Limit:Total_Revolving_Bal 
              + Total_Revolving_Bal:Avg_Utilization_Ratio 
-             + Credit_Limit:Avg_Utilization_Ratio 
-             + Is_Female:Total_Ct_Chng_Q4_Q1 + Customer_Age:Marital_Status , 
+             + Total_Trans_Amt:Total_Trans_Ct 
+             + Total_Amt_Chng_Q4_Q1:Total_Trans_Amt 
+             + Is_Female:Total_Trans_Amt
+             + Total_Relationship_Count:Total_Trans_Amt 
+             + Dependent_count:Total_Ct_Chng_Q4_Q1
+             + Is_Female:Total_Ct_Chng_Q4_Q1
+             + Customer_Age:Marital_Status , 
              data = train_bal, family = "binomial")
 lda_b
 ```
 
-We now search for the threshold resulting in the best F1 score and we obtain that it is $0.8$.
-We have better results than the balanced GLM for everything other than Recall. Its performance is also comparable to the unbalanced LDA with better Recall at the price of a worse Precision.
+We now search for the threshold resulting in the best F1 score and we obtain $0.8$.
+We have similar results to the balanced GLM with a slightly worse F1 score. We can also notice that it performs better in comparison to the LDA performed on the unbalanced dataset.
 
 
 ```{r}
@@ -1099,15 +1095,14 @@ pred_lda_b <- ifelse(lda_predict_b[,2] >= Threshold , 1,0)
 
 #Confusion matrix
 c_mat_lda_b <- table(test$Attrition_Flag,pred_lda_b)
-c_mat_lda_b
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1306 | 84 | 1390 |
-| 1 | 88 | 170 | 258 |
-| Total | 1394 | 254 | 1648 |
+| 0 | 1317 | 73 | 1390 |
+| 1 | 75 | 183 | 258 |
+| Total | 1392 | 256 | 1648 |
 
 ```{r}
 #Accuracy
@@ -1151,7 +1146,7 @@ ldahist(lda_b_predict$x[,1], g = lda_b_predict$class , col = 2)
 
 
 We now shows the ROC curves and the AUC values corresponding to the LDA models trained on the unbalanced and balanced datasets. 
-We can notice that the AUC value for the Balanced LDA is even higher than the best model obtained by GLM, even if the F1 score is lower.
+We can notice that the AUC value for the Balanced LDA is equal to best models obtained by GLM, even if the F1 score is lower.
 
 ```{r ,fig.align='center',fig.asp= 0.9, fig.width= 7, warning=FALSE, message=FALSE}
 #ROC curves
@@ -1174,7 +1169,7 @@ Quadratic discriminant analysis is computationally more expensive than LDA but i
 
 **Unbalanced dataset**
 
-Like in LDA, we consider the set of variables and interactions chosen in *glm_8*, beacuse of its performance and the problem of collinearity.
+Like in LDA, we consider the set of variables and interactions chosen in *glm_7*, beacuse of its performance and the problem of collinearity.
 
 ```{r}
 qda_u <- qda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count
@@ -1182,39 +1177,38 @@ qda_u <- qda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count
              + Months_Inactive_12_mon + Contacts_Count_12_mon + Credit_Limit 
              + Total_Revolving_Bal + Total_Amt_Chng_Q4_Q1 
              + Total_Trans_Amt + Total_Trans_Ct + Total_Ct_Chng_Q4_Q1 
-             + Avg_Utilization_Ratio + Customer_Age:Total_Amt_Chng_Q4_Q1 
-             + Dependent_count:Total_Amt_Chng_Q4_Q1
+             + Avg_Utilization_Ratio + Total_Revolving_Bal:Avg_Utilization_Ratio 
+             + Total_Trans_Amt:Total_Trans_Ct 
              + Total_Amt_Chng_Q4_Q1:Total_Trans_Amt 
-             + Total_Amt_Chng_Q4_Q1:Total_Trans_Ct 
-             + Credit_Limit:Total_Revolving_Bal 
-             + Total_Revolving_Bal:Avg_Utilization_Ratio 
-             + Credit_Limit:Avg_Utilization_Ratio 
-             + Is_Female:Total_Ct_Chng_Q4_Q1 + Customer_Age:Marital_Status , 
+             + Is_Female:Total_Trans_Amt
+             + Total_Relationship_Count:Total_Trans_Amt 
+             + Dependent_count:Total_Ct_Chng_Q4_Q1
+             + Is_Female:Total_Ct_Chng_Q4_Q1
+             + Customer_Age:Marital_Status , 
              data = train, family = "binomial")
 qda_u
 ```
 
-We have that $0.4$ is the threshold resulting in the best F1 score and we use it to calculate other significant measures for the model's performance.
-In terms of F1 score it is the better performing model analyzed until now. It has much higher Sensitivity in comparison to the other models but lower Specificity and accuracy.
+We have that $0.9$ is the threshold resulting in the best F1 score and we use it to calculate other significant measures for the model's performance.
+We noticed that it has a really high Recall, considering the threshold chosen. It seems that the model can recognize with a good accuracy the *Attriting Customers*, at the cost of a small precision.
 
 ```{r}
 #Threshold
-Threshold <- 0.4
+Threshold <- 0.9
 qda_u_predict <- predict(qda_u,test,type = "response")
 qda_predict_u <- qda_u_predict$posterior
 pred_qda_u <- ifelse(qda_predict_u[,2] >= Threshold , 1,0)
 
 #Confusion matrix
 c_mat_qda_u <- table(test$Attrition_Flag,pred_qda_u)
-c_mat_qda_u
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1255 | 135 | 1390 |
-| 1 | 48 | 210 | 258 |
-| Total | 1303 | 345 | 1648 |
+| 0 | 1310 | 80 | 1390 |
+| 1 | 68 | 210 | 190 |
+| Total | 1378 | 270 | 1648 |
 
 ```{r}
 #Accuracy
@@ -1260,41 +1254,42 @@ We consider the final set of variables used on the balanced GLM and we define th
 qda_b <- qda(Attrition_Flag ~ Customer_Age + Is_Female + Dependent_count 
              + Education_Level + Marital_Status + Income_Category 
              + Total_Relationship_Count + Months_Inactive_12_mon 
-             + Contacts_Count_12_mon + Credit_Limit + Total_Revolving_Bal 
+             + Contacts_Count_12_mon + Total_Revolving_Bal 
              + Total_Amt_Chng_Q4_Q1 + Total_Trans_Amt + Total_Trans_Ct 
              + Total_Ct_Chng_Q4_Q1  + Avg_Utilization_Ratio 
              + Customer_Age:Total_Amt_Chng_Q4_Q1 
-             + Dependent_count:Total_Amt_Chng_Q4_Q1
-             + Total_Amt_Chng_Q4_Q1:Total_Trans_Amt 
-             + Credit_Limit:Total_Revolving_Bal 
              + Total_Revolving_Bal:Avg_Utilization_Ratio 
-             + Credit_Limit:Avg_Utilization_Ratio 
-             + Is_Female:Total_Ct_Chng_Q4_Q1 + Customer_Age:Marital_Status , 
+             + Total_Trans_Amt:Total_Trans_Ct 
+             + Total_Amt_Chng_Q4_Q1:Total_Trans_Amt 
+             + Is_Female:Total_Trans_Amt
+             + Total_Relationship_Count:Total_Trans_Amt 
+             + Dependent_count:Total_Ct_Chng_Q4_Q1
+             + Is_Female:Total_Ct_Chng_Q4_Q1
+             + Customer_Age:Marital_Status , 
              data = train_bal, family = "binomial")
 qda_b
 ```
 
-The best threshold based on the F1 score is $0.8$.
-The performance is comparable to the Unbalanced QDA with a slightly better Specificity at the cost of a slightly worse Sensitivity which results in a lower F1 score.
+The best threshold based on the F1 score is $0.9$.
+We can see that it accentuates the behavior of the unbalanced QDA. In fact, even with threshold equal to $0.9$, the Recall is extremly high while the Precision is low. The resulting F1 score is lower in comparison to the model built with the other techniques.
 
 ```{r}
 #Threshold
-Threshold <- 0.8
+Threshold <- 0.9
 qda_b_predict <- predict(qda_b,test,type = "response")
 qda_predict_b <- qda_b_predict$posterior
 pred_qda_b <- ifelse(qda_predict_b[,2] >= Threshold , 1,0)
 
 #Confusion matrix
 c_mat_qda_b <- table(test$Attrition_Flag,pred_qda_b)
-c_mat_qda_b
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1260 | 130 | 1390 |
-| 1 | 59 | 199 | 258 |
-| Total | 1319 | 329 | 1648 |
+| 0 | 1243 | 147 | 1390 |
+| 1 | 40 | 218 | 258 |
+| Total | 1283 | 365 | 1648 |
 ```{r}
 #Accuracy
 
@@ -1330,7 +1325,7 @@ F1_qda_b
 
 We plot the ROC curves and corresponding AUC values of the two QDA models.
 We can notice that the two ROC curve are pretty similar and there is not a curve which is strictly above the other.
-The AUC values are also pretty high but still lower than the LDA model built on the balanced dataset.
+The AUC values are also much lower in comparison to the other models, except the initial GLM.
 
 ```{r ,fig.align='center',fig.asp= 0.9, fig.width= 7, warning=FALSE, message=FALSE}
 #ROC curves
@@ -1361,20 +1356,18 @@ This is done since we will use the function *cv.glmnet*, from the *glmnet* libra
 #Creation of train and test set with interactions
 train_int <- data.frame(train)
 
-train_int$Total_Amt_Chng_Q4_Q1_Customer_Age <- 
-  train$Total_Amt_Chng_Q4_Q1 * train$Customer_Age
-train_int$Total_Amt_Chng_Q4_Q1_Dependent_count <- 
-    train$Total_Amt_Chng_Q4_Q1 * train$Dependent_count 
-train_int$Total_Amt_Chng_Q4_Q1_Total_Trans_Amt <- 
-    train$Total_Amt_Chng_Q4_Q1*train$Total_Trans_Amt
-train_int$Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- 
-    train$Total_Amt_Chng_Q4_Q1 * train$Total_Trans_Ct 
-train_int$Credit_Limit_Total_Revolving_Bal <- 
-    train$Credit_Limit * train$Total_Revolving_Bal
 train_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- 
     train$Total_Revolving_Bal * train$Avg_Utilization_Ratio
-train_int$Credit_Limit_Avg_Utilization_Ratio <- 
-    train$Credit_Limit * train$Avg_Utilization_Ratio
+train_int$Total_Trans_Amt_Total_Trans_Ct <- 
+  train$Total_Trans_Amt * train$Total_Trans_Ct
+train_int$Total_Trans_Amt_Total_Amt_Chng_Q4_Q1 <- 
+  train$Total_Trans_Amt * train$Total_Amt_Chng_Q4_Q1
+train_int$Total_Trans_Amt_Is_Female <- 
+  train$Total_Trans_Amt * train$Is_Female
+train_int$Total_Trans_Amt_Total_Relationship_Count <- 
+  train$Total_Trans_Amt * train$Total_Relationship_Count
+train_int$Dependant_count_Total_Ct_Chng_Q4_Q1 <- 
+    train$Dependent_count * train$Total_Ct_Chng_Q4_Q1
 train_int$Is_Female_Total_Ct_Chng_Q4_Q1 <- 
     train$Is_Female * train$Total_Ct_Chng_Q4_Q1
 train_int$Customer_Age_Marital_Status <- 
@@ -1382,67 +1375,46 @@ train_int$Customer_Age_Marital_Status <-
 
 test_int <- data.frame(test)
 
-test_int$Total_Amt_Chng_Q4_Q1_Customer_Age <- 
-    test$Total_Amt_Chng_Q4_Q1 * test$Customer_Age
-test_int$Total_Amt_Chng_Q4_Q1_Dependent_count <- 
-    test$Total_Amt_Chng_Q4_Q1 * test$Dependent_count 
-test_int$Total_Amt_Chng_Q4_Q1_Total_Trans_Amt <- 
-    test$Total_Amt_Chng_Q4_Q1 * test$Total_Trans_Amt
-test_int$Total_Amt_Chng_Q4_Q1_Total_Trans_Ct <- 
-    test$Total_Amt_Chng_Q4_Q1 * test$Total_Trans_Ct 
-test_int$Credit_Limit_Total_Revolving_Bal <- 
-    test$Credit_Limit * test$Total_Revolving_Bal
 test_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- 
     test$Total_Revolving_Bal * test$Avg_Utilization_Ratio
-test_int$Credit_Limit_Avg_Utilization_Ratio <- 
-    test$Credit_Limit * test$Avg_Utilization_Ratio
+test_int$Total_Trans_Amt_Total_Trans_Ct <- 
+  test$Total_Trans_Amt * test$Total_Trans_Ct
+test_int$Total_Trans_Amt_Total_Amt_Chng_Q4_Q1 <- 
+  test$Total_Trans_Amt * test$Total_Amt_Chng_Q4_Q1
+test_int$Total_Trans_Amt_Is_Female <- 
+  test$Total_Trans_Amt * test$Is_Female
+test_int$Total_Trans_Amt_Total_Relationship_Count <- 
+  test$Total_Trans_Amt * test$Total_Relationship_Count
+test_int$Dependant_count_Total_Ct_Chng_Q4_Q1 <- 
+    test$Dependent_count * test$Total_Ct_Chng_Q4_Q1
 test_int$Is_Female_Total_Ct_Chng_Q4_Q1 <- 
     test$Is_Female * test$Total_Ct_Chng_Q4_Q1
 test_int$Customer_Age_Marital_Status <- 
     test$Customer_Age * test$Marital_Status
 ```
 
-We do the same for the balanced set
+We do the same for the balanced training set. We don't need to do another matrix for the test set since the interactions are the same as in the unbalanced
 
 ```{r}
-#Creation of train_bal and test set with interactions
+#Creation of train_bal with interactions
 train_bal_int <- data.frame(train_bal)
 
-train_bal_int$Total_Amt_Chng_Q4_Q1_Customer_Age <- 
-    train_bal$Total_Amt_Chng_Q4_Q1 * train_bal$Customer_Age
-train_bal_int$Total_Amt_Chng_Q4_Q1_Dependent_count <- 
-    train_bal$Total_Amt_Chng_Q4_Q1 * train_bal$Dependent_count 
-train_bal_int$Total_Amt_Chng_Q4_Q1_Total_Trans_Amt <- 
-    train_bal$Total_Amt_Chng_Q4_Q1 * train_bal$Total_Trans_Amt 
-train_bal_int$Credit_Limit_Total_Revolving_Bal <- 
-    train_bal$Credit_Limit * train_bal$Total_Revolving_Bal
 train_bal_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- 
     train_bal$Total_Revolving_Bal * train_bal$Avg_Utilization_Ratio
-train_bal_int$Credit_Limit_Avg_Utilization_Ratio <- 
-    train_bal$Credit_Limit * train_bal$Avg_Utilization_Ratio
+train_bal_int$Total_Trans_Amt_Total_Trans_Ct <- 
+  train_bal$Total_Trans_Amt * train_bal$Total_Trans_Ct
+train_bal_int$Total_Trans_Amt_Total_Amt_Chng_Q4_Q1 <- 
+  train_bal$Total_Trans_Amt * train_bal$Total_Amt_Chng_Q4_Q1
+train_bal_int$Total_Trans_Amt_Is_Female <- 
+  train_bal$Total_Trans_Amt * train_bal$Is_Female
+train_bal_int$Total_Trans_Amt_Total_Relationship_Count <- 
+  train_bal$Total_Trans_Amt * train_bal$Total_Relationship_Count
+train_bal_int$Dependant_count_Total_Ct_Chng_Q4_Q1 <- 
+    train_bal$Dependent_count * train_bal$Total_Ct_Chng_Q4_Q1
 train_bal_int$Is_Female_Total_Trans_Ct_Q4_Q1 <- 
     train_bal$Is_Female * train_bal$Total_Ct_Chng_Q4_Q1
 train_bal_int$Customer_Age_Marital_Status <- 
     train_bal$Customer_Age * train_bal$Marital_Status
-
-test_bal_int <- data.frame(test)
-
-test_bal_int$Total_Amt_Chng_Q4_Q1_Customer_Age <- 
-    test$Total_Amt_Chng_Q4_Q1 * test$Customer_Age
-test_bal_int$Total_Amt_Chng_Q4_Q1_Dependent_count <- 
-    test$Total_Amt_Chng_Q4_Q1 * test$Dependent_count 
-test_bal_int$Total_Amt_Chng_Q4_Q1_Total_Trans_Amt <- 
-    test$Total_Amt_Chng_Q4_Q1 * test$Total_Trans_Amt 
-test_bal_int$Credit_Limit_Total_Revolving_Bal <- 
-    test$Credit_Limit * test$Total_Revolving_Bal
-test_bal_int$Total_Revolving_Bal_Avg_Utilization_Ratio <- 
-    test$Total_Revolving_Bal * test$Avg_Utilization_Ratio
-test_bal_int$Credit_Limit_Avg_Utilization_Ratio <- 
-    test$Credit_Limit * test$Avg_Utilization_Ratio
-test_bal_int$Is_Female_Total_Trans_Ct_Q4_Q1 <- 
-    test$Is_Female * test$Total_Ct_Chng_Q4_Q1
-test_bal_int$Customer_Age_Marital_Status <- 
-    test$Customer_Age * test$Marital_Status
 ```
 
 
@@ -1492,9 +1464,9 @@ c_mat_ridge_u
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1298 | 92 | 1390 |
+| 0 | 1296 | 94 | 1390 |
 | 1 | 77 | 181 | 258 |
-| Total | 1375 | 273 | 1648 |
+| Total | 1373 | 275 | 1648 |
 
 ```{r}
 #Accuracy
@@ -1531,9 +1503,9 @@ F1_ridge_u
 We create the matrix that we will use for the model
 
 ```{r}
-# Matrix without Attrition_Flag, Months_on_book and Avg_Open_To_Buy
-train_mat_b <- data.matrix(train_bal_int[,-c(1,8,14)])
-test_mat_b <- data.matrix(test_bal_int[,-c(1,8,14)])
+# Matrix without Attrition_Flag, Months_on_book,Credit_Limit and Avg_Open_To_Buy
+train_mat_b <- data.matrix(train_bal_int[,-c(1,8,12,14)])
+test_mat_b <- data.matrix(test_int[,-c(1,8,12,14)])
 ```
 
 We apply the same step done with the balanced step.
@@ -1562,15 +1534,14 @@ pred_ridge_b <- ifelse(ridge_predict_b >= Threshold , 1,0)
 
 #Confusion matrix
 c_mat_ridge_b <- table(test$Attrition_Flag,pred_ridge_b)
-c_mat_ridge_b
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1250 | 140 | 1390 |
-| 1 | 66 | 192 | 258 |
-| Total | 1316 | 332 | 1648 |
+| 0 | 1257 | 133 | 1390 |
+| 1 | 62 | 196 | 258 |
+| Total | 1319 | 329 | 1648 |
 
 ```{r}
 #Accuracy
@@ -1607,7 +1578,7 @@ F1_ridge_b
 ```
 
 We plot the ROC curves and corresponding AUC values of the two models.
-Like the F1 score, we have the AUC values are much lower compared to the models obtained with the other techniques.
+Like the F1 score, we have the AUC values are much lower compared to the models obtained with the other techniques, except for the QDA. Even if they have a better AUC than QDA, because of their poor F1 score, these two model are a worse choice for our problem.
 It seems that adding the L2 norm as a penalization term leads to a worse model in terms of performance.
 
 ```{r ,fig.align='center',fig.asp= 0.9, fig.width= 7, warning=FALSE, message=FALSE}
@@ -1632,7 +1603,7 @@ Because of this property we consider the set of all the predictor variables in a
 **Unbalanced dataset**
 
 ```{r}
-# Matrix without Attrition_Flag
+# Matrix without Attrition_Flag and Avg_Open_To_Buy
 train_mat <- data.matrix(train_int[,-c(1)])
 test_mat <- data.matrix(test_int[,-c(1)])
 ```
@@ -1662,15 +1633,14 @@ pred_lasso_u <- ifelse(lasso_predict_u >= Threshold , 1,0)
 
 #Confusion matrix
 c_mat_lasso_u <- table(test$Attrition_Flag,pred_lasso_u)
-c_mat_lasso_u
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1318 | 72 | 1390 |
-| 1 | 85 | 173 | 258 |
-| Total | 1403 | 245 | 1648 |
+| 0 | 1322 | 68 | 1390 |
+| 1 | 73 | 185 | 258 |
+| Total | 1395 | 253 | 1648 |
 
 
 ```{r}
@@ -1713,7 +1683,7 @@ F1_lasso_u
 ```{r}
 # Matrix without Attrition_Flag
 train_mat_b <- data.matrix(train_bal_int[,-c(1)])
-test_mat_b <- data.matrix(test_bal_int[,-c(1)])
+test_mat_b <- data.matrix(test_int[,-c(1)])
 ```
 
 We shows the values of the misclassification error depending on log($\lambda$).
@@ -1731,26 +1701,25 @@ lambda_lasso_b <- lasso_b$lambda.min
 lambda_lasso_b
 ```
 
-After choosing the best threshold we compute some useful test for the model's performance. We have that the F1 score is better than the ones obtained with Ridge but lower than the other models. 
+After choosing the best threshold we compute some useful test for the model's performance. We have that the F1 score is better than the ones obtained with Ridge but lower than the one obtained with the unbalanced set. 
 
 ```{r}
 #Threshold
-Threshold <- 0.8
+Threshold <- 0.7
 lasso_predict_b <- predict(lasso_b,test_mat_b,type = "response", s = lambda_lasso_b)
 pred_lasso_b <- ifelse(lasso_predict_b >= Threshold , 1,0)
 
 #Confusion matrix
 
 c_mat_lasso_b <- table(test$Attrition_Flag,pred_lasso_b)
-c_mat_lasso_b
 ```
 
 |        |    Predicted Values     |       |
 | :----: | :----: | :---: | :---: |
 | Real Values | 0 | 1 | Total |
-| 0 | 1312 | 78 | 1390 |
-| 1 | 96 | 162 | 258 |
-| Total | 1408 | 240 | 1648 |
+| 0 | 1283 | 107 | 1390 |
+| 1 | 56 | 202 | 258 |
+| Total | 1339 | 309 | 1648 |
 
 
 ```{r}
@@ -1788,7 +1757,7 @@ F1_lasso_b
 ```
 
 We plot the ROC curves and corresponding AUC values of the two models.
-We notice that the ROC curves and the AUC values are nearly equal, however the balanced model had a higher F1 score and is then a better choice for our problem.
+We notice that the ROC curves and the AUC values are comparable to the best other models analyzed, however, since the balanced model had a higher F1 score it is a better choice for our problem.
 
 ```{r ,fig.align='center',fig.asp= 0.75, fig.width= 7, warning=FALSE, message=FALSE}
 #ROC curves
@@ -1817,16 +1786,19 @@ We report the Recall of each value since, in case of models with similar perform
 
 | *Model* |     | *F1* | *Recall* | *AUC* |
 | :--- | --- | :---: | :---: | :---: |
-| GLM_i |    | 0.643 | 0.608 | 0.947 |
-| GLM_f |    | 0.683 | 0.659 | 0.950 |
-| LDA |    | 0.692 | 0.670 | 0.950 |
-| QDA |    | 0.696 | 0.814 | 0.903 |
-| RIDGE |    | 0.682 | 0.702 | 0.934 |
-| LASSO |    | 0.688 | 0.670 | 0.948 |
+| GLM_i |    | 0.667 | 0.705 | 0.913 |
+| GLM_f |    | 0.726 | 0.775 | 0.948 |
+| LDA |    | 0.705 | 0.690 | 0.941 |
+| QDA |    | 0.720 | 0.736 | 0.921 |
+| RIDGE |    | 0.679 | 0.702 | 0.924 |
+| LASSO |    | 0.724 | 0.717 | 0.949 |
 
-We will consider as the best model the one obtained with QDA, since it has the highest F1 score and Recall,  and the second highest AUC values.
-We also notice how Lasso regression leads to a model with the same AUC values as the QDA but lower F1 score.
-Moreover we can assert that Ridge regression is not a good choice for this dataset since its performance it's even worse than the complete GLM.
+
+We will consider as the best model the one obtained with GLM, since it has the highest F1 score and Recall,  and the second highest AUC values.
+We also notice how Lasso regression leads to a model with a similar AUC values and F1 score as the final GLM but lower accuracy.
+It could then be a good choice if we prefer to involve less customers who didn't have the intention to churn.
+Another interesting model is the one obtained with QDA that, while having low AUC, it has good values of F1 score and Recall.
+Moreover we can assert that Ridge regression is not a good choice for our problem since its performance is comparable to the complete GLM, the GLM with all the predictors.
 
 
 **Balanced dataset**
@@ -1837,20 +1809,20 @@ We apply the same notation used in the Unbalanced models.
 
 | *Model* |     | *F1* | *Recall* | *AUC* |
 | :--- | --- | :---: | :---: | :---: |
-| GLM_i |    | 0.645 | 0.612 | 0.947 |
-| GLM_f |    | 0.671 | 0.733 | 0.916 |
-| LDA |    | 0.664 | 0.659 | 0.940 |
-| QDA |    | 0.678 | 0.771 | 0.906 |
-| RIDGE |    | 0.651 | 0.744 | 0.899 |
-| LASSO |    | 0.651 | 0.628 | 0.944 |
+| GLM_i |    | 0.650 | 0.709 | 0.915 |
+| GLM_f |    | 0.715 | 0.709 | 0.948 |
+| LDA |    | 0.712 | 0.709 | 0.948 |
+| QDA |    | 0.700 | 0.845 | 0.921 |
+| RIDGE |    | 0.668 | 0.760 | 0.928 |
+| LASSO |    | 0.712 | 0.783 | 0.948 |
 
 
-With the LDA, we obtained the model with the highest AUC value among all the models we analayzed. However its F1 score its considerably lower in comparison to the model built with QDA . For this reason, in addition to the high Recall and AUC values, we pick QDA as the best model fitted on the balanced dataset.
-We also note that, as in the unbalanced models, Ridge as the worst performance among the models analyzed.
+As you can except from models fitted on balanced data, the Recall tends to be higher then the ones obtained from the unbalanced models.
+The AUC values obtained, instead, are similar or even greater than the corresponding models fitted on the unbalanced training set. However theirs F1 score are all lower of their counterpart, with the exception of the LDA, which is still lower than the best unbalanced models. For this reason, we pick the unbalanced *GLM_f* as the best overall model for our problem.
 
 ## Conclusions
 
 
-Like we said at the beginning of the model's definition, we aim to discover customers who are going to churn without bothering too many customer who did not plan to leave the bank. To do so we have chosen the F1 score as the most significant measure of the model's performance.
-By comparing the two previous tables, we can see that the unbalanced models have a better F1 score compared to the balanced ones. So, even if the highest AUC values was obtained by fitting a model on the balanced dataset, we will pick the model built using QDA and fitted on the unbalanced training set.
+Like we said at the beginning of the model's definition, we aim to discover customers who are going to churn without bothering too many customer who didn't plan to leave the bank. To do so we have chosen the F1 score as the most significant measure of the model's performance.
+After analyzing different models in a balanced dataset and in a unbalanced dataset, we chose *glm_f* as the best model to address our problem. In fact *glm_f* had the best F1 score and one of the highest AUC value and Recall between all the models considered. 
 
