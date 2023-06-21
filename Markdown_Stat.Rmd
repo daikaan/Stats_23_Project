@@ -1793,8 +1793,9 @@ We report the Recall of each value since, in case of models with similar perform
 | RIDGE |    | 0.679 | 0.702 | 0.924 |
 | LASSO |    | 0.724 | 0.717 | 0.949 |
 
+
 We will consider as the best model the one obtained with GLM, since it has the highest F1 score and Recall,  and the second highest AUC values.
-We also notice how Lasso regression leads to a model with a similar AUC values anf F1 score as the final GLM but lower accuracy.
+We also notice how Lasso regression leads to a model with a similar AUC values and F1 score as the final GLM but lower accuracy.
 It could then be a good choice if we prefer to involve less customers who didn't have the intention to churn.
 Another interesting model is the one obtained with QDA that, while having low AUC, it has good values of F1 score and Recall.
 Moreover we can assert that Ridge regression is not a good choice for our problem since its performance is comparable to the complete GLM, the GLM with all the predictors.
