@@ -439,7 +439,7 @@ To investigate the relationship between only the two variables we use the *corre
 
 ```{r, echo=TRUE, eval=FALSE}
 #Partial correlation (We will not show the output, since it takes too much space)
-correlation(train,partial = TRUE)
+correlation(train[,-14],partial = TRUE)
 ```
 
 For the response variable the most significant partial correlations are the following
@@ -449,12 +449,12 @@ For the response variable the most significant partial correlations are the foll
 | Variable | Correlation with Attrition_Flag |
 | :----------------------- | ------------------------------: |
 | Total_Trans_Ct | -0.41 |
+| Total_Relantioship_Count | -0.23 |
 | Total_Trans_Amt | 0.22 |
 | Total_Ct_Chng_Q4_Q1 | -0.21 |
-| Total_Relantioship_Count | -0.23 |
 | Contacts_Count_12_mon | 0.15 |
+| Total_Revolving_Bal | -0.15 |
 | Months_Inactive_12_mon | 0.14 |
-| Avg_Utilization_Ratio | -0.02 |
 | Is_Female | 0.11 |
 
 
@@ -463,7 +463,7 @@ Now we visualize the full results by using the function *corrplot* from the hono
 
 ```{r , fig.align='center',fig.asp= 0.85, fig.width= 7}
 #Partial Correlation matrix 
-part_cor_mat <- pcor(train)$estimate
+part_cor_mat <- pcor(train[,-14])$estimate
 corrplot(part_cor_mat, method = "number",type = "upper",number.cex = 0.6,
          tl.pos = "td",tl.cex=0.5, tl.col = "black" ,diag = FALSE)
 
@@ -475,14 +475,13 @@ As done previously, we will show the highest partial correlations in a table:
 | Variable 1 | Variable 2 | Correlation |
 | :--------- | :--------: | ----------: |
 | Customer_Age | Months_on_book | 0.79 |
-| Is_Female | Income_Category | -0.68 |
-| Credit_Limit | Avg_Open_To_Buy | 0.92 |
-| Credit_Limit | Avg_Utilization_Ratio | 0.63 |
-| Total_Revolving_Bal | Avg_Open_To_Buy | 0.26 |
-| Total_Revolving_Bal | Avg_Utilization_Ratio | 0.64 |
-| Avg_Open_To_Buy | Avg_Utilization_Ratio | -0.85 |
-| Total_Amt_Chng_Q4_Q1 | Total_Ct_Chng_Q4_Q1 | 0.38 |
-| Total_Trans_Amt | Total_Trans_Ct | 0.90 |
+| Is_Female | Income_Category | -0.70 |
+| Income_Category | Credit_Limit | 0.38 |
+| Credit_Limit | Total_Revolving_Bal | 0.38 |
+| Credit_Limit | Avg_Utilization_Ratio | -0.50 |
+| Total_Revolving_Bal | Avg_Utilization_Ratio | 0.76 |
+| Total_Amt_Chng_Q4_Q1 | Total_Ct_Chng_Q4_Q1 | 0.39 |
+| Total_Trans_Amt | Total_Trans_Ct | 0.79 |
 
 
 
@@ -493,17 +492,17 @@ a <- ggplot(train, aes(x = Total_Trans_Ct, fill = Customer)) +
   geom_density(alpha=0.3) + ggtitle("Total_Trans_Ct") +
   scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
 
-b <- ggplot(train, aes(x = Total_Trans_Amt, fill = Customer)) +
+b <- ggplot(train, aes(x = Total_Relationship_Count, fill = Customer)) +
+  geom_bar(aes(y = after_stat(prop) ),alpha=0.3, position = "dodge") + 
+  ggtitle("Total_Relationship_Count") + 
+  scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
+
+c <- ggplot(train, aes(x = Total_Trans_Amt, fill = Customer)) +
   geom_density(alpha=0.3) + ggtitle("Total_Trans_Amt") +
   scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
 
-c <- ggplot(train, aes(x = Total_Ct_Chng_Q4_Q1, fill = Customer)) +
+d <- ggplot(train, aes(x = Total_Ct_Chng_Q4_Q1, fill = Customer)) +
   geom_density(alpha=0.3) + ggtitle("Total_Ct_Chng_Q4_Q1")+
-  scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
-
-d <- ggplot(train, aes(x = Total_Relationship_Count, fill = Customer)) +
-  geom_bar(aes(y = after_stat(prop) ),alpha=0.3, position = "dodge") + 
-  ggtitle("Total_Relationship_Count") + 
   scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
 
 e <- ggplot(train, aes(x = Contacts_Count_12_mon, fill = Customer)) +
@@ -511,17 +510,18 @@ e <- ggplot(train, aes(x = Contacts_Count_12_mon, fill = Customer)) +
   ggtitle("Contacts_Count_12_mon") +
   scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
 
-f <- ggplot(train, aes(x = Months_Inactive_12_mon, fill = Customer)) +
+f <- ggplot(train, aes(x = Total_Revolving_Bal, fill = Customer)) +
+  geom_density(alpha=0.3) + ggtitle("Total_Revolving_Bal") +
+  scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
+
+g <- ggplot(train, aes(x = Months_Inactive_12_mon, fill = Customer)) +
   geom_bar(aes(y = after_stat(prop) ),alpha=0.3, position = "dodge") + 
   ggtitle("Months_Inactive_12_mon") +
   scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
 
-g <- ggplot(train, aes(x = Avg_Utilization_Ratio, fill = Customer)) +
-  geom_density(alpha=0.3) + ggtitle("Avg_Utilization_Ratio") +
-  scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
-
-h <- ggplot(train, aes(x = Avg_Open_To_Buy, fill = Customer)) +
-  geom_density(alpha=0.3) + ggtitle("Avg_Open_To_Buy") +
+h <- ggplot(train, aes(x = Is_Female, fill = Customer)) +
+  geom_bar(aes(y = after_stat(prop) ),alpha=0.3, position = "dodge") + 
+  ggtitle("Is_Female") +
   scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
 
 
@@ -537,7 +537,8 @@ From these plots we can notice that a customer is more likely to churn if:
 * In the last year he has been inactive for many months.
 * He didn't use much his card.
 
-For *Avg_Open_To_Buy* we notice that there is a difference between the classes of Attriting and Existing Customer but it's not enough to infer a clear relationship between Attriting customers and the variable analyzed.
+For *Total_Revolving_Bal* we can see that who has 0 as his Revolving Balance is more likely to churn, while customer who have a Revolving balance not excessively high are likely to remain with the bank.
+From the variable instead *Is_Female* we notice that Females are slightly more likely to churn in comparison with male customers, however it is not enough to infer a clear relationship between Attriting customers and the gender of the customer.
 
 \newpage
 
@@ -559,7 +560,7 @@ We will initially define the model containing all the predictor variables and, a
 We will start by defining the complete model and assess its performance.
 
 ```{r}
-glm_1 <- glm(data = train,Attrition_Flag~ .,family = "binomial")
+glm_1 <- glm(data = train,Attrition_Flag~ . - Avg_Open_To_Buy ,family = "binomial")
 summary(glm_1)
 ```
 
@@ -575,7 +576,6 @@ pred_i <- ifelse(pred_glm_i >= Threshold , 1,0)
 #Confusion matrix
 
 c_mat_i <- table(test$Attrition_Flag,pred_i)
-c_mat_i
 ```
 
 |        |    Predicted Values     |       |
@@ -626,7 +626,7 @@ We can notice that there are a lot of values much higher than 1. That means that
 To mitigate this effect we remove the indipendent variable *Avg_Open_To_Buy*. We also remove *Months_on_book* since, from the summary, it seems that it is not significant and it would be removed with the stepwise selection.
 
 ```{r}
-glm_2 <- update(glm_1, . ~ . - Avg_Open_To_Buy - Months_on_book)
+glm_2 <- update(glm_1, . ~ . - Avg_Utilization_Ratio - Months_on_book)
 
 vif(glm_2)
 ```
