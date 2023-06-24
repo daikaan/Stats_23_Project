@@ -81,12 +81,15 @@ descriptions <- c("refers to the distinct identification numbers assigned to cus
                   "represents the change in transaction count from the fourth quarter (Q4) to the first quarter (Q1).",
                   
                   "represents the average card utilization ratio.")
+
 var.dict <- as.data.frame(descriptions, row.names = var.names, )
 formattable(var.dict)
 
 # DATA PREPERATION
 
 #display of the categorical variables
+table(bank_data$CLIENTNUM)
+
 table(bank_data$Attrition_Flag)
 
 table(bank_data$Gender)
@@ -164,18 +167,18 @@ ggplot(bank_data_withoutNA_quan, aes(x=Months_on_book, y= Credit_Limit, shape = 
 #Numerical columns analysis
 attach(bank_data_withoutNA_quan)
 
-cust.age.boxplot <- boxplot(Customer_Age, ylab = "age")
-months.onbook.boxplot <- boxplot(Months_on_book, ylab = "months")
-reltn.cnt.boxplot <- boxplot(Total_Relationship_Count, ylab = "#")
-mnths.inact.boxplot <- boxplot(Months_Inactive_12_mon, ylab = "months")
-cntc.cnt.boxplot <- boxplot(Contacts_Count_12_mon, ylab = "#")
-credit.limit.boxplot <- boxplot(Credit_Limit, ylab = "Dollars")
-ttl.revbal.boxplot <- boxplot(Total_Revolving_Bal, ylab = "Dollars")
-avg.opnbuy.boxplot <- boxplot(Avg_Open_To_Buy, ylab = "Dollars")
-total.amtchg.boxplot <- boxplot(Total_Amt_Chng_Q4_Q1, ylab = "Dollars")
-ttl.transct.boxplot <- boxplot(Total_Trans_Ct, ylab = "#")
-total.cntchg.boxplot <- boxplot(Total_Ct_Chng_Q4_Q1, ylab = "Dollars")
-avg.utilrate.boxplot <- boxplot(Avg_Utilization_Ratio, ylab = "Ratio")
+cust.age.boxplot <- boxplot(Customer_Age, main="Customer age", ylab = "age")
+months.onbook.boxplot <- boxplot(Months_on_book, main="Months on Book", ylab = "months")
+reltn.cnt.boxplot <- boxplot(Total_Relationship_Count, main="Total_Relationship_Count", ylab = "#")
+mnths.inact.boxplot <- boxplot(Months_Inactive_12_mon,  main="Months_Inactive_12_mon", ylab = "months")
+cntc.cnt.boxplot <- boxplot(Contacts_Count_12_mon, main="Contacts_Count_12_mon", ylab = "#")
+credit.limit.boxplot <- boxplot(Credit_Limit,  main="Credit_Limit", ylab = "Dollars")
+ttl.revbal.boxplot <- boxplot(Total_Revolving_Bal, main="Total_Revolving_Bal", ylab = "Dollars")
+avg.opnbuy.boxplot <- boxplot(Avg_Open_To_Buy, main="Avg_Open_To_Buy", ylab = "Dollars")
+total.amtchg.boxplot <- boxplot(Total_Amt_Chng_Q4_Q1, main="Total_Amt_Chng_Q4_Q1", ylab = "Dollars")
+ttl.transct.boxplot <- boxplot(Total_Trans_Ct, main="Total_Trans_Ct", ylab = "#")
+total.cntchg.boxplot <- boxplot(Total_Ct_Chng_Q4_Q1, main="Total_Ct_Chng_Q4_Q1", ylab = "Dollars")
+avg.utilrate.boxplot <- boxplot(Avg_Utilization_Ratio, main="Avg_Utilization_Ratio", ylab = "Ratio")
 
 #Since the outliers in most of the numerical columns can be identifying on whether the customer is going to churn we decided to keep them in the data set
 
@@ -206,9 +209,19 @@ cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age >
 cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age > 44 & cleaned_bank_data_withoutNA_quan$Customer_Age <= 54, "age_group"] <- 3
 cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age > 54, "age_group"] <- 4
 
-#grouped age histogram
-Grouped.age.hist <- hist(as.numeric(cleaned_bank_data_withoutNA_quan$age_group), xlab="age_group", ylab="freq", breaks=4,
-                         main="Customer age group distribution", col="green")
+#grouped age bar plot
+par(mfrow=c(1,1))
+cleaned_bank_data_withoutNA_quan %>%
+  group_by(age_group) %>% summarise(N=n()) %>%
+  ggplot(aes(x=age_group,y=N,fill=age_group))+
+  geom_bar(stat = 'identity',color='black')+
+  scale_y_continuous(labels = scales::comma_format(accuracy = 2))+
+  geom_text(aes(label=N),vjust=-0.25,fontface='bold')+
+  theme_bw()+
+  theme(axis.text = element_text(color='black',face='bold'),
+        axis.title = element_text(color='black',face='bold'),
+        legend.text = element_text(color='black',face='bold'),
+        legend.title = element_text(color='black',face='bold'))
 
 
 # grouped age piechart
@@ -231,6 +244,11 @@ int.hist = function(x,ylab="Frequency",...) {
   barplot(table(factor(x,levels=min(x):max(x))),space=0,xaxt="n",ylab=ylab,...);axis(1)
 }
 
+
+dev.off(dev.list()["RStudioGD"]) #to clear the previous plots on the screen
+
+fig.dim = c(4, 3)
+
 #Histograms
 attach(cleaned_bank_data_withoutNA_quan)
 par(mfrow=c(3,2))
@@ -240,12 +258,6 @@ hist(Avg_Utilization_Ratio)
 hist(Months_on_book)
 hist(Credit_Limit)
 hist(Months_Inactive_12_mon)
-
-
-#grouped age histogram
-par(mfrow=c(1,1))
-Grouped.age.hist <- hist(as.numeric(cleaned_bank_data_withoutNA_quan$age_group), xlab="age_group", ylab="freq",
-                         main="Customer age group distribution", col="green")
 
 
 #Correlation matrix
