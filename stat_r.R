@@ -231,6 +231,8 @@ int.hist = function(x,ylab="Frequency",...) {
 
 dev.off(dev.list()["RStudioGD"]) #to clear the previous plots on the screen
 
+fig.dim = c(4, 3)
+
 #Histograms
 attach(cleaned_bank_data_withoutNA_quan)
 par(mfrow=c(3,2))
