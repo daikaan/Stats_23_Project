@@ -19,6 +19,8 @@ library(RColorBrewer)#for the visualization colorings
 bank_data_origin <- read.csv('~/GitHub/Stats_23_Project/BankChurners.csv')
 head(bank_data_origin)
 
+tinytex::install_tinytex()
+
 summary(bank_data_origin)
 
 dim(bank_data_origin)
@@ -239,6 +241,7 @@ hist(Months_on_book)
 hist(Credit_Limit)
 hist(Months_Inactive_12_mon)
 
+tinytex::install_tinytex()
 
 #grouped age histogram
 par(mfrow=c(1,1))
