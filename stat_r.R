@@ -203,9 +203,19 @@ cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age >
 cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age > 44 & cleaned_bank_data_withoutNA_quan$Customer_Age <= 54, "age_group"] <- 3
 cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age > 54, "age_group"] <- 4
 
-#grouped age histogram
-Grouped.age.hist <- hist(as.numeric(cleaned_bank_data_withoutNA_quan$age_group), xlab="age_group", ylab="freq", breaks=4,
-                         main="Customer age group distribution", col="green")
+#grouped age bar plot
+par(mfrow=c(1,1))
+cleaned_bank_data_withoutNA_quan %>%
+  group_by(age_group) %>% summarise(N=n()) %>%
+  ggplot(aes(x=age_group,y=N,fill=age_group))+
+  geom_bar(stat = 'identity',color='black')+
+  scale_y_continuous(labels = scales::comma_format(accuracy = 2))+
+  geom_text(aes(label=N),vjust=-0.25,fontface='bold')+
+  theme_bw()+
+  theme(axis.text = element_text(color='black',face='bold'),
+        axis.title = element_text(color='black',face='bold'),
+        legend.text = element_text(color='black',face='bold'),
+        legend.title = element_text(color='black',face='bold'))
 
 
 # grouped age piechart
@@ -243,21 +253,6 @@ hist(Months_on_book)
 hist(Credit_Limit)
 hist(Months_Inactive_12_mon)
 
-tinytex::install_tinytex()
-
-#grouped age bar plot
-par(mfrow=c(1,1))
-cleaned_bank_data_withoutNA_quan %>%
-  group_by(age_group) %>% summarise(N=n()) %>%
-  ggplot(aes(x=age_group,y=N,fill=age_group))+
-  geom_bar(stat = 'identity',color='black')+
-  scale_y_continuous(labels = scales::comma_format(accuracy = 2))+
-  geom_text(aes(label=N),vjust=-0.25,fontface='bold')+
-  theme_bw()+
-  theme(axis.text = element_text(color='black',face='bold'),
-        axis.title = element_text(color='black',face='bold'),
-        legend.text = element_text(color='black',face='bold'),
-        legend.title = element_text(color='black',face='bold'))
 
 
 #Correlation matrix
