@@ -1795,7 +1795,7 @@ We report the Recall of each value since, in case of models with similar perform
 | *Model* |     | *F1* | *Recall* | *AUC* |
 | :--- | --- | :---: | :---: | :---: |
 | GLM_i |    | 0.667 | 0.705 | 0.913 |
-| GLM_f |    | 0.726 | 0.775 | 0.948 |
+| GLM_f |    | 0.729 | 0.775 | 0.948 |
 | LDA |    | 0.705 | 0.690 | 0.941 |
 | QDA |    | 0.720 | 0.736 | 0.921 |
 | RIDGE |    | 0.679 | 0.702 | 0.924 |
