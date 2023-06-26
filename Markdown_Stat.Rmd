@@ -54,11 +54,14 @@ Before diving into modelling, it is important to understand the nature of the se
 summary(bank_data_origin)
 ```
 
-As expected, the set we have contains both numerical and categorical variables. Hence, a direct use without cleaning the set would lead us to an inappropriate model. In the beginning we have 23 columns and 10127 rows. However, this dataset was part of a study that had the same aim with a different approach.This approach was Naive Bayes Classification and 2 columns named as "Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1" and "Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2" were the results of their work. Thus, removing them will not only make the dataset more clear, but also will increase the originality of the work done in this project. We will start our project by removing these 2 columns which is independent from others. Finally, we have 21 columns and 10127 rows in the beginning.
+As expected, the set we have contains both numerical and categorical variables. Hence, a direct use without cleaning the set would lead us to an inappropriate model. In the beginning we have 23 columns and 10127 rows. However, this dataset was part of a study that had the same aim with a different approach.This approach was Naive Bayes Classification and 2 columns named as "Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_
+Education_Level_Months_Inactive_12_mon_1" and "Naive_Bayes_Classifier_Attrition_Flag_Card_
+Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2" were the results of their work. Thus, removing them will not only make the dataset more clear, but also will increase the originality of the work done in this project. We will start our project by removing these 2 columns which is independent from others. Finally, we have 21 columns and 10127 rows in the beginning.
 
 ```{r}
 dim(bank_data_origin)
-bank_data <- subset(bank_data_origin, select = -c(Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
+bank_data <- subset(bank_data_origin, select = -c(Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1, 
+                                                  Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2))
 final_dim <- dim(bank_data)
 final_dim
 
@@ -67,14 +70,21 @@ final_dim
 The columns that is going to be present in the study can be found in the table below next to their descriptions.
 
 ```{r, echo = FALSE}
-var.names <- c("Clientnum", "Attrition_Flag", "Customer_Age", "Gender", "Dependent_count", 
-               "Education_Level", "Marital_Status", "Income_Category", "Card_Category", "Months_on_book",
-               "Total_Relationship_Count", "Months_Inactive_12_mon", "Contacts_Count_12_mon", "Credit_Limit",
-               "Total_Revolving_Bal", "Avg_Open_To_Buy", "Total_Amt_Chng_Q4_Q1", "Total_Trans_Amt",
+var.names <- c("Clientnum", "Attrition_Flag", "Customer_Age", "Gender",
+               "Dependent_count", "Education_Level", "Marital_Status", 
+               "Income_Category", "Card_Category", "Months_on_book",
+               "Total_Relationship_Count", "Months_Inactive_12_mon",
+               "Contacts_Count_12_mon", "Credit_Limit", "Total_Revolving_Bal",
+               "Avg_Open_To_Buy", "Total_Amt_Chng_Q4_Q1", "Total_Trans_Amt",
                "Total_Trans_Ct", "Total_Ct_Chng_Q4_Q1", "Avg_Utilization_Ratio")
-descriptions <- c("refers to the distinct identification numbers assigned to customers, consisting of a unique sequence of 9 digits. The datasets contain a total of 10,127 customers with unique IDs.",
+descriptions <- c("refers to the distinct identification numbers assigned 
+                  to customers, consisting of a unique sequence of 9 digits. The
+                  datasets contain a total of 10,127 customers with unique IDs.",
                   
-                  "refers to the current status of customers, indicating whether they are Existing Customers (current customers) or Attrited Customers (churned customers). There are two distinct values for this target/output variable.",
+                  "refers to the current status of customers, indicating whether
+                  they are Existing Customers (current customers) or Attrited
+                  Customers (churned customers). There are two distinct values
+                  for this target/output variable.",
                   
                   "represents the age of customers, with a range between 27 and 73.",
                   
@@ -82,35 +92,51 @@ descriptions <- c("refers to the distinct identification numbers assigned to cus
                   
                   "represents the number of dependents associated with a customer.",
                   
-                  "represents the educational qualification of a customer. It encompasses seven distinct values: High School, Graduate, Uneducated, College, Post-graduate, Doctorate, and Unknown. The Unknown category includes 1519 customers.",
+                  "represents the educational qualification of a customer. 
+                  It encompasses seven distinct values: High School, Graduate,
+                  Uneducated, College, Post-graduate, Doctorate, and Unknown. 
+                  The Unknown category includes 1519 customers.",
                   
-                  "represents the marital status of customers, with four unique values: Married, Single, Unknown, and Divorced. The Unknown category includes 749 customers.",
+                  "represents the marital status of customers, with four unique 
+                  values: Married, Single, Unknown, and Divorced. The Unknown 
+                  category includes 749 customers.",
                   
-                  "represents the annual income category of cardholders: Less than 40K, 40K-60K, 60K-80K, 80K-120K, $120+, and Unknown. The Unknown category includes 1112 customers.",
+                  "represents the annual income category of cardholders: Less 
+                  than 40K, 40K-60K, 60K-80K, 80K-120K, $120+, and Unknown. The
+                  Unknown category includes 1112 customers.",
                   
-                  "refers to a product variable that indicates the type of credit card held by customers. It includes four unique values: Blue, Gold, Silver, and Platinum.",
+                  "refers to a product variable that indicates the type of 
+                  credit card held by customers. It includes four unique values:
+                  Blue, Gold, Silver, and Platinum.",
                   
-                  "represents the duration, in months, that an account holder has been a customer at the bank.",
+                  "represents the duration, in months, that an account holder 
+                  has been a customer at the bank.",
                   
                   "represents the number of products held by a customer.",
                   
-                  "represents the number of months during which a customer has been inactive in the last 12 months (1 year).",
+                  "represents the number of months during which a customer has 
+                  been inactive in the last 12 months (1 year).",
                   
-                  "represents the number of times a customer has contacted the bank.",
+                  "represents the number of times a customer has contacted the 
+                  bank.",
                   
                   "represents the credit limit on the customer's credit card.",
                   
-                  "represents the total revolving balance on the customer's credit card.",
+                  "represents the total revolving balance on the customer's 
+                  credit card.",
                   
-                  "represents the average Open to Buy Credit Line for the last 12 months.",
+                  "represents the average Open to Buy Credit Line for the last 
+                  12 months.",
                   
-                  "represents the change in transaction amount from the fourth quarter (Q4) to the first quarter (Q1).",
+                  "represents the change in transaction amount from the fourth 
+                  quarter (Q4) to the first quarter (Q1).",
                   
                   "represents the total transaction amount in the last 12 months.",
                   
                   "represents the total transaction count in the last 12 months.",
                   
-                  "represents the change in transaction count from the fourth quarter (Q4) to the first quarter (Q1).",
+                  "represents the change in transaction count from the fourth 
+                  quarter (Q4) to the first quarter (Q1).",
                   
                   "represents the average card utilization ratio.")
 var.dict <- as.data.frame(descriptions, row.names = var.names, )
@@ -162,10 +188,13 @@ For the 6 categorical columns, we change their data form to numeric to be able t
 ```{r}
 bank_data_withoutNA_quan <- bank_data_withoutNA
 
-bank_data_withoutNA_quan$Attrition_Flag <- as.numeric(bank_data_withoutNA_quan$Attrition_Flag == "Attrited Customer")
+bank_data_withoutNA_quan$Attrition_Flag <- as.numeric(
+    bank_data_withoutNA_quan$Attrition_Flag == "Attrited Customer")
 
-bank_data_withoutNA_quan$Gender <- as.numeric(bank_data_withoutNA_quan$Gender == "F")
-bank_data_withoutNA_quan <- bank_data_withoutNA_quan %>% rename("Is_Female" = "Gender")
+bank_data_withoutNA_quan$Gender <- as.numeric(
+    bank_data_withoutNA_quan$Gender == "F")
+bank_data_withoutNA_quan <- bank_data_withoutNA_quan %>% 
+    rename("Is_Female" = "Gender")
 
 order_education_level <- list("Uneducated" = 1,
                               "High School" = 2,
@@ -173,26 +202,30 @@ order_education_level <- list("Uneducated" = 1,
                               "Graduate" = 4,
                               "Post-Graduate" = 5,
                               "Doctorate" = 6)
-bank_data_withoutNA_quan$Education_Level <- unlist(order_education_level[as.character(bank_data_withoutNA_quan$Education_Level)])
+bank_data_withoutNA_quan$Education_Level <- unlist(order_education_level[
+    as.character(bank_data_withoutNA_quan$Education_Level)])
 
 order_Marital_Status <- list("Single" = 1,
                              "Married" = 2,
                              "Divorced" = 3)
-bank_data_withoutNA_quan$Marital_Status <- unlist(order_Marital_Status[as.character(bank_data_withoutNA_quan$Marital_Status)])
+bank_data_withoutNA_quan$Marital_Status <- unlist(order_Marital_Status[
+    as.character(bank_data_withoutNA_quan$Marital_Status)])
 
 order_Income_Category <- list("Less than $40K" = 1,
                               "$40K - $60K" = 2,
                               "$60K - $80K" = 3,
                               "$80K - $120K" = 4,
                               "$120K +" = 5)
-bank_data_withoutNA_quan$Income_Category <- unlist(order_Income_Category[as.character(bank_data_withoutNA_quan$Income_Category)])
+bank_data_withoutNA_quan$Income_Category <- unlist(order_Income_Category[
+    as.character(bank_data_withoutNA_quan$Income_Category)])
 
 
 order_Card_Category <- list("Blue" = 1,
                             "Silver" = 2,
                             "Gold" = 3,
                             "Platinum" = 4)
-bank_data_withoutNA_quan$Card_Category <- unlist(order_Card_Category[as.character(bank_data_withoutNA_quan$Card_Category)])
+bank_data_withoutNA_quan$Card_Category <- unlist(order_Card_Category[
+    as.character(bank_data_withoutNA_quan$Card_Category)])
 ```
 
 ```{r}
@@ -207,10 +240,18 @@ par(mar = c(4, 4, .1, .1))
 #Bar plots
 par(mfrow=c(2,2))
 myPalette <- brewer.pal(6, "Set2")
-ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Income_Category), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag") 
-ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Marital_Status), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag") 
-ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Education_Level), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag") 
-ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Card_Category), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag")
+ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Income_Category), fill = 
+                                       factor(Attrition_Flag))) + geom_bar() +
+                                       labs(fill = "Attrition Flag") 
+ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Marital_Status), fill = 
+                                       factor(Attrition_Flag))) + geom_bar() + 
+                                       labs(fill = "Attrition Flag") 
+ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Education_Level), fill = 
+                                       factor(Attrition_Flag))) + geom_bar() +
+                                       labs(fill = "Attrition Flag") 
+ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Card_Category), fill = 
+                                       factor(Attrition_Flag))) + geom_bar() +
+                                       labs(fill = "Attrition Flag")
 ```
 
 There seems to be a great imbalance on card category, while the others distributions seem to be reasonably similar. Before moving further, card categories' relationship with few other numerical values might be important to understand if card category is going to affect the performance of the model. Below, the relationship between card category and numerical columns that is expected to be decisive in churn out behavior (credit limit and months on book) is presented.
@@ -218,35 +259,49 @@ There seems to be a great imbalance on card category, while the others distribut
 ```{r}
 # Card Category
 
-ggplot(bank_data_withoutNA_quan, aes(x=Months_on_book, y= Credit_Limit, shape = as.factor(Card_Category), color= as.factor(Card_Category)))+
-  geom_point() + geom_smooth(method=lm, se=FALSE, fullrange=TRUE)
+ggplot(bank_data_withoutNA_quan, aes(x=Months_on_book, y= Credit_Limit, shape = 
+                as.factor(Card_Category), color= as.factor(Card_Category)))+
+                geom_point() + geom_smooth(method=lm, se=FALSE, fullrange=TRUE)
 ```
 
 It is clear that blue card holders have different attributes than the others while the other card holders seem to be acting similar. Thus, we decided to rescope our study only to focus on blue card holders. By doing so, we believe that numerical values fed into the model will have more accurate effect on the model.
 
 ```{r}
-#Since most of the data is coming from the Blue cards and there is a visible difference on many parameters among categories, we decided to only focus on blue card category
+#Since most of the data is coming from the Blue cards and there is a visible 
+#difference on many parameters among categories, we decided to only focus on blue card category
 card.exc.list <- c(2, 3, 4)
 ```
 
 At this point, the numerical columns are decided to be checked whether they have any 
 ```{r, figures-side1, fig.show="hold", out.width="50%"}
-par(mar = c(4, 4, .1, .1))
+par(mar = c(2, 4, 3, .1))
 #Numerical columns analysis
 attach(bank_data_withoutNA_quan)
 
-cust.age.boxplot <- boxplot(Customer_Age, main="Customer age", ylab = "age")
-months.onbook.boxplot <- boxplot(Months_on_book, main="Months on Book", ylab = "months")
-reltn.cnt.boxplot <- boxplot(Total_Relationship_Count, main="Total_Relationship_Count", ylab = "#")
-mnths.inact.boxplot <- boxplot(Months_Inactive_12_mon,  main="Months_Inactive_12_mon", ylab = "months")
-cntc.cnt.boxplot <- boxplot(Contacts_Count_12_mon, main="Contacts_Count_12_mon", ylab = "#")
-credit.limit.boxplot <- boxplot(Credit_Limit,  main="Credit_Limit", ylab = "Dollars")
-ttl.revbal.boxplot <- boxplot(Total_Revolving_Bal, main="Total_Revolving_Bal", ylab = "Dollars")
-avg.opnbuy.boxplot <- boxplot(Avg_Open_To_Buy, main="Avg_Open_To_Buy", ylab = "Dollars")
-total.amtchg.boxplot <- boxplot(Total_Amt_Chng_Q4_Q1, main="Total_Amt_Chng_Q4_Q1", ylab = "Dollars")
-ttl.transct.boxplot <- boxplot(Total_Trans_Ct, main="Total_Trans_Ct", ylab = "#")
-total.cntchg.boxplot <- boxplot(Total_Ct_Chng_Q4_Q1, main="Total_Ct_Chng_Q4_Q1", ylab = "Dollars")
-avg.utilrate.boxplot <- boxplot(Avg_Utilization_Ratio, main="Avg_Utilization_Ratio", ylab = "Ratio")
+cust.age.boxplot <- boxplot(Customer_Age, main = "Customer_Age",
+                            ylab = "age")
+months.onbook.boxplot <- boxplot(Months_on_book, main = "Months_on_book",
+                            ylab = "months")
+reltn.cnt.boxplot <- boxplot(Total_Relationship_Count,
+                            main = "Total_Relationship_Count", ylab = "#")
+mnths.inact.boxplot <- boxplot(Months_Inactive_12_mon,
+                            main = "Months_Inactive_12_mon", ylab = "months")
+cntc.cnt.boxplot <- boxplot(Contacts_Count_12_mon,
+                            main = "Contacts_Count_12_mon", ylab = "#")
+credit.limit.boxplot <- boxplot(Credit_Limit, main = "Credit_Limit",
+                            ylab = "Dollars")
+ttl.revbal.boxplot <- boxplot(Total_Revolving_Bal, main = "Total_Revolving_Bal",
+                            ylab = "Dollars")
+avg.opnbuy.boxplot <- boxplot(Avg_Open_To_Buy, main = "Avg_Open_To_Buy",
+                            ylab = "Dollars")
+total.amtchg.boxplot <- boxplot(Total_Amt_Chng_Q4_Q1, 
+                            main = "Total_Amt_Chng_Q4_Q1", ylab = "Dollars")
+ttl.transct.boxplot <- boxplot(Total_Trans_Ct,main = "Total_Trans_Ct",
+                            ylab = "#")
+total.cntchg.boxplot <- boxplot(Total_Ct_Chng_Q4_Q1,
+                            main = "Total_Ct_Chng_Q4_Q1", ylab = "Dollars")
+avg.utilrate.boxplot <- boxplot(Avg_Utilization_Ratio,
+                            main = "Avg_Utilization_Ratio", ylab = "Ratio")
 ```
 
 It is clear that many of the numerical columns have too many outliers. However, as a result of the nature of our study, eliminating the outliers might significantly affect the sake of study.
@@ -263,30 +318,42 @@ cleaned_bank_data_withoutNA_quan <- bank_data_withoutNA_quan
 #it is seen that customers over the age of 70 are outliers
 age.exc.list <- boxplot.stats(cleaned_bank_data_withoutNA_quan$Customer_Age)$out
 
-#Since most of the data is coming from the Blue cards and there is a visible difference on many parameters among categories, we decided to only focus on blue card category
+#Since most of the data is coming from the Blue cards and there is a visible 
+#difference on many parameters among categories, we decided to only focus on blue card category
 card.exc.list <- c(2, 3, 4)
 
 
-cleaned_bank_data_withoutNA_quan <- subset(cleaned_bank_data_withoutNA_quan,!((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
-cleaned_bank_data_withoutNA_quan<- subset(cleaned_bank_data_withoutNA_quan, select = -c(Card_Category)) #after the cleaning this column is irrelevant since the only category left is blue
+cleaned_bank_data_withoutNA_quan <- subset(cleaned_bank_data_withoutNA_quan,
+        !((Customer_Age %in% age.exc.list)| (Card_Category %in% card.exc.list)))
+
+#after the cleaning this column is irrelevant since the only category left is blue
+cleaned_bank_data_withoutNA_quan<- subset(cleaned_bank_data_withoutNA_quan, 
+                    select = -c(Card_Category)) 
 head(cleaned_bank_data_withoutNA_quan)
 ```
 
 After the cleaning, lets examine the current situation of the dataset with more graphs.
 
-```{r}
+```{r, fig.align='center',fig.asp= 0.55, fig.width= 6}
 # Descriptive Graphs
+
 #histogram
-Cust.age.hist <- hist(cleaned_bank_data_withoutNA_quan$Customer_Age, xlab="age", ylab="freq",
-                      main="Customer age distribution", col="orange")
+Cust.age.hist <- hist(cleaned_bank_data_withoutNA_quan$Customer_Age, xlab="age",
+                    ylab="freq", main="Customer age distribution", col="orange")
 Cust.age.hist
 #using the histogram, dividing ages into 4 groups seems satisfying
 
 #Creating age groups
-cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age <= 34, "age_group"] <- 1
-cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age > 34 & cleaned_bank_data_withoutNA_quan$Customer_Age <= 44, "age_group"] <- 2
-cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age > 44 & cleaned_bank_data_withoutNA_quan$Customer_Age <= 54, "age_group"] <- 3
-cleaned_bank_data_withoutNA_quan[cleaned_bank_data_withoutNA_quan$Customer_Age > 54, "age_group"] <- 4
+cleaned_bank_data_withoutNA_quan[
+    cleaned_bank_data_withoutNA_quan$Customer_Age <= 34, "age_group"] <- 1
+cleaned_bank_data_withoutNA_quan[
+    cleaned_bank_data_withoutNA_quan$Customer_Age > 34 & 
+    cleaned_bank_data_withoutNA_quan$Customer_Age <= 44, "age_group"] <- 2
+cleaned_bank_data_withoutNA_quan[
+    cleaned_bank_data_withoutNA_quan$Customer_Age > 44 & 
+    cleaned_bank_data_withoutNA_quan$Customer_Age <= 54, "age_group"] <- 3
+cleaned_bank_data_withoutNA_quan[
+    cleaned_bank_data_withoutNA_quan$Customer_Age > 54, "age_group"] <- 4
 
 #grouped age histogram
 par(mfrow=c(1,1))
@@ -305,28 +372,37 @@ cleaned_bank_data_withoutNA_quan %>%
 
 # grouped age piechart
 age.labels <- c("<=34", "35-44", "45-54", ">=55")
-cust.age.piechart <- pie(count(cleaned_bank_data_withoutNA_quan, age_group)$n, border="white", col=myPalette, labels = age.labels)
+cust.age.piechart <- pie(count(cleaned_bank_data_withoutNA_quan, age_group)$n,
+                         border="white", col=myPalette, labels = age.labels)
 
 #Dependent Count
 
 depcount.labels <- c(0, 1, 2, 3, 4, 5)
-dependent.count.piechart <- pie(count(cleaned_bank_data_withoutNA_quan, Dependent_count)$n, border="white", col=myPalette, labels = depcount.labels)
+dependent.count.piechart <- pie(count(cleaned_bank_data_withoutNA_quan,
+                                      Dependent_count)$n, border="white", 
+                                col=myPalette, labels = depcount.labels)
 
 #Months inactive
-barplot(table(factor(Months_Inactive_12_mon,levels=min(Months_Inactive_12_mon):max(Months_Inactive_12_mon))), col = yarrr::transparent('red',trans.val = 0.9))
-barplot(table(factor(Contacts_Count_12_mon,levels=min(Contacts_Count_12_mon):max(Contacts_Count_12_mon))), col = yarrr::transparent('blue', trans.val = 0.8), add = TRUE)
+barplot(table(factor(Months_Inactive_12_mon,levels=
+                    min(Months_Inactive_12_mon):max(Months_Inactive_12_mon))), 
+        col = yarrr::transparent('red',trans.val = 0.9))
+barplot(table(factor(Contacts_Count_12_mon,levels= 
+                    min(Contacts_Count_12_mon):max(Contacts_Count_12_mon))), 
+        col = yarrr::transparent('blue', trans.val = 0.8), add = TRUE)
 
 hist(cleaned_bank_data_withoutNA_quan$Total_Trans_Ct)
 
 int.hist = function(x,ylab="Frequency",...) {
-  barplot(table(factor(x,levels=min(x):max(x))),space=0,xaxt="n",ylab=ylab,...);axis(1)
+  barplot(table(factor(x,levels=min(x):max(x))),space=0,xaxt="n",ylab=ylab,...);
+  axis(1)
 }
 ```
 
-```{r}
+```{r ,figures-side2, fig.show="hold", out.width="50%"}
 #Histograms
 attach(cleaned_bank_data_withoutNA_quan)
-par(mfrow=c(3,2))
+
+par(mar = c(4,4,3,.1))
 hist(Avg_Open_To_Buy)
 hist(Total_Trans_Amt)
 hist(Avg_Utilization_Ratio)
@@ -365,8 +441,8 @@ It can be seen that the dataset is unbalanced. We decide then to create a balanc
 
 ```{r}
 # ovun.sample is a function form the "Rose" library
-train_bal <- ovun.sample(Attrition_Flag~.,data = train, method = "both", p = 0.5, 
-                         N =4948)$data
+train_bal <- ovun.sample(Attrition_Flag~.,data = train, method = "both", 
+                         p = 0.5, N =4948)$data
 ```
 
 We can see that this new Training set is indeed balanced
@@ -498,39 +574,47 @@ Next, we will investigate the relationship between the response variable and the
 Customer <- as.factor(train$Attrition_Flag)
 a <- ggplot(train, aes(x = Total_Trans_Ct, fill = Customer)) +
   geom_density(alpha=0.3) + ggtitle("Total_Trans_Ct") +
-  scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
+  scale_fill_manual(values = c("darkgrey","red"),labels = 
+                      c("Existing","Attrited"))
 
 b <- ggplot(train, aes(x = Total_Relationship_Count, fill = Customer)) +
   geom_bar(aes(y = after_stat(prop) ),alpha=0.3, position = "dodge") + 
   ggtitle("Total_Relationship_Count") + 
-  scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
+  scale_fill_manual(values = c("darkgrey","red"),labels = 
+                      c("Existing","Attrited"))
 
 c <- ggplot(train, aes(x = Total_Trans_Amt, fill = Customer)) +
   geom_density(alpha=0.3) + ggtitle("Total_Trans_Amt") +
-  scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
+  scale_fill_manual(values = c("darkgrey","red"),labels = 
+                      c("Existing","Attrited"))
 
 d <- ggplot(train, aes(x = Total_Ct_Chng_Q4_Q1, fill = Customer)) +
   geom_density(alpha=0.3) + ggtitle("Total_Ct_Chng_Q4_Q1")+
-  scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
+  scale_fill_manual(values = c("darkgrey","red"),labels = 
+                      c("Existing","Attrited"))
 
 e <- ggplot(train, aes(x = Contacts_Count_12_mon, fill = Customer)) +
   geom_bar(aes(y = after_stat(prop) ),alpha=0.3, position = "dodge") + 
   ggtitle("Contacts_Count_12_mon") +
-  scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
+  scale_fill_manual(values = c("darkgrey","red"),labels = 
+                      c("Existing","Attrited"))
 
 f <- ggplot(train, aes(x = Total_Revolving_Bal, fill = Customer)) +
   geom_density(alpha=0.3) + ggtitle("Total_Revolving_Bal") +
-  scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
+  scale_fill_manual(values = c("darkgrey","red"),labels = 
+                      c("Existing","Attrited"))
 
 g <- ggplot(train, aes(x = Months_Inactive_12_mon, fill = Customer)) +
   geom_bar(aes(y = after_stat(prop) ),alpha=0.3, position = "dodge") + 
   ggtitle("Months_Inactive_12_mon") +
-  scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
+  scale_fill_manual(values = c("darkgrey","red"),labels = 
+                      c("Existing","Attrited"))
 
 h <- ggplot(train, aes(x = Is_Female, fill = Customer)) +
   geom_bar(aes(y = after_stat(prop) ),alpha=0.3, position = "dodge") + 
   ggtitle("Is_Female") +
-  scale_fill_manual(values = c("darkgrey","red"),labels = c("Existing","Attrited"))
+  scale_fill_manual(values = c("darkgrey","red"),labels = 
+                      c("Existing","Attrited"))
 
 
 ggarrange(a,b,c,d,e,f,g,h,nrow=4,ncol=2)
@@ -568,7 +652,8 @@ We will initially define the model containing all the predictor variables and, a
 We will start by defining the complete model and assess its performance.
 
 ```{r}
-glm_1 <- glm(data = train,Attrition_Flag~ . - Avg_Open_To_Buy ,family = "binomial")
+glm_1 <- glm(data = train,Attrition_Flag~ . - Avg_Open_To_Buy ,
+             family = "binomial")
 summary(glm_1)
 ```
 
@@ -784,7 +869,8 @@ Fitting the model on the balanced data helps the model to recognize the minority
 We repeat the same procedure we used for the unbalanced dataset. We initially analyze the complete model and we check its performance
 
 ```{r}
-glm_1_bal <- glm(data = train_bal,Attrition_Flag~ . - Avg_Open_To_Buy ,family = "binomial")
+glm_1_bal <- glm(data = train_bal,Attrition_Flag~ . - Avg_Open_To_Buy ,
+                 family = "binomial")
 summary(glm_1_bal)
 ```
 
@@ -949,8 +1035,10 @@ roc_f_bal <- roc(test$Attrition_Flag ~ pred_glm_f_bal)
 plot(roc_i_bal, col = "black",print.auc = FALSE, auc.polygon = TRUE,
      max.auc.polygon = TRUE, lwd=2)
 plot(roc_f_bal,add = TRUE,col = "blue", print.auc = FALSE, lwd=2)
-text(0.3, 0.45, paste("AUC for glm_1_bal:", round(roc_i_bal$auc, 3)), col = "black")
-text(0.3, 0.38, paste("AUC for glm_7_bal:", round(roc_f_bal$auc, 3)), col = "blue")
+text(0.3, 0.45, paste("AUC for glm_1_bal:", round(roc_i_bal$auc, 3)), 
+     col = "black")
+text(0.3, 0.38, paste("AUC for glm_7_bal:", round(roc_f_bal$auc, 3)), 
+     col = "blue")
 ```
 
 
@@ -1056,7 +1144,7 @@ F1_lda_u
 Finally we shows how the model separates the two categories.
 We can notice from the graph below that it manages to separate accurately the two classes, with only an overlap where there are mostly elements belonging to the *Attrition* class.
 
-```{r}
+```{r ,fig.align='center',fig.asp= 0.9, fig.width= 7}
 
 # x indicates the linear combinations of the variables obtained by the model
 # class indicates the two classes Existing and Attriting Customers.
@@ -1156,7 +1244,7 @@ ldahist(lda_b_predict$x[,1], g = lda_b_predict$class , col = 2)
 We now shows the ROC curves and the AUC values corresponding to the LDA models trained on the unbalanced and balanced datasets. 
 We can notice that the AUC value for the Balanced LDA is equal to best models obtained by GLM, even if the F1 score is lower.
 
-```{r ,fig.align='center',fig.asp= 0.9, fig.width= 7, warning=FALSE, message=FALSE}
+```{r ,fig.align='center',fig.asp= 0.85, fig.width= 6.5, warning=FALSE, message=FALSE}
 #ROC curves
 roc_lda_u <- roc(test$Attrition_Flag ~ lda_predict_u[,2])
 roc_lda_b <- roc(test$Attrition_Flag ~ lda_predict_b[,2])
@@ -1220,34 +1308,29 @@ c_mat_qda_u <- table(test$Attrition_Flag,pred_qda_u)
 
 ```{r}
 #Accuracy
-
 mean(pred_qda_u==test$Attrition_Flag)*100
 ```
 
 ```{r}
 #True Negative Rate / Specificity
-
 Spec_qda_u <- c_mat_qda_u[1,1]/sum(c_mat_qda_u[1,])
 Spec_qda_u
 ```
 
 ```{r}
 #Precision / Positive Predicted Value
-
 Prec_qda_u <- c_mat_qda_u[2,2]/sum(c_mat_qda_u[,2])
 Prec_qda_u
 ```
 
 ```{r}
 #Recall / True Positive Rate / Sensitivity
-
 Rec_qda_u <- c_mat_qda_u[2,2]/sum(c_mat_qda_u[2,])
 Rec_qda_u
 ```
 
 ```{r}
 #F1 Score
-
 F1_qda_u <- 2 * (Prec_qda_u * Rec_qda_u)/(Prec_qda_u + Rec_qda_u)
 F1_qda_u
 ```
@@ -1300,33 +1383,28 @@ c_mat_qda_b <- table(test$Attrition_Flag,pred_qda_b)
 | Total | 1283 | 365 | 1648 |
 ```{r}
 #Accuracy
-
 mean(pred_qda_b==test$Attrition_Flag)*100
 ```
 ```{r}
 #True Negative Rate / Specificity
-
 Spec_qda_b <- c_mat_qda_b[1,1]/sum(c_mat_qda_b[1,])
 Spec_qda_b
 ```
 
 ```{r}
 #Precision / Positive Predicted Value
-
 Prec_qda_b <- c_mat_qda_b[2,2]/sum(c_mat_qda_b[,2])
 Prec_qda_b
 ```
 
 ```{r}
 #Recall / True Positive Rate / Sensitivity
-
 Rec_qda_b <- c_mat_qda_b[2,2]/sum(c_mat_qda_b[2,])
 Rec_qda_b
 ```
 
 ```{r}
 #F1 Score
-
 F1_qda_b <- 2 * (Prec_qda_b * Rec_qda_b)/(Prec_qda_b + Rec_qda_b)
 F1_qda_b
 ```
@@ -1335,7 +1413,7 @@ We plot the ROC curves and corresponding AUC values of the two QDA models.
 We can notice that the two ROC curve are pretty similar and there is not a curve which is strictly above the other.
 The AUC values are also much lower in comparison to the other models, except the initial GLM.
 
-```{r ,fig.align='center',fig.asp= 0.9, fig.width= 7, warning=FALSE, message=FALSE}
+```{r ,fig.align='center',fig.asp= 0.85, fig.width= 6.3, warning=FALSE, message=FALSE}
 #ROC curves
 roc_qda_u <- roc(test$Attrition_Flag ~ qda_predict_u[,2])
 roc_qda_b <- roc(test$Attrition_Flag ~ qda_predict_b[,2])
@@ -1461,12 +1539,12 @@ The best threshold for the F1 score is $0.3$. It seems that the model has a wors
 ```{r}
 #Threshold
 Threshold <- 0.3
-ridge_predict_u <- predict(ridge_u,test_mat,type = "response", s = lambda_ridge_u)
+ridge_predict_u <- predict(ridge_u,test_mat,type = "response",
+                           s = lambda_ridge_u)
 pred_ridge_u <- ifelse(ridge_predict_u >= Threshold , 1,0)
 
 #Confusion matrix
 c_mat_ridge_u <- table(test$Attrition_Flag,pred_ridge_u)
-c_mat_ridge_u
 ```
 
 |        |    Predicted Values     |       |
@@ -1537,7 +1615,8 @@ The best threshold for the F1 score is $0.6$. While it has a better Recall that 
 ```{r}
 #Threshold
 Threshold <- 0.6
-ridge_predict_b <- predict(ridge_b,test_mat_b,type = "response", s = lambda_ridge_b)
+ridge_predict_b <- predict(ridge_b,test_mat_b,type = "response", 
+                           s = lambda_ridge_b)
 pred_ridge_b <- ifelse(ridge_predict_b >= Threshold , 1,0)
 
 #Confusion matrix
@@ -1597,8 +1676,10 @@ roc_ridge_b <- roc(test$Attrition_Flag ~ as.numeric(ridge_predict_b))
 plot(roc_ridge_u, col = "black",print.auc = FALSE, auc.polygon = TRUE,
      max.auc.polygon = TRUE, lwd=2)
 plot(roc_ridge_b,add = TRUE,col = "blue", print.auc = FALSE, lwd=2)
-text(0.3, 0.45, paste("AUC for ridge_u:", round(roc_ridge_u$auc, 3)), col = "black")
-text(0.3, 0.38, paste("AUC for ridge_b:", round(roc_ridge_b$auc, 3)), col = "blue")
+text(0.3, 0.45, paste("AUC for ridge_u:", round(roc_ridge_u$auc, 3)),
+     col = "black")
+text(0.3, 0.38, paste("AUC for ridge_b:", round(roc_ridge_b$auc, 3)),
+     col = "blue")
 ```
 
 
@@ -1636,7 +1717,8 @@ The best threshold for the F1 score is $0.4$. Unlike with Ridge, the model's per
 ```{r}
 #Threshold
 Threshold <- 0.4
-lasso_predict_u <- predict(lasso_u,test_mat,type = "response", s = lambda_lasso_u)
+lasso_predict_u <- predict(lasso_u,test_mat,type = "response", 
+                           s = lambda_lasso_u)
 pred_lasso_u <- ifelse(lasso_predict_u >= Threshold , 1,0)
 
 #Confusion matrix
@@ -1653,34 +1735,29 @@ c_mat_lasso_u <- table(test$Attrition_Flag,pred_lasso_u)
 
 ```{r}
 #Accuracy
-
 mean(pred_lasso_u==test$Attrition_Flag)*100
 ```
 
 ```{r}
 #True Negative Rate / Specificity
-
 Spec_lasso_u <- c_mat_lasso_u[1,1]/sum(c_mat_lasso_u[1,])
 Spec_lasso_u
 ```
 
 ```{r}
 #Precision / Positive Predicted Value
-
 Prec_lasso_u <- c_mat_lasso_u[2,2]/sum(c_mat_lasso_u[,2])
 Prec_lasso_u
 ```
 
 ```{r}
 #Recall / True Positive Rate / Sensitivity
-
 Rec_lasso_u <- c_mat_lasso_u[2,2]/sum(c_mat_lasso_u[2,])
 Rec_lasso_u
 ```
 
 ```{r}
 #F1 Score
-
 F1_lasso_u <- 2 * (Prec_lasso_u * Rec_lasso_u)/(Prec_lasso_u + Rec_lasso_u)
 F1_lasso_u
 ```
@@ -1714,11 +1791,11 @@ After choosing the best threshold we compute some useful test for the model's pe
 ```{r}
 #Threshold
 Threshold <- 0.7
-lasso_predict_b <- predict(lasso_b,test_mat_b,type = "response", s = lambda_lasso_b)
+lasso_predict_b <- predict(lasso_b,test_mat_b,type = "response", 
+                           s = lambda_lasso_b)
 pred_lasso_b <- ifelse(lasso_predict_b >= Threshold , 1,0)
 
 #Confusion matrix
-
 c_mat_lasso_b <- table(test$Attrition_Flag,pred_lasso_b)
 ```
 
@@ -1732,34 +1809,29 @@ c_mat_lasso_b <- table(test$Attrition_Flag,pred_lasso_b)
 
 ```{r}
 #Accuracy
-
 mean(pred_lasso_b==test$Attrition_Flag)*100
 ```
 
 ```{r}
 #True Negative Rate / Specificity
-
 Spec_lasso_b <- c_mat_lasso_b[1,1]/sum(c_mat_lasso_b[1,])
 Spec_lasso_b
 ```
 
 ```{r}
 #Precision / Positive Predicted Value
-
 Prec_lasso_b <- c_mat_lasso_b[2,2]/sum(c_mat_lasso_b[,2])
 Prec_lasso_b
 ```
 
 ```{r}
 #Recall / True Positive Rate / Sensitivity
-
 Rec_lasso_b <- c_mat_lasso_b[2,2]/sum(c_mat_lasso_b[2,])
 Rec_lasso_b
 ```
 
 ```{r}
 #F1 Score
-
 F1_lasso_b <- 2 * (Prec_lasso_b * Rec_lasso_b)/(Prec_lasso_b + Rec_lasso_b)
 F1_lasso_b
 ```
@@ -1767,7 +1839,7 @@ F1_lasso_b
 We plot the ROC curves and corresponding AUC values of the two models.
 We notice that the ROC curves and the AUC values are comparable to the best other models analyzed, however, since the balanced model had a higher F1 score it is a better choice for our problem.
 
-```{r ,fig.align='center',fig.asp= 0.75, fig.width= 7, warning=FALSE, message=FALSE}
+```{r ,fig.align='center',fig.asp= 0.85, fig.width= 6.3, warning=FALSE, message=FALSE}
 #ROC curves
 roc_lasso_u <- roc(test$Attrition_Flag ~ as.numeric(lasso_predict_u))
 roc_lasso_b <- roc(test$Attrition_Flag ~ as.numeric(lasso_predict_b))
@@ -1775,8 +1847,10 @@ roc_lasso_b <- roc(test$Attrition_Flag ~ as.numeric(lasso_predict_b))
 plot(roc_lasso_u, col = "black",print.auc = FALSE, auc.polygon = TRUE,
      max.auc.polygon = TRUE, lwd=2)
 plot(roc_lasso_b,add = TRUE,col = "blue", print.auc = FALSE, lwd=2)
-text(0.3, 0.45, paste("AUC for lasso_u:", round(roc_lasso_u$auc, 3)), col = "black")
-text(0.3, 0.38, paste("AUC for lasso_b:", round(roc_lasso_b$auc, 3)), col = "blue")
+text(0.3, 0.45, paste("AUC for lasso_u:", round(roc_lasso_u$auc, 3)),
+     col = "black")
+text(0.3, 0.38, paste("AUC for lasso_b:", round(roc_lasso_b$auc, 3)),
+     col = "blue")
 ```
 
 
