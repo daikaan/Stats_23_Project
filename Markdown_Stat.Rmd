@@ -1,7 +1,11 @@
 ---
-title: "Stat_Markdown"
+title: "Bank Customer Churn Prediction"
+author: 
+  - Jean Zacharie Mariethoz, 2097670 
+  - Furkan Can Algan, 2085308
+  - Kaan Daibasoglu, 2072039
 output: pdf_document
-date: "`r Sys.Date()`"
+date: "29.06.2023"
 ---
 
 ```{r setup, include=FALSE}
