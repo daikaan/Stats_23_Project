@@ -102,6 +102,7 @@ table(bank_data$Income_Category)
 
 table(bank_data$Card_Category)
 
+
 #Change Unknown value to NA
 bank_data_NA <- data.frame(bank_data)
 bank_data_NA[bank_data_NA=='Unknown'] <- NA
@@ -157,6 +158,11 @@ ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Income_Category), fill = fact
 ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Marital_Status), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag") 
 ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Education_Level), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag") 
 ggplot(bank_data_withoutNA_quan, aes(x = as.factor(Card_Category), fill = factor(Attrition_Flag))) + geom_bar() + labs(fill = "Attrition Flag")
+
+
+bank_data_withoutNA_quan %>%
+  group_by(Is_Female, Attrition_Flag) %>%
+  summarize(Freq=n())
 
 # Card Category
 
