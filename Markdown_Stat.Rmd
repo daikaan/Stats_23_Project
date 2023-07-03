@@ -263,20 +263,18 @@ There seems to be a great imbalance on card category, while the others distribut
 ```{r}
 # Card Category
 
-ggplot(bank_data_withoutNA_quan, aes(x=Months_on_book, y= Credit_Limit, shape = 
-                as.factor(Card_Category), color= as.factor(Card_Category)))+
-                geom_point() + geom_smooth(method=lm, se=FALSE, fullrange=TRUE)
+ggplot(bank_data_withoutNA_quan, aes(x=Months_on_book, y= Credit_Limit, shape = as.factor(Card_Category), color= as.factor(Card_Category)))+
+  geom_point() + geom_smooth(method=lm, se=FALSE, fullrange=TRUE)
 ```
 
 It is clear that blue card holders have different attributes than the others while the other card holders seem to be acting similar. Thus, we decided to rescope our study only to focus on blue card holders. By doing so, we believe that numerical values fed into the model will have more accurate effect on the model.
 
 ```{r}
-#Since most of the data is coming from the Blue cards and there is a visible 
-#difference on many parameters among categories, we decided to only focus on blue card category
+#Since most of the data is coming from the Blue cards and there is a visible difference on many parameters among categories, we decided to only focus on blue card category
 card.exc.list <- c(2, 3, 4)
 ```
 
-At this point, the numerical columns are decided to be checked whether they have any 
+At this point, we checked the numerical columns to see whether they have any significant outliers.
 ```{r, figures-side1, fig.show="hold", out.width="50%"}
 par(mar = c(2, 4, 3, .1))
 #Numerical columns analysis
